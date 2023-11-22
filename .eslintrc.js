@@ -1,19 +1,35 @@
 module.exports = {
-  parserOptions: {
-    ecmaVersion: 2021,
-    sourceType: 'module',
-    ecmaFeatures: {
-      jsx: true,
-    },
-  },
   env: {
     browser: true,
-    node: true,
-    es6: true,
+    es2021: true,
   },
-  extends: ['eslint-config-prettier'],
-  plugins: ['eslint-plugin-prettier'],
+  extends: [
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
+    'plugin:react/jsx-runtime',
+    'prettier',
+  ],
+  overrides: [],
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+  },
+  plugins: ['react'],
   rules: {
-    'prettier/prettier': 'error',
+    'react/function-component-definition': [2, { namedComponents: 'arrow-function' }],
+    'no-unused-vars': 'warn',
+    'no-nested-ternary': 'off',
+    'prefer-template': 'off',
+    'react/prop-types': 'off',
+    'react/no-unstable-nested-components': 'off',
+    'react-hooks/exhaustive-deps': 'off',
+    'jsx-a11y/no-static-element-interactions': 'off',
+    'no-console': 'off',
+    'react/jsx-props-no-spreading': 'off',
+    'import/no-cycle': 'off',
+    'jsx-a11y/anchor-is-valid': 'off',
+    'jsx-a11y/click-events-have-key-events': 'off',
+    'quote-props': ['warn', 'as-needed'],
   },
 };
