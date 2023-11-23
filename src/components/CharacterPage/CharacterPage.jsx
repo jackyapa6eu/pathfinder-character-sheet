@@ -27,6 +27,14 @@ const CharacterPageContainer = styled(Form)`
     grid-area: title;
     margin: 0;
   }
+
+  @media screen and (max-width: 550px) {
+    align-content: start;
+    grid-template-areas:
+      'title title title title title title'
+      'baseInfo baseInfo baseInfo baseInfo baseInfo baseInfo'
+      'abilities abilities abilities abilities abilities abilities';
+  }
 `;
 
 const BaseInfo = styled.div`
