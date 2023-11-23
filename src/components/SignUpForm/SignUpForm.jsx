@@ -38,6 +38,7 @@ const ButtonBox = styled.div`
 
 const StyledHeader = styled.h3`
   margin: 0;
+  grid-area: title;
 `;
 
 const SignUpForm = observer(() => {

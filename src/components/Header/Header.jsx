@@ -1,6 +1,6 @@
-import React, { memo, useEffect } from 'react';
+import { memo } from 'react';
 import styled from 'styled-components';
-import { Button, Dropdown, Menu } from 'antd';
+import { Button, Dropdown } from 'antd';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import authStore from '../../store/authStore';
 import { observer } from 'mobx-react';
@@ -9,9 +9,10 @@ import DiceIcon from '../../icons/DiceIcon';
 const StyledHeader = styled.div`
   width: 100%;
   display: grid;
-  grid-template-columns: 80px 1fr 120px;
+  grid-template-columns: minmax(auto, max-content) 1fr minmax(auto, max-content);
+  gap: 20px;
   grid-area: header;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 0 3px rgba(128, 128, 128, 0.5);
   padding: 10px;
 `;
 
@@ -26,6 +27,26 @@ const SignButton = styled(Button)`
   color: #282828;
 `;
 
+const HeaderNavMenu = styled.div`
+  display: flex;
+  align-items: end;
+  justify-content: end;
+  width: 100%;
+`;
+
+const NavMenuItem = styled.button`
+  background: none;
+  border: 1px solid black;
+  border-radius: 6px;
+  padding: 5px;
+  cursor: pointer;
+  transition: all ease 0.3s;
+  &:hover {
+    background: black;
+    color: white;
+  }
+`;
+
 const Header = observer(() => {
   const navigate = useNavigate();
   const { user, logout, mountedAuthLoadingState } = authStore;
@@ -36,8 +57,16 @@ const Header = observer(() => {
 
   const items = [
     {
+      key: '2',
+      label: <span onClick={() => handleNavigateButton('create-character')}>Create character</span>,
+    },
+    {
       key: '1',
-      label: <span onClick={logout}>Выйти</span>,
+      label: (
+        <span style={{ color: 'gray' }} onClick={logout}>
+          Logout
+        </span>
+      ),
     },
   ];
 
@@ -45,7 +74,14 @@ const Header = observer(() => {
     <StyledHeader>
       <DiceIcon size='60px' handleClick={() => handleNavigateButton('')} />
 
-      <div></div>
+      <HeaderNavMenu>
+        {/*{user && (*/}
+        {/*  <NavMenuItem onClick={() => handleNavigateButton('create-character')}>*/}
+        {/*    create character*/}
+        {/*  </NavMenuItem>*/}
+        {/*)}*/}
+      </HeaderNavMenu>
+
       {mountedAuthLoadingState !== 'loading' && (
         <UserContainer>
           {user ? (
@@ -62,7 +98,7 @@ const Header = observer(() => {
                 path='/sign-in'
                 element={
                   <SignButton size='default' onClick={() => handleNavigateButton('sign-up')}>
-                    Регистрация
+                    Sign up
                   </SignButton>
                 }
               />
@@ -70,7 +106,7 @@ const Header = observer(() => {
                 path='/*'
                 element={
                   <SignButton size='default' onClick={() => handleNavigateButton('sign-in')}>
-                    Вход
+                    Sign in
                   </SignButton>
                 }
               />

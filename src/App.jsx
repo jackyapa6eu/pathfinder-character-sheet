@@ -10,6 +10,9 @@ import authStore from './store/authStore';
 import ProtectedRoute from './components/ProtectedRouter/ProtectedRoute';
 import { observer } from 'mobx-react';
 import SignInForm from './components/SignInForm';
+import CreateCharacter from './components/CreateCharacter';
+import MainPage from './components/MainPage';
+import CharacterPage from './components/CharacterPage';
 
 const StyledApp = styled.div`
   display: grid;
@@ -42,15 +45,12 @@ const App = observer(() => {
     });
   }, []);
 
-  useEffect(() => {
-    console.log('use Effect user:', user);
-  }, [user]);
   return (
     <StyledApp>
       <Header />
       <MainContainer>
         <Routes>
-          <Route element={<div>Main</div>} path='/' />
+          <Route element={<MainPage />} path='/' />
           <Route
             element={<ProtectedRoute component={<SignInForm />} to='/' condition={!user} />}
             path='/sign-in'
@@ -58,6 +58,14 @@ const App = observer(() => {
           <Route
             element={<ProtectedRoute component={<SignUpForm />} to='/' condition={!user} />}
             path='/sign-up'
+          />
+          <Route
+            element={<ProtectedRoute component={<CreateCharacter />} to='/' condition={user} />}
+            path='/create-character'
+          />
+          <Route
+            element={<ProtectedRoute component={<CharacterPage />} to='/' condition={user} />}
+            path='/chars/:charId'
           />
           <Route element={<div>404 страница не найдена</div>} path='/*' />
         </Routes>

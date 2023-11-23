@@ -1,8 +1,7 @@
-import { Button, Form, Input, message } from 'antd';
-import { memo, useEffect } from 'react';
+import { Button, Form, Input } from 'antd';
+import { memo } from 'react';
 import styled from 'styled-components';
 import authStore from '../../store/authStore';
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 
 const StyledForm = styled(Form)`
@@ -35,6 +34,7 @@ const ButtonBox = styled.div`
 `;
 
 const StyledHeader = styled.h3`
+  grid-area: title;
   margin: 0;
 `;
 

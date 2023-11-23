@@ -6,6 +6,8 @@ import { message } from 'antd';
 class AuthStore {
   user = null;
 
+  characters = [];
+
   authLoadingState = 'pending';
 
   mountedAuthLoadingState = 'pending';
@@ -35,7 +37,7 @@ class AuthStore {
   getUserData = async (uid) => {
     const db = getDatabase();
 
-    const dataRef = ref(db, `users/${uid}`);
+    const dataRef = ref(db, `users/${uid}/userData`);
 
     try {
       const response = await get(dataRef);
@@ -60,7 +62,7 @@ class AuthStore {
       const { user } = await createUserWithEmailAndPassword(auth, email, password);
       const { uid } = user;
 
-      const dataRef = ref(db, `users/${user.uid}`);
+      const dataRef = ref(db, `users/${user.uid}/userData`);
       await set(dataRef, { uid, email, displayName });
       message.success('Success!');
     } catch (error) {
