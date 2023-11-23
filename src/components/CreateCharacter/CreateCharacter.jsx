@@ -5,6 +5,7 @@ import authStore from '../../store/authStore';
 import { observer } from 'mobx-react';
 import charactersStore from '../../store/charactersStore';
 import { useNavigate } from 'react-router-dom';
+import { alignmentSelectOptions } from '../../utils/consts';
 
 const StyledForm = styled(Form)`
   display: grid;
@@ -41,36 +42,6 @@ const StyledHeader = styled.h3`
   grid-area: title;
   margin: 0;
 `;
-
-const alignmentSelectOptions = [
-  {
-    value: 'Lawful Good',
-  },
-  {
-    value: 'Neutral Good',
-  },
-  {
-    value: 'Chaotic Good',
-  },
-  {
-    value: 'Lawful Neutral',
-  },
-  {
-    value: 'Neutral',
-  },
-  {
-    value: 'Chaotic Neutral',
-  },
-  {
-    value: 'Lawful Evil',
-  },
-  {
-    value: 'Neutral Evil',
-  },
-  {
-    value: 'Chaotic Evil',
-  },
-];
 
 const CreateCharacter = observer(() => {
   const { user } = authStore;

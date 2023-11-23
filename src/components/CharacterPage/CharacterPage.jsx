@@ -5,15 +5,20 @@ import authStore from '../../store/authStore';
 import charactersStore from '../../store/charactersStore';
 import { toJS } from 'mobx';
 import styled from 'styled-components';
+import { Button, Form, Input, InputNumber, Select } from 'antd';
+import { alignmentSelectOptions } from '../../utils/consts';
+import FormItem from '../FormItem';
+import Abilities from '../Abilities';
+import { useForm } from 'antd/es/form/Form';
 
-const CharacterPageContainer = styled.div`
+const CharacterPageContainer = styled(Form)`
   display: grid;
   width: 100%;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
   grid-template-rows: max-content;
   grid-template-areas:
     'title title title title title title'
-    '. . . baseInfo baseInfo baseInfo';
+    'abilities abilities abilities baseInfo baseInfo baseInfo';
   box-shadow: 0 0 3px rgba(128, 128, 128, 0.5);
   padding: 0 5px;
   gap: 5px;
@@ -22,23 +27,33 @@ const CharacterPageContainer = styled.div`
     grid-area: title;
     margin: 0;
   }
+`;
 
-  & .character-base-info {
-    display: flex;
-    grid-area: baseInfo;
-    justify-content: end;
-    gap: 5px;
-    margin: 0;
-  }
+const BaseInfo = styled.div`
+  display: grid;
+  grid-template-columns: 120px 40px 140px;
+  grid-template-areas: 'race level alignment';
+  grid-area: baseInfo;
+  width: 100%;
+  gap: 5px;
+  margin: 0;
+  height: max-content;
+  justify-content: end;
+  padding-top: 15px;
 `;
 
 const CharacterPage = observer(() => {
   const { user } = authStore;
   const { subscribeCharacter, openedCharacter, clearOpenedCharacter } = charactersStore;
+
   const { charId } = useParams();
+  const [form] = useForm();
 
   useEffect(() => {
     console.log('Данные обновлены:', toJS(openedCharacter));
+    if (openedCharacter) {
+      form.setFieldsValue({ ...openedCharacter });
+    }
   }, [openedCharacter]);
 
   useEffect(() => {
@@ -51,16 +66,28 @@ const CharacterPage = observer(() => {
   }, []);
 
   return (
-    <CharacterPageContainer>
-      {Object.keys(openedCharacter).length ? (
-        <>
-          <h3>{openedCharacter.name}</h3>
-          <p className='character-base-info'>
-            <span>{openedCharacter.race}</span>/<span>{openedCharacter.level} lvl</span>/
-            <span>{openedCharacter.alignment}</span>
-          </p>
-        </>
-      ) : null}
+    <CharacterPageContainer form={form} onFinish={(values) => console.log(values)}>
+      <h3>{openedCharacter.name}</h3>
+      <Abilities gridArea='abilities' />
+      <BaseInfo>
+        <FormItem name='race' label='race' gridArea='race'>
+          <Input size='small' style={{ width: '100%' }} />
+        </FormItem>
+        <FormItem gridArea='level' label='lvl' name='level'>
+          <InputNumber size='small' controls={false} style={{ width: '100%' }} />
+        </FormItem>
+        <FormItem gridArea='alignment' label='alignment' name='alignment'>
+          <Select options={alignmentSelectOptions} size='small' style={{ width: '100%' }} />
+        </FormItem>
+      </BaseInfo>
+
+      <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
+        <FormItem>
+          <Button type='default' htmlType='submit'>
+            Create
+          </Button>
+        </FormItem>
+      </div>
     </CharacterPageContainer>
   );
 });
