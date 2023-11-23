@@ -52,7 +52,7 @@ const CharacterPage = observer(() => {
 
   return (
     <CharacterPageContainer>
-      {Object.keys(openedCharacter).length && (
+      {Object.keys(openedCharacter).length ? (
         <>
           <h3>{openedCharacter.name}</h3>
           <p className='character-base-info'>
@@ -60,7 +60,7 @@ const CharacterPage = observer(() => {
             <span>{openedCharacter.alignment}</span>
           </p>
         </>
-      )}
+      ) : null}
     </CharacterPageContainer>
   );
 });
