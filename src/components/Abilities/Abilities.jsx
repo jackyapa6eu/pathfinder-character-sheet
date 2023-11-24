@@ -13,15 +13,15 @@ const AbilitiesContainer = styled.div`
   gap: 3px;
 `;
 
-const Abilities = () => {
+const Abilities = ({ charId }) => {
   return (
     <AbilitiesContainer>
-      <Ability showLabel name='str' />
-      <Ability name='dex' />
-      <Ability name='con' />
-      <Ability name='int' />
-      <Ability name='wis' />
-      <Ability name='cha' />
+      <Ability showLabel name='str' charId={charId} abilityDesc='Сила' />
+      <Ability name='dex' charId={charId} abilityDesc='Ловкость' />
+      <Ability name='con' charId={charId} abilityDesc='Телосложение' />
+      <Ability name='int' charId={charId} abilityDesc='Интеллект' />
+      <Ability name='wis' charId={charId} abilityDesc='Мудрость' />
+      <Ability name='cha' charId={charId} abilityDesc='Харизма' />
     </AbilitiesContainer>
   );
 };

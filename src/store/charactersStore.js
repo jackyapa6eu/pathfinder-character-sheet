@@ -1,6 +1,52 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { getDatabase, ref, set, get, onValue } from 'firebase/database';
+import { getDatabase, ref, set, get, onValue, update } from 'firebase/database';
 import { message } from 'antd';
+import { debounce } from 'lodash';
+
+export const initialUserData = {
+  race: '',
+  level: 1,
+  alignment: '',
+
+  abilities: {
+    str: {
+      score: null,
+      modifier: null,
+      adjustment: null,
+      tempModifier: null,
+    },
+    dex: {
+      score: null,
+      modifier: null,
+      adjustment: null,
+      tempModifier: null,
+    },
+    con: {
+      score: null,
+      modifier: null,
+      adjustment: null,
+      tempModifier: null,
+    },
+    int: {
+      score: null,
+      modifier: null,
+      adjustment: null,
+      tempModifier: null,
+    },
+    wis: {
+      score: null,
+      modifier: null,
+      adjustment: null,
+      tempModifier: null,
+    },
+    cha: {
+      score: null,
+      modifier: null,
+      adjustment: null,
+      tempModifier: null,
+    },
+  },
+};
 
 class CharactersStore {
   characters = {};
@@ -62,7 +108,7 @@ class CharactersStore {
     const dataRef = ref(db, `users/${uid}/characters/${charRef}`);
 
     try {
-      await set(dataRef, charData);
+      await set(dataRef, { ...initialUserData, ...charData });
       message.success('Character created!');
       if (callBack) callBack();
     } catch (e) {
@@ -70,6 +116,50 @@ class CharactersStore {
       message.error('Error on character creation');
     }
   };
+
+  changeAbility = debounce(async (uid, charRef, abilityName, abilityType, abilityValue) => {
+    const db = getDatabase();
+    if (abilityType === 'score') {
+      try {
+        const updates = {};
+        const adjustment = this.openedCharacter.abilities?.[abilityName]?.adjustment || 0;
+        const tempModifier = Math.floor((abilityValue + (adjustment || 0) - 10) / 2);
+        console.log('adjustment: ', adjustment, tempModifier);
+        updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/${abilityType}`] =
+          abilityValue;
+        updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/modifier`] =
+          Math.floor((abilityValue - 10) / 2);
+        updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/tempModifier`] =
+          adjustment ? tempModifier : null;
+        console.log('adjustment ? null : tempModifier :', adjustment ? null : tempModifier);
+        update(ref(db), updates);
+        message.success(`Ability ${abilityName} changed!`);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    if (abilityType === 'adjustment') {
+      const score = this.openedCharacter.abilities?.[abilityName].score || 0;
+      const adjustment = abilityValue;
+
+      console.log('score:', score);
+      console.log('adjustment: ', adjustment, abilityValue);
+      console.log('score + adjustment - 10 / 2 = ', (score + (adjustment || 0) - 10) / 2);
+      try {
+        const updates = {};
+        const tempModifier = Math.floor((score + (adjustment || 0) - 10) / 2);
+        updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/adjustment`] =
+          adjustment ?? null;
+        updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/tempModifier`] =
+          adjustment ? tempModifier : null;
+
+        update(ref(db), updates);
+        message.success(`Ability ${abilityName.toUpperCase()} changed!`);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }, 700);
 }
 
 const charactersStore = new CharactersStore();

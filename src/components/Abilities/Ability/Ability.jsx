@@ -1,54 +1,77 @@
 import { memo } from 'react';
 import styled from 'styled-components';
 import FormItem from '../../FormItem';
-import { InputNumber } from 'antd';
+import { InputNumber, Tooltip } from 'antd';
+import charactersStore from '../../../store/charactersStore';
+import { observer } from 'mobx-react';
+import authStore from '../../../store/authStore';
+import CharSheetRowLabel from '../../CharlSheetRowLabel/CharSheetRowLabel';
 
 const AbilityContainer = styled.div`
   display: grid;
-  grid-template-columns: 32px 44px 44px 44px 44px;
+  grid-template-columns: 38px 44px 44px 44px 44px;
   justify-items: center;
   align-items: center;
 `;
 
-const Ability = ({ name = '', showLabel = false }) => {
+const Ability = observer(({ name = '', showLabel = false, abilityDesc, charId }) => {
+  const { changeAbility } = charactersStore;
+  const { user } = authStore;
+
+  const handleScoreChange = async (value, name, type) => {
+    await changeAbility(user.uid, charId, name, type, value);
+  };
+
   return (
     <AbilityContainer>
-      <span>{name.toUpperCase()}</span>
+      <CharSheetRowLabel label={name} desc={abilityDesc} />
 
       <FormItem
-        name={`${name}Score`}
+        name={['abilities', name, 'score']}
         label={showLabel && 'ability score'}
         textAlign='center'
+        labelDesc='Базовое значение'
         noBgLabel
       >
-        <InputNumber controls={false} style={{ width: '100%' }} />
+        <InputNumber
+          controls={false}
+          style={{ width: '100%' }}
+          onChange={(value) => handleScoreChange(value, name, 'score')}
+        />
       </FormItem>
       <FormItem
-        name={`${name}Modifier`}
+        name={['abilities', name, 'modifier']}
         label={showLabel && 'ability modifier'}
         textAlign='center'
+        labelDesc='Модификатор'
         noBgLabel
       >
-        <InputNumber controls={false} style={{ width: '100%' }} />
+        <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
       </FormItem>
       <FormItem
-        name={`${name}Adjustment`}
+        name={['abilities', name, 'adjustment']}
         label={showLabel && 'temp adjustment'}
         textAlign='center'
+        labelDesc={'Временная корректировка.\n Может быть отрицательным.'}
         noBgLabel
       >
-        <InputNumber controls={false} style={{ width: '100%' }} />
+        <InputNumber
+          controls={false}
+          style={{ width: '100%' }}
+          onChange={(value) => handleScoreChange(value, name, 'adjustment')}
+        />
       </FormItem>
       <FormItem
-        name={`${name}TempModifier`}
+        name={['abilities', name, 'tempModifier']}
         label={showLabel && 'temp modifier'}
         textAlign='center'
         noBgLabel
+        labelDesc={'Временный модификатор.'}
       >
-        <InputNumber controls={false} style={{ width: '100%' }} />
+        <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
       </FormItem>
     </AbilityContainer>
   );
-};
+});
 
 export default memo(Ability);

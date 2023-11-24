@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Form } from 'antd';
+import { Form, Tooltip } from 'antd';
 import { memo } from 'react';
 
 const StyledFormItem = styled(Form.Item)`
@@ -25,6 +25,7 @@ const LabelContainer = styled.div`
   display: flex;
   align-items: end;
   justify-content: center;
+  cursor: pointer;
 `;
 
 const Label = styled.p`
@@ -41,13 +42,23 @@ const Label = styled.p`
   font-weight: 500;
 `;
 
-const FormItem = ({ name, gridArea, children, label = false, noBgLabel = false, textAlign }) => {
+const FormItem = ({
+  name,
+  gridArea,
+  children,
+  label = false,
+  noBgLabel = false,
+  labelDesc,
+  textAlign,
+}) => {
   return (
     <FormItemContainer gridarea={gridArea}>
       {label && (
-        <LabelContainer>
-          <Label nobg={noBgLabel}>{label}</Label>
-        </LabelContainer>
+        <Tooltip title={labelDesc}>
+          <LabelContainer>
+            <Label nobg={noBgLabel}>{label}</Label>
+          </LabelContainer>
+        </Tooltip>
       )}
       <StyledFormItem name={name} textalign={textAlign}>
         {children}
