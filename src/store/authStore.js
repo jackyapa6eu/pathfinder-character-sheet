@@ -63,7 +63,7 @@ class AuthStore {
       const { uid } = user;
 
       const dataRef = ref(db, `users/${user.uid}/userData`);
-      await set(dataRef, { uid, email, displayName });
+      await set(dataRef, { uid, email, displayName, dm: false });
       message.success('Success!');
     } catch (error) {
       message.error(`Error! ${error.message}`);

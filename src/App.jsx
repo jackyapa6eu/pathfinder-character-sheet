@@ -67,6 +67,10 @@ const App = observer(() => {
             element={<ProtectedRoute component={<CharacterPage />} to='/' condition={user} />}
             path='/chars/:charId'
           />
+          <Route
+            element={<ProtectedRoute component={<CharacterPage />} to='/' condition={user?.dm} />}
+            path='dm/:userId/chars/:charId'
+          />
           <Route element={<div>404 страница не найдена</div>} path='/*' />
         </Routes>
       </MainContainer>

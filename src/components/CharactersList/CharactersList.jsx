@@ -4,6 +4,8 @@ import charactersStore from '../../store/charactersStore';
 import authStore from '../../store/authStore';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import usersStore from '../../store/usersStore';
+import { toJS } from 'mobx';
 
 const CharacterListContainer = styled.div`
   display: flex;
@@ -53,16 +55,22 @@ const CharacterCard = styled.div`
 const CharactersList = observer(() => {
   const { getCharactersList, characters } = charactersStore;
   const { user } = authStore;
+  const { users, getUsers } = usersStore;
 
   const navigate = useNavigate();
 
   const getData = async () => {
     await getCharactersList(user.uid);
+    if (user.dm) await getUsers();
   };
 
   useEffect(() => {
     getData();
   }, []);
+
+  useEffect(() => {
+    console.log(toJS(users));
+  }, [users]);
 
   return (
     <CharacterListContainer>
@@ -85,6 +93,39 @@ const CharactersList = observer(() => {
             </CharacterCard>
           ))}
         </CardsContainer>
+      )}
+      {user.dm && (
+        <div>
+          {Object.values(users).map((user) => (
+            <div key={user.userData.uid}>
+              <h3 style={{ margin: 0, marginBottom: '15px' }}>
+                {user.userData.displayName} сharacters
+              </h3>
+              {Object.keys(characters) && (
+                <CardsContainer>
+                  {Object.entries(user.characters).map(([charRef, charData]) => (
+                    <CharacterCard
+                      key={charRef}
+                      onClick={() => navigate(`dm/${user.userData.uid}/chars/${charRef}`)}
+                    >
+                      <h4>{charData.name}</h4>
+                      <p>
+                        <span>level</span>
+                        <span>{charData.level}</span>
+                      </p>
+                      <p>
+                        <span>{charData.race}</span>
+                      </p>
+                      <p>
+                        <span>{charData.alignment}</span>
+                      </p>
+                    </CharacterCard>
+                  ))}
+                </CardsContainer>
+              )}
+            </div>
+          ))}
+        </div>
       )}
     </CharacterListContainer>
   );

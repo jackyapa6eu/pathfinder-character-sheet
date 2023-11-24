@@ -10,7 +10,7 @@ import { alignmentSelectOptions } from '../../utils/consts';
 import FormItem from '../FormItem';
 import Abilities from '../Abilities';
 import { useForm } from 'antd/es/form/Form';
-import HitPoints from '../HitPoints';
+import HitPointsInitiativeArmor from '../HitPointsInitiativeArmor';
 
 const CharacterPageContainer = styled(Form)`
   display: grid;
@@ -19,10 +19,10 @@ const CharacterPageContainer = styled(Form)`
   grid-template-rows: max-content;
   grid-template-areas:
     'title title title title title title'
-    'abilities abilities hitPoints baseInfo baseInfo baseInfo';
+    'abilities HitPointsInitiativeArmor HitPointsInitiativeArmor baseInfo baseInfo baseInfo';
   box-shadow: 0 0 3px rgba(128, 128, 128, 0.5);
   padding: 0 5px;
-  gap: 5px;
+  gap: 8px;
 
   & h3 {
     grid-area: title;
@@ -34,7 +34,16 @@ const CharacterPageContainer = styled(Form)`
     grid-template-areas:
       'title title title title title title'
       'baseInfo baseInfo baseInfo baseInfo baseInfo baseInfo'
-      'abilities abilities abilities abilities hitPoints hitPoints';
+      'abilities HitPointsInitiativeArmor HitPointsInitiativeArmor . . .';
+  }
+
+  @media screen and (max-width: 470px) {
+    align-content: start;
+    grid-template-areas:
+      'title title title title title title'
+      'baseInfo baseInfo baseInfo baseInfo baseInfo baseInfo'
+      'abilities abilities abilities abilities abilities abilities'
+      'HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor';
   }
 `;
 
@@ -55,7 +64,7 @@ const CharacterPage = observer(() => {
   const { user } = authStore;
   const { subscribeCharacter, openedCharacter, clearOpenedCharacter } = charactersStore;
 
-  const { charId } = useParams();
+  const { charId, userId } = useParams();
   const [form] = useForm();
 
   useEffect(() => {
@@ -67,7 +76,7 @@ const CharacterPage = observer(() => {
   }, [openedCharacter]);
 
   useEffect(() => {
-    const unsubscribe = subscribeCharacter(user.uid, charId);
+    const unsubscribe = subscribeCharacter(userId || user.uid, charId);
 
     return () => {
       unsubscribe();
@@ -78,8 +87,8 @@ const CharacterPage = observer(() => {
   return (
     <CharacterPageContainer form={form} onFinish={(values) => console.log(values)}>
       <h3>{openedCharacter.name}</h3>
-      <Abilities gridArea='abilities' charId={charId} />
-      <HitPoints />
+      <Abilities gridArea='abilities' charId={charId} userId={userId} />
+      <HitPointsInitiativeArmor charId={charId} userId={userId} />
       <BaseInfo>
         <FormItem name='race' label='race' gridArea='race'>
           <Input style={{ width: '100%' }} />

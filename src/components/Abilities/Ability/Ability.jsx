@@ -14,12 +14,12 @@ const AbilityContainer = styled.div`
   align-items: center;
 `;
 
-const Ability = observer(({ name = '', showLabel = false, abilityDesc, charId }) => {
+const Ability = observer(({ name = '', showLabel = false, abilityDesc, charId, userId }) => {
   const { changeAbility } = charactersStore;
   const { user } = authStore;
 
   const handleScoreChange = async (value, name, type) => {
-    await changeAbility(user.uid, charId, name, type, value);
+    await changeAbility(userId || user.uid, charId, name, type, value);
   };
 
   return (

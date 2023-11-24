@@ -46,6 +46,17 @@ export const initialUserData = {
       tempModifier: null,
     },
   },
+
+  hitPoints: {
+    total: null,
+    wounds: null,
+    nonLethal: null,
+  },
+
+  initiative: {
+    total: null,
+    miscModifier: null,
+  },
 };
 
 class CharactersStore {
@@ -124,14 +135,12 @@ class CharactersStore {
         const updates = {};
         const adjustment = this.openedCharacter.abilities?.[abilityName]?.adjustment || 0;
         const tempModifier = Math.floor((abilityValue + (adjustment || 0) - 10) / 2);
-        console.log('adjustment: ', adjustment, tempModifier);
         updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/${abilityType}`] =
           abilityValue;
         updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/modifier`] =
           Math.floor((abilityValue - 10) / 2);
         updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/tempModifier`] =
           adjustment ? tempModifier : null;
-        console.log('adjustment ? null : tempModifier :', adjustment ? null : tempModifier);
         update(ref(db), updates);
         message.success(`Ability ${abilityName} changed!`);
       } catch (e) {
@@ -141,10 +150,6 @@ class CharactersStore {
     if (abilityType === 'adjustment') {
       const score = this.openedCharacter.abilities?.[abilityName].score || 0;
       const adjustment = abilityValue;
-
-      console.log('score:', score);
-      console.log('adjustment: ', adjustment, abilityValue);
-      console.log('score + adjustment - 10 / 2 = ', (score + (adjustment || 0) - 10) / 2);
       try {
         const updates = {};
         const tempModifier = Math.floor((score + (adjustment || 0) - 10) / 2);
@@ -158,6 +163,30 @@ class CharactersStore {
       } catch (e) {
         console.log(e);
       }
+    }
+  }, 700);
+
+  changeHitPoints = debounce(async (uid, charRef, hpType, hpValue) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/hitPoints/${hpType}`);
+    try {
+      await set(dataRef, hpValue);
+      message.success('Hit points changed!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error on character creation');
+    }
+  }, 700);
+
+  changeMiscInitiative = debounce(async (uid, charRef, newInitiative) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/initiative/miscModifier`);
+    try {
+      await set(dataRef, newInitiative);
+      message.success('Initiative changed!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error on character creation');
     }
   }, 700);
 }
