@@ -84,6 +84,16 @@ const CharacterPage = observer(() => {
     };
   }, []);
 
+  useEffect(() => {
+    if (openedCharacter.name) {
+      document.title = openedCharacter.name;
+    }
+
+    return () => {
+      document.title = 'Olegators is Pathfinder';
+    };
+  }, [openedCharacter]);
+
   return (
     <CharacterPageContainer form={form} onFinish={(values) => console.log(values)}>
       <h3>{openedCharacter.name}</h3>
