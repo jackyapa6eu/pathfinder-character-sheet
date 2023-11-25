@@ -16,7 +16,7 @@ const HitPointsContainer = styled.div`
   width: 100%;
   margin: 0;
   height: max-content;
-  gap: 3px;
+  gap: 5px;
 `;
 
 const TotalHitPoints = styled.div`
@@ -33,18 +33,48 @@ const Initiative = styled.div`
   align-items: center;
 `;
 
+const Ac = styled.div`
+  display: grid;
+  grid-template-columns: 38px 44px 44px 44px 44px 44px 44px 44px;
+  justify-items: center;
+  align-items: center;
+`;
+
+const TouchFlat = styled.div`
+  display: grid;
+  grid-template-columns: 82px 44px 89px 44px;
+  justify-items: center;
+  align-items: center;
+`;
+
 const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
-  const { changeHitPoints, openedCharacter, changeMiscInitiative } = charactersStore;
+  const { changeHitPoints, openedCharacter, changeMiscInitiative, changeAc } = charactersStore;
   const { user } = authStore;
   const [totalInitiative, setTotalInitiative] = useState(null);
+  const [totalAc, setTotalAc] = useState(null);
+  const [touch, setTouch] = useState(null);
+  const [flat, setFlat] = useState(null);
 
   useEffect(() => {
     const tempDexMod = openedCharacter.abilities?.dex?.tempModifier;
     const dexMod = openedCharacter.abilities?.dex?.modifier;
 
-    const total = (openedCharacter.initiative?.miscModifier || 0) + (tempDexMod || dexMod);
-    console.log(tempDexMod);
-    setTotalInitiative(total);
+    const initiative = (openedCharacter.initiative?.miscModifier || 0) + (tempDexMod || dexMod);
+    const ac =
+      10 +
+      (openedCharacter.ac?.armorBonus || 0) +
+      (openedCharacter.ac?.shieldBonus || 0) +
+      (openedCharacter.ac?.naturalArmor || 0) +
+      (openedCharacter.ac?.deflectionModifier || 0) +
+      (openedCharacter.ac?.miscModifier || 0) +
+      (tempDexMod || dexMod);
+    const touchArmor = 10 + (tempDexMod || dexMod) + (openedCharacter.ac?.miscModifier || 0);
+    const flatArmor = 10 + (openedCharacter.ac?.miscModifier || 0);
+
+    setTotalInitiative(initiative);
+    setTotalAc(ac);
+    setTouch(touchArmor);
+    setFlat(flatArmor);
   }, [openedCharacter]);
 
   return (
@@ -128,6 +158,89 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
           />
         </FormItem>
       </Initiative>
+      <Ac>
+        <CharSheetRowLabel label='ac' />
+        <FormItem label='total' textAlign='center' noBgLabel>
+          <InputNumber
+            value={totalAc}
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            disabled
+          />
+        </FormItem>
+        <FormItem name={['ac', 'armorBonus']} label='armor' textAlign='center' noBgLabel>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'armorBonus', value)}
+          />
+        </FormItem>
+        <FormItem name={['ac', 'shieldBonus']} label='shield' textAlign='center' noBgLabel>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'shieldBonus', value)}
+          />
+        </FormItem>
+        <FormItem
+          name={
+            openedCharacter.abilities?.dex?.tempModifier
+              ? ['abilities', 'dex', 'tempModifier']
+              : ['abilities', 'dex', 'modifier']
+          }
+          label='dex'
+          textAlign='center'
+          noBgLabel
+        >
+          <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
+        </FormItem>
+        <FormItem name={['ac', 'naturalArmor']} label='natural ' textAlign='center' noBgLabel>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'naturalArmor', value)}
+          />
+        </FormItem>
+        <FormItem
+          name={['ac', 'deflectionModifier']}
+          label='deflection '
+          textAlign='center'
+          noBgLabel
+        >
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'deflectionModifier', value)}
+          />
+        </FormItem>
+        <FormItem name={['ac', 'miscModifier']} label='misc' textAlign='center' noBgLabel>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'miscModifier', value)}
+          />
+        </FormItem>
+      </Ac>
+      <TouchFlat>
+        <CharSheetRowLabel label='touch' />
+        <FormItem textAlign='center' noBgLabel>
+          <InputNumber
+            value={touch}
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            disabled
+          />
+        </FormItem>
+        <CharSheetRowLabel label='flat-footed' />
+        <FormItem textAlign='center' noBgLabel>
+          <InputNumber
+            value={flat}
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            disabled
+          />
+        </FormItem>
+      </TouchFlat>
     </HitPointsContainer>
   );
 });

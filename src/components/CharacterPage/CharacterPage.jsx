@@ -11,18 +11,21 @@ import FormItem from '../FormItem';
 import Abilities from '../Abilities';
 import { useForm } from 'antd/es/form/Form';
 import HitPointsInitiativeArmor from '../HitPointsInitiativeArmor';
+import SavingThrows from '../SavingThrows';
 
 const CharacterPageContainer = styled(Form)`
   display: grid;
   width: 100%;
+  align-content: start;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-  grid-template-rows: max-content;
+  grid-template-rows: repeat(auto-fit, max-content);
   grid-template-areas:
     'title title title title title title'
-    'abilities HitPointsInitiativeArmor HitPointsInitiativeArmor baseInfo baseInfo baseInfo';
+    'abilities HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor baseInfo baseInfo'
+    'savingThrows savingThrows . . . .';
   box-shadow: 0 0 3px rgba(128, 128, 128, 0.5);
   padding: 0 5px;
-  gap: 8px;
+  gap: 10px;
 
   & h3 {
     grid-area: title;
@@ -99,6 +102,7 @@ const CharacterPage = observer(() => {
       <h3>{openedCharacter.name}</h3>
       <Abilities gridArea='abilities' charId={charId} userId={userId} />
       <HitPointsInitiativeArmor charId={charId} userId={userId} />
+      <SavingThrows charId={charId} userId={userId} />
       <BaseInfo>
         <FormItem name='race' label='race' gridArea='race'>
           <Input style={{ width: '100%' }} />

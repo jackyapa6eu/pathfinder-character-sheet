@@ -5,7 +5,7 @@ import { Tooltip } from 'antd';
 const StyledContainer = styled.span`
   background-color: black;
   color: white;
-  padding: 3px;
+  padding: 3px 0;
   width: 100%;
   text-align: center;
 `;

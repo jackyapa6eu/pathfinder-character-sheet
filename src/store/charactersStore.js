@@ -1,7 +1,13 @@
-import { makeAutoObservable, runInAction } from 'mobx';
+import { makeAutoObservable, runInAction, toJS } from 'mobx';
 import { getDatabase, ref, set, get, onValue, update } from 'firebase/database';
 import { message } from 'antd';
 import { debounce } from 'lodash';
+
+const savingThrowsAbilities = {
+  fortitude: 'con',
+  reflex: 'dex',
+  will: 'wis',
+};
 
 export const initialUserData = {
   race: '',
@@ -54,8 +60,38 @@ export const initialUserData = {
   },
 
   initiative: {
-    total: null,
     miscModifier: null,
+  },
+
+  ac: {
+    armorBonus: null,
+    shieldBonus: null,
+    naturalArmor: null,
+    deflectionModifier: null,
+    miscModifier: null,
+  },
+  savingThrows: {
+    fortitude: {
+      total: null,
+      base: null,
+      magicMod: null,
+      miscMod: null,
+      tempMod: null,
+    },
+    reflex: {
+      total: null,
+      base: null,
+      magicMod: null,
+      miscMod: null,
+      tempMod: null,
+    },
+    will: {
+      total: null,
+      base: null,
+      magicMod: null,
+      miscMod: null,
+      tempMod: null,
+    },
   },
 };
 
@@ -141,7 +177,7 @@ class CharactersStore {
           Math.floor((abilityValue - 10) / 2);
         updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/tempModifier`] =
           adjustment ? tempModifier : null;
-        update(ref(db), updates);
+        await update(ref(db), updates);
         message.success(`Ability ${abilityName} changed!`);
       } catch (e) {
         console.log(e);
@@ -158,12 +194,13 @@ class CharactersStore {
         updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/tempModifier`] =
           adjustment ? tempModifier : null;
 
-        update(ref(db), updates);
+        await update(ref(db), updates);
         message.success(`Ability ${abilityName.toUpperCase()} changed!`);
       } catch (e) {
         console.log(e);
       }
     }
+    this.recalcTotalSavingThrows(uid, charRef);
   }, 700);
 
   changeHitPoints = debounce(async (uid, charRef, hpType, hpValue) => {
@@ -189,6 +226,66 @@ class CharactersStore {
       message.error('Error on character creation');
     }
   }, 700);
+
+  changeAc = debounce(async (uid, charRef, field, newValue) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/ac/${field}`);
+    try {
+      await set(dataRef, newValue);
+      message.success('Ac changed!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error on character creation');
+    }
+  }, 700);
+
+  changeSavingThrows = debounce(async (uid, charRef, throwName, field, newValue, abilityName) => {
+    const db = getDatabase();
+    const tempAbilityMod = this.openedCharacter.abilities?.[abilityName]?.tempModifier;
+    const abilityMod = this.openedCharacter.abilities?.[abilityName]?.modifier;
+    const savingThrow = this.openedCharacter.savingThrows[throwName];
+    // получим объект всех спасбросков кроме изменяемого и тотал.
+    const { total: prevTotal = 0, [field]: current, ...otherThrows } = savingThrow || {};
+    const total =
+      (tempAbilityMod || abilityMod) +
+      (newValue || 0) +
+      Object.values(otherThrows).reduce((acc, curr) => acc + curr, 0);
+
+    try {
+      const updates = {};
+
+      updates[`users/${uid}/characters/${charRef}/savingThrows/${throwName}/${field}`] = newValue;
+      updates[`users/${uid}/characters/${charRef}/savingThrows/${throwName}/total`] =
+        Math.floor(total);
+
+      await update(ref(db), updates);
+      message.success(`Saving throw ${throwName} changed!`);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+
+  recalcTotalSavingThrows = debounce(async (uid, charRef) => {
+    const db = getDatabase();
+    const updates = {};
+
+    Object.entries(this.openedCharacter.savingThrows).forEach(([name, data]) => {
+      const { total = 0, ...otherThrows } = data || {};
+      const tempAbilityMod =
+        this.openedCharacter.abilities?.[savingThrowsAbilities[name]]?.tempModifier;
+      const abilityMod = this.openedCharacter.abilities?.[savingThrowsAbilities[name]]?.modifier;
+      const newTotal =
+        (tempAbilityMod || abilityMod) +
+        Object.values(otherThrows).reduce((acc, curr) => acc + curr, 0);
+      updates[`users/${uid}/characters/${charRef}/savingThrows/${name}/total`] =
+        Math.floor(newTotal);
+    });
+    try {
+      await update(ref(db), updates);
+    } catch (e) {
+      console.log(e);
+    }
+  });
 }
 
 const charactersStore = new CharactersStore();

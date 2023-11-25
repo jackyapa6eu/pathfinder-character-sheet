@@ -10,7 +10,7 @@ const AbilitiesContainer = styled.div`
   width: 100%;
   margin: 0;
   height: max-content;
-  gap: 3px;
+  gap: 5px;
 `;
 
 const Abilities = ({ charId, userId }) => {
