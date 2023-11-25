@@ -21,7 +21,7 @@ const HitPointsContainer = styled.div`
 
 const TotalHitPoints = styled.div`
   display: grid;
-  grid-template-columns: 38px 44px;
+  grid-template-columns: 38px 44px 88px 88px;
   justify-items: center;
   align-items: center;
 `;
@@ -88,8 +88,6 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
             onChange={(hpValue) => changeHitPoints(userId || user.uid, charId, 'total', hpValue)}
           />
         </FormItem>
-      </TotalHitPoints>
-      <div style={{ width: '82px' }}>
         <FormItem
           name={['hitPoints', 'wounds']}
           label='wounds'
@@ -103,9 +101,7 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
             onChange={(hpValue) => changeHitPoints(userId || user.uid, charId, 'wounds', hpValue)}
           />
         </FormItem>
-      </div>
 
-      <div style={{ width: '82px' }}>
         <FormItem
           name={['hitPoints', 'nonLethal']}
           label='nonlethal'
@@ -121,7 +117,7 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
             }
           />
         </FormItem>
-      </div>
+      </TotalHitPoints>
 
       <Initiative>
         <CharSheetRowLabel label='initiative' />

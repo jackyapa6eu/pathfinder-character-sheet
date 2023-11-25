@@ -20,9 +20,9 @@ const CharacterPageContainer = styled(Form)`
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
   grid-template-rows: repeat(auto-fit, max-content);
   grid-template-areas:
-    'title title title title title title'
-    'abilities HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor baseInfo baseInfo'
-    'savingThrows savingThrows . . . .';
+    'title baseInfo baseInfo baseInfo baseInfo baseInfo'
+    'abilities HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor . .'
+    'abilities savingThrows savingThrows . . .';
   box-shadow: 0 0 3px rgba(128, 128, 128, 0.5);
   padding: 0 5px;
   gap: 10px;
@@ -32,21 +32,25 @@ const CharacterPageContainer = styled(Form)`
     margin: 0;
   }
 
-  @media screen and (max-width: 685px) {
+  @media screen and (max-width: 605px) {
     align-content: start;
+    grid-template-columns: 1fr 1fr 1fr;
     grid-template-areas:
-      'title title title title title title'
-      'baseInfo baseInfo baseInfo baseInfo baseInfo baseInfo'
-      'abilities HitPointsInitiativeArmor HitPointsInitiativeArmor . . .';
+      'title baseInfo baseInfo'
+      'abilities abilities abilities '
+      'HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor'
+      'savingThrows savingThrows savingThrows';
   }
 
-  @media screen and (max-width: 470px) {
+  @media screen and (max-width: 510px) {
     align-content: start;
+    grid-template-columns: 1fr;
     grid-template-areas:
-      'title title title title title title'
-      'baseInfo baseInfo baseInfo baseInfo baseInfo baseInfo'
-      'abilities abilities abilities abilities abilities abilities'
-      'HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor';
+      'title'
+      'baseInfo'
+      'abilities'
+      'HitPointsInitiativeArmor'
+      'savingThrows';
   }
 `;
 
@@ -59,8 +63,6 @@ const BaseInfo = styled.div`
   gap: 5px;
   margin: 0;
   height: max-content;
-  justify-content: end;
-  padding-top: 15px;
 `;
 
 const CharacterPage = observer(() => {

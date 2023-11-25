@@ -30,6 +30,13 @@ const MainContainer = styled.main`
   grid-area: mainContainer;
   justify-items: center;
   padding: 10px;
+
+  @media screen and (max-width: 605px) {
+    & {
+      padding: 0;
+      padding-bottom: 10px;
+    }
+  }
 `;
 
 const App = observer(() => {

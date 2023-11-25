@@ -17,7 +17,7 @@ const FormItemContainer = styled.div`
 
 const LabelContainer = styled.div`
   position: absolute;
-  top: -15px;
+  top: -10px;
   left: 0;
   width: 100%;
   height: 16px;
