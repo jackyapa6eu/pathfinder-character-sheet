@@ -8,6 +8,7 @@ const StyledContainer = styled.span`
   padding: 3px 0;
   width: 100%;
   text-align: center;
+  font-size: 13px;
 `;
 
 const CharSheetRowLabel = ({ label, desc }) => {
