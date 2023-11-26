@@ -15,3 +15,8 @@ code {
 .ant-input-number input {
   color: black!important;
 }
+
+.ant-checkbox-checked .ant-checkbox-inner {
+  background-color: black!important;
+  border-color: black!important;
+}

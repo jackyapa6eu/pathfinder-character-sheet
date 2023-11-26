@@ -70,6 +70,7 @@ export const initialUserData = {
     deflectionModifier: null,
     miscModifier: null,
   },
+
   savingThrows: {
     fortitude: {
       total: null,
@@ -91,6 +92,170 @@ export const initialUserData = {
       magicMod: null,
       miscMod: null,
       tempMod: null,
+    },
+  },
+
+  attack: {
+    bab: null,
+    cmb: null,
+    cmd: null,
+  },
+
+  skills: {
+    acrobatics: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    appraise: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    bluff: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    climb: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    craft: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    diplomacy: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    disableDevice: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    escapeArtist: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    handleAnimal: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    knowledgeArcana: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    knowledgeDungeoneering: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    knowledgeEngineering: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    knowledgeGeography: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    knowledgeHistory: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    knowledgeLocal: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    knowledgeNature: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    knowledgeNobility: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    knowledgePlanes: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    knowledgeReligion: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    linguistics: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    perception: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    perform: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    profession: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    ride: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    senseMotive: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    sleightOfHand: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    spellCraft: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    stealth: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    survival: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    swim: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
+    },
+    useMagicDevice: {
+      classSkill: false,
+      ranks: null,
+      miscMod: null,
     },
   },
 };
@@ -201,6 +366,7 @@ class CharactersStore {
       }
     }
     this.recalcTotalSavingThrows(uid, charRef);
+    this.changeAttack(uid, charRef);
   }, 700);
 
   changeHitPoints = debounce(async (uid, charRef, hpType, hpValue) => {
@@ -243,11 +409,11 @@ class CharactersStore {
     const db = getDatabase();
     const tempAbilityMod = this.openedCharacter.abilities?.[abilityName]?.tempModifier;
     const abilityMod = this.openedCharacter.abilities?.[abilityName]?.modifier;
-    const savingThrow = this.openedCharacter.savingThrows[throwName];
+    const savingThrow = this.openedCharacter.savingThrows?.[throwName];
     // получим объект всех спасбросков кроме изменяемого и тотал.
     const { total: prevTotal = 0, [field]: current, ...otherThrows } = savingThrow || {};
     const total =
-      (tempAbilityMod || abilityMod) +
+      (tempAbilityMod ?? abilityMod) +
       (newValue || 0) +
       Object.values(otherThrows).reduce((acc, curr) => acc + curr, 0);
 
@@ -265,6 +431,34 @@ class CharactersStore {
     }
   });
 
+  changeAttack = debounce(async (uid, charRef, newValue, isUpdate = false) => {
+    const db = getDatabase();
+
+    const updates = {};
+    const tempStrMod = this.openedCharacter.abilities?.str?.tempModifier;
+    const strMod = this.openedCharacter.abilities?.str?.modifier;
+    const tempDexMod = this.openedCharacter.abilities?.dex?.tempModifier;
+    const dexMod = this.openedCharacter.abilities?.dex?.modifier;
+    const cmb = (newValue || this.openedCharacter.attack?.bab || 0) + (tempStrMod ?? strMod);
+    const cmd =
+      (newValue || this.openedCharacter.attack?.bab || 0) +
+      (tempStrMod ?? strMod) +
+      (tempDexMod ?? dexMod) +
+      10;
+
+    updates[`users/${uid}/characters/${charRef}/attack/bab`] =
+      newValue || this.openedCharacter.attack?.bab || 0;
+    updates[`users/${uid}/characters/${charRef}/attack/cmb`] = cmb;
+    updates[`users/${uid}/characters/${charRef}/attack/cmd`] = cmd;
+
+    try {
+      await update(ref(db), updates);
+      if (!isUpdate) message.success(`Base attack bonus changed!`);
+    } catch (e) {
+      console.log(e);
+    }
+  }, 700);
+
   recalcTotalSavingThrows = debounce(async (uid, charRef) => {
     const db = getDatabase();
     const updates = {};
@@ -275,7 +469,7 @@ class CharactersStore {
         this.openedCharacter.abilities?.[savingThrowsAbilities[name]]?.tempModifier;
       const abilityMod = this.openedCharacter.abilities?.[savingThrowsAbilities[name]]?.modifier;
       const newTotal =
-        (tempAbilityMod || abilityMod) +
+        (tempAbilityMod ?? abilityMod) +
         Object.values(otherThrows).reduce((acc, curr) => acc + curr, 0);
       updates[`users/${uid}/characters/${charRef}/savingThrows/${name}/total`] =
         Math.floor(newTotal);
@@ -286,6 +480,18 @@ class CharactersStore {
       console.log(e);
     }
   });
+
+  changeSkills = debounce(async (uid, charRef, skillName, field, newValue) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/skills/${skillName}/${field}`);
+    try {
+      await set(dataRef, newValue);
+      message.success('Skill changed!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error on character creation');
+    }
+  }, 700);
 }
 
 const charactersStore = new CharactersStore();

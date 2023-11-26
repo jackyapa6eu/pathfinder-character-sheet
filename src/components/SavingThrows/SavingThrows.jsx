@@ -1,10 +1,5 @@
 import { memo } from 'react';
 import styled from 'styled-components';
-import FormItem from '../FormItem';
-import { InputNumber } from 'antd';
-import CharSheetRowLabel from '../CharlSheetRowLabel/CharSheetRowLabel';
-import { observer } from 'mobx-react';
-import charactersStore from '../../store/charactersStore';
 import SavingThrow from './SavingThrow';
 
 const ThrowsContainer = styled.div`

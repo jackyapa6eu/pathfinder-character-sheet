@@ -12,17 +12,22 @@ import Abilities from '../Abilities';
 import { useForm } from 'antd/es/form/Form';
 import HitPointsInitiativeArmor from '../HitPointsInitiativeArmor';
 import SavingThrows from '../SavingThrows';
+import Attack from '../Attack';
+import Skills from '../Skills';
 
 const CharacterPageContainer = styled(Form)`
   display: grid;
   width: 100%;
   align-content: start;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 215px 1fr 1fr;
   grid-template-rows: repeat(auto-fit, max-content);
   grid-template-areas:
-    'title baseInfo baseInfo baseInfo baseInfo baseInfo'
-    'abilities HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor . .'
-    'abilities savingThrows savingThrows . . .';
+    'title baseInfo .'
+    'abilities HitPointsInitiativeArmor feats'
+    'abilities savingThrows feats'
+    'attack savingThrows feats'
+    'attack . feats'
+    '. . feats';
   box-shadow: 0 0 3px rgba(128, 128, 128, 0.5);
   padding: 0 5px;
   gap: 10px;
@@ -32,14 +37,27 @@ const CharacterPageContainer = styled(Form)`
     margin: 0;
   }
 
+  @media screen and (max-width: 950px) {
+    align-content: start;
+    grid-template-columns: 215px 1fr;
+    grid-template-areas:
+      'title baseInfo '
+      'abilities HitPointsInitiativeArmor'
+      'abilities savingThrows'
+      'attack savingThrows'
+      'attack feats'
+      '.  feats';
+  }
+
   @media screen and (max-width: 605px) {
     align-content: start;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-areas:
       'title baseInfo baseInfo'
-      'abilities abilities abilities '
+      'abilities abilities attack'
       'HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor'
-      'savingThrows savingThrows savingThrows';
+      'savingThrows savingThrows savingThrows'
+      'feats feats feats';
   }
 
   @media screen and (max-width: 510px) {
@@ -50,7 +68,9 @@ const CharacterPageContainer = styled(Form)`
       'baseInfo'
       'abilities'
       'HitPointsInitiativeArmor'
-      'savingThrows';
+      'savingThrows'
+      'attack'
+      'feats';
   }
 `;
 
@@ -73,7 +93,7 @@ const CharacterPage = observer(() => {
   const [form] = useForm();
 
   useEffect(() => {
-    console.log('Данные обновлены:', toJS(openedCharacter));
+    // console.log('Данные обновлены:', toJS(openedCharacter));
     if (openedCharacter) {
       form.setFieldsValue({ ...initialUserData });
       form.setFieldsValue({ ...openedCharacter });
@@ -105,6 +125,8 @@ const CharacterPage = observer(() => {
       <Abilities gridArea='abilities' charId={charId} userId={userId} />
       <HitPointsInitiativeArmor charId={charId} userId={userId} />
       <SavingThrows charId={charId} userId={userId} />
+      <Attack charId={charId} userId={userId} />
+      <Skills charId={charId} userId={userId} />
       <BaseInfo>
         <FormItem name='race' label='race' gridArea='race'>
           <Input style={{ width: '100%' }} />

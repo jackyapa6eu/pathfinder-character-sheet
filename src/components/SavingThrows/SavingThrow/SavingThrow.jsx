@@ -54,6 +54,13 @@ const SavingThrow = observer(({ name, abilityName, charId, userId, showLabels = 
         label={showLabels && 'ability modifier'}
         textAlign='center'
         noBgLabel
+        labelDesc={
+          <div>
+            <p style={{ margin: 0 }}>FORTITUDE: CON</p>
+            <p style={{ margin: 0 }}>REFLEX: DEX</p>
+            <p style={{ margin: 0 }}>WILL: WIS</p>
+          </div>
+        }
       >
         <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
       </FormItem>

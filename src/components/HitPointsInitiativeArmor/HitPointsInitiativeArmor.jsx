@@ -59,7 +59,7 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
     const tempDexMod = openedCharacter.abilities?.dex?.tempModifier;
     const dexMod = openedCharacter.abilities?.dex?.modifier;
 
-    const initiative = (openedCharacter.initiative?.miscModifier || 0) + (tempDexMod || dexMod);
+    const initiative = (openedCharacter.initiative?.miscModifier || 0) + (tempDexMod ?? dexMod);
     const ac =
       10 +
       (openedCharacter.ac?.armorBonus || 0) +
@@ -67,9 +67,19 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
       (openedCharacter.ac?.naturalArmor || 0) +
       (openedCharacter.ac?.deflectionModifier || 0) +
       (openedCharacter.ac?.miscModifier || 0) +
-      (tempDexMod || dexMod);
-    const touchArmor = 10 + (tempDexMod || dexMod) + (openedCharacter.ac?.miscModifier || 0);
-    const flatArmor = 10 + (openedCharacter.ac?.miscModifier || 0);
+      (tempDexMod ?? dexMod);
+    const touchArmor =
+      10 +
+      (openedCharacter.ac?.deflectionModifier || 0) +
+      (openedCharacter.ac?.miscModifier || 0) +
+      (tempDexMod ?? dexMod);
+    const flatArmor =
+      10 +
+      (openedCharacter.ac?.armorBonus || 0) +
+      (openedCharacter.ac?.shieldBonus || 0) +
+      (openedCharacter.ac?.naturalArmor || 0) +
+      (openedCharacter.ac?.deflectionModifier || 0) +
+      (openedCharacter.ac?.miscModifier || 0);
 
     setTotalInitiative(initiative);
     setTotalAc(ac);
@@ -131,7 +141,7 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
         </FormItem>
         <FormItem
           name={
-            openedCharacter.abilities?.dex?.tempModifier
+            openedCharacter.abilities?.dex?.tempModifier !== undefined
               ? ['abilities', 'dex', 'tempModifier']
               : ['abilities', 'dex', 'modifier']
           }
@@ -180,7 +190,7 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
         </FormItem>
         <FormItem
           name={
-            openedCharacter.abilities?.dex?.tempModifier
+            openedCharacter.abilities?.dex?.tempModifier !== undefined
               ? ['abilities', 'dex', 'tempModifier']
               : ['abilities', 'dex', 'modifier']
           }
