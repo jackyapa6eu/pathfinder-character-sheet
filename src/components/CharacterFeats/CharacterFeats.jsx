@@ -29,9 +29,15 @@ const FeatsListItem = styled.p`
   cursor: pointer;
   padding: 5px;
   transition: all 0.3s ease;
+  position: relative;
+
   &:hover {
     background: black;
     color: white;
+
+    & .delete-feat-button {
+      display: flex;
+    }
   }
 `;
 
@@ -47,9 +53,25 @@ const ButtonBox = styled.div`
   grid-area: submit;
 `;
 
+const DeleteFeatButton = styled(Button)`
+  position: absolute;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+  top: -3px;
+  right: -3px;
+  background: white;
+  color: black;
+  padding: 0;
+  border-radius: 0px;
+  font-size: 6px;
+`;
+
 const CharacterFeats = observer(({ charId, userId }) => {
   const [addFeatModalIsOpen, setAddFeatModalIsOpen] = useState(false);
-  const { addFeat, openedCharacter } = charactersStore;
+  const { addFeat, deleteFeat, openedCharacter } = charactersStore;
   const { user } = authStore;
 
   const [api, contextHolder] = notification.useNotification();
@@ -67,6 +89,11 @@ const CharacterFeats = observer(({ charId, userId }) => {
     });
   };
 
+  const handleDeleteFeat = async (event, featRef) => {
+    event.stopPropagation();
+    await deleteFeat(userId || user.uid, charId, featRef);
+  };
+
   return (
     <FeatsContainer>
       <Modal
@@ -74,6 +101,7 @@ const CharacterFeats = observer(({ charId, userId }) => {
         open={addFeatModalIsOpen}
         onCancel={() => setAddFeatModalIsOpen(false)}
         footer={null}
+        destroyOnClose
       >
         <Form layout='vertical' labelAlign='left' onFinish={onFinish}>
           <StyledFormItem gridarea='name' name='name' label='name' rules={[{ required: true }]}>
@@ -104,6 +132,12 @@ const CharacterFeats = observer(({ charId, userId }) => {
         {openedCharacter.feats &&
           Object.entries(openedCharacter.feats).map(([featKey, data]) => (
             <FeatsListItem key={featKey} onClick={() => handleOpenFeat(data)}>
+              <DeleteFeatButton
+                className='delete-feat-button'
+                onClick={(event) => handleDeleteFeat(event, featKey)}
+              >
+                X
+              </DeleteFeatButton>
               {data.name}
             </FeatsListItem>
           ))}

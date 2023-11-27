@@ -260,6 +260,24 @@ export const initialUserData = {
       miscMod: null,
     },
   },
+
+  spells: {
+    ranger: {
+      0: {
+        maxCountPerDay: 0,
+        spells: {},
+      },
+      1: {
+        maxCountPerDay: 1,
+        spells: {
+          'spell-ref': {
+            name: '',
+            isUsed: false,
+          },
+        },
+      },
+    },
+  },
 };
 
 class CharactersStore {
@@ -504,6 +522,20 @@ class CharactersStore {
     try {
       await set(dataRef, featData);
       message.success('Feat added!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
+  deleteFeat = async (uid, charRef, featRef) => {
+    const db = getDatabase();
+
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/feats/${featRef}`);
+
+    try {
+      await set(dataRef, null);
+      message.success('Feat deleted!');
     } catch (e) {
       console.log(e);
       message.error('Error!');
