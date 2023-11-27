@@ -9,11 +9,12 @@ import DiceIcon from '../../icons/DiceIcon';
 const StyledHeader = styled.div`
   width: 100%;
   display: grid;
+  align-items: center;
   grid-template-columns: minmax(auto, max-content) 1fr minmax(auto, max-content);
   gap: 20px;
   grid-area: header;
   box-shadow: 0 0 3px rgba(128, 128, 128, 0.5);
-  padding: 10px;
+  padding: 0 10px;
 `;
 
 const UserContainer = styled.div`

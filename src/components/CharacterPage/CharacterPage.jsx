@@ -5,7 +5,7 @@ import authStore from '../../store/authStore';
 import charactersStore, { initialUserData } from '../../store/charactersStore';
 import { toJS } from 'mobx';
 import styled from 'styled-components';
-import { Button, Form, Input, InputNumber, Select } from 'antd';
+import { Button, Form, Input, InputNumber, Modal, Select, Tabs } from 'antd';
 import { alignmentSelectOptions } from '../../utils/consts';
 import FormItem from '../FormItem';
 import Abilities from '../Abilities';
@@ -14,15 +14,45 @@ import HitPointsInitiativeArmor from '../HitPointsInitiativeArmor';
 import SavingThrows from '../SavingThrows';
 import Attack from '../Attack';
 import Skills from '../Skills';
+import CharacterFeats from '../CharacterFeats';
 
-const CharacterPageContainer = styled(Form)`
+const StyledTabs = styled(Tabs)`
+  width: 100%;
+  color: black;!important;
+
+  & .ant-tabs-nav {
+    margin: 0;
+  }
+  
+  & .ant-tabs-tab-btn {
+    color: black!important;
+    
+  }
+  
+  & .ant-tabs-tab  {
+    padding-top: 0!important;
+  }
+`;
+
+const FormInstance = styled(Form)`
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  width: 100%;
+
+  & h3 {
+    grid-area: title;
+    margin: 0;
+  }
+`;
+
+const CharacterPageContainer = styled.div`
   display: grid;
   width: 100%;
   align-content: start;
   grid-template-columns: 215px 1fr 1fr;
   grid-template-rows: repeat(auto-fit, max-content);
   grid-template-areas:
-    'title baseInfo .'
     'abilities HitPointsInitiativeArmor feats'
     'abilities savingThrows feats'
     'attack savingThrows feats'
@@ -32,16 +62,9 @@ const CharacterPageContainer = styled(Form)`
   padding: 0 5px;
   gap: 10px;
 
-  & h3 {
-    grid-area: title;
-    margin: 0;
-  }
-
   @media screen and (max-width: 950px) {
-    align-content: start;
     grid-template-columns: 215px 1fr;
     grid-template-areas:
-      'title baseInfo '
       'abilities HitPointsInitiativeArmor'
       'abilities savingThrows'
       'attack savingThrows'
@@ -50,10 +73,8 @@ const CharacterPageContainer = styled(Form)`
   }
 
   @media screen and (max-width: 605px) {
-    align-content: start;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-areas:
-      'title baseInfo baseInfo'
       'abilities abilities attack'
       'HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor'
       'savingThrows savingThrows savingThrows'
@@ -61,11 +82,8 @@ const CharacterPageContainer = styled(Form)`
   }
 
   @media screen and (max-width: 510px) {
-    align-content: start;
     grid-template-columns: 1fr;
     grid-template-areas:
-      'title'
-      'baseInfo'
       'abilities'
       'HitPointsInitiativeArmor'
       'savingThrows'
@@ -120,13 +138,8 @@ const CharacterPage = observer(() => {
   }, [openedCharacter]);
 
   return (
-    <CharacterPageContainer form={form} onFinish={(values) => console.log(values)}>
+    <FormInstance form={form}>
       <h3>{openedCharacter.name}</h3>
-      <Abilities gridArea='abilities' charId={charId} userId={userId} />
-      <HitPointsInitiativeArmor charId={charId} userId={userId} />
-      <SavingThrows charId={charId} userId={userId} />
-      <Attack charId={charId} userId={userId} />
-      <Skills charId={charId} userId={userId} />
       <BaseInfo>
         <FormItem name='race' label='race' gridArea='race'>
           <Input style={{ width: '100%' }} />
@@ -138,15 +151,44 @@ const CharacterPage = observer(() => {
           <Select options={alignmentSelectOptions} style={{ width: '100%' }} />
         </FormItem>
       </BaseInfo>
+      <StyledTabs
+        size='small'
+        type='card'
+        items={[
+          {
+            label: `Stats`,
+            key: 1,
+            children: (
+              <CharacterPageContainer>
+                <Abilities gridArea='abilities' charId={charId} userId={userId} />
+                <HitPointsInitiativeArmor charId={charId} userId={userId} />
+                <SavingThrows charId={charId} userId={userId} />
+                <Attack charId={charId} userId={userId} />
+                <Skills charId={charId} userId={userId} />
 
-      <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
-        <FormItem>
-          <Button type='default' htmlType='submit'>
-            Create
-          </Button>
-        </FormItem>
-      </div>
-    </CharacterPageContainer>
+                <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
+                  <FormItem>
+                    <Button type='default' htmlType='submit'>
+                      Create
+                    </Button>
+                  </FormItem>
+                </div>
+              </CharacterPageContainer>
+            ),
+          },
+          {
+            label: `Feats`,
+            key: 'Feats',
+            children: <CharacterFeats charId={charId} userId={userId} />,
+          },
+          {
+            label: `Spells`,
+            key: 'Spells',
+            children: <div>Spells</div>,
+          },
+        ]}
+      />
+    </FormInstance>
   );
 });
 

@@ -39,7 +39,11 @@ const Skill = observer(({ name, title, ability, charId, userId, showLabels, trai
     const abilityMod = openedCharacter.abilities?.[ability]?.modifier;
     const ranks = openedCharacter.skills?.[name]?.ranks;
     const miscMod = openedCharacter.skills?.[name]?.miscMod;
-    const featTotal = (tempAbilityMod ?? abilityMod) + (ranks || 0) + (miscMod || 0);
+    const featTotal =
+      (tempAbilityMod ?? abilityMod) +
+      (ranks || 0) +
+      (miscMod || 0) +
+      (openedCharacter.skills?.[name]?.classSkill && ranks > 0 ? 3 : 0);
     setTotal(trainedOnly && ranks === undefined ? null : featTotal);
   }, [openedCharacter]);
   return (

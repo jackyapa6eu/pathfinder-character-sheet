@@ -101,6 +101,8 @@ export const initialUserData = {
     cmd: null,
   },
 
+  feats: {},
+
   skills: {
     acrobatics: {
       classSkill: false,
@@ -492,6 +494,21 @@ class CharactersStore {
       message.error('Error on character creation');
     }
   }, 700);
+
+  addFeat = async (uid, charRef, featData) => {
+    const db = getDatabase();
+    const featRef = featData.name.replace(/\s+/g, '-').toLowerCase();
+
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/feats/${featRef}`);
+
+    try {
+      await set(dataRef, featData);
+      message.success('Feat added!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
 }
 
 const charactersStore = new CharactersStore();

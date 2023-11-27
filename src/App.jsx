@@ -17,7 +17,7 @@ import CharacterPage from './components/CharacterPage';
 const StyledApp = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-  grid-template-rows: 80px 1fr;
+  grid-template-rows: 65px 1fr;
   grid-template-areas:
     'header header header header header header'
     'mainContainer mainContainer mainContainer mainContainer mainContainer mainContainer';
