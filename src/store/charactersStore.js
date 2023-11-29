@@ -451,11 +451,11 @@ class CharactersStore {
     const strMod = this.openedCharacter.abilities?.str?.modifier;
     const tempDexMod = this.openedCharacter.abilities?.dex?.tempModifier;
     const dexMod = this.openedCharacter.abilities?.dex?.modifier;
-    const cmb = (newValue || this.openedCharacter.attack?.bab || 0) + (tempStrMod ?? strMod);
+    const cmb = (newValue || this.openedCharacter.attack?.bab || 0) + ((tempStrMod ?? strMod) || 0);
     const cmd =
       (newValue || this.openedCharacter.attack?.bab || 0) +
-      (tempStrMod ?? strMod) +
-      (tempDexMod ?? dexMod) +
+      ((tempStrMod ?? strMod) || 0) +
+      ((tempDexMod ?? dexMod) || 0) +
       10;
 
     updates[`users/${uid}/characters/${charRef}/attack/bab`] =
@@ -641,6 +641,38 @@ class CharactersStore {
       message.error('Error!');
     }
   };
+
+  changeFreeSlotsForLevel = async (uid, charRef, isFreeSlots, className, level) => {
+    const db = getDatabase();
+    const dataRef = ref(
+      db,
+      `users/${uid}/characters/${charRef}/spellsPerDay/${className}/${level}/freeSpells`
+    );
+
+    try {
+      await set(dataRef, isFreeSlots);
+      message.success(`Free slots changed`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
+  changeMaxSpellsPerDay = debounce(async (uid, charRef, newCount, className, level) => {
+    const db = getDatabase();
+    const dataRef = ref(
+      db,
+      `users/${uid}/characters/${charRef}/spellsPerDay/${className}/${level}/maxCountPerDay`
+    );
+
+    try {
+      await set(dataRef, newCount);
+      message.success(`Free slots changed`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  }, 700);
 }
 
 const charactersStore = new CharactersStore();

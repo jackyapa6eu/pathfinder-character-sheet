@@ -1,6 +1,18 @@
 import { memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Button, Checkbox, Collapse, Form, Input, Modal, notification, Select, Switch } from 'antd';
+import {
+  Button,
+  Checkbox,
+  Collapse,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  notification,
+  Select,
+  Switch,
+  Tooltip,
+} from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
 import charactersStore from '../../store/charactersStore';
 import authStore from '../../store/authStore';
@@ -139,8 +151,16 @@ const CharacterSpells = observer(({ charId, userId }) => {
   const [showAllSpellsPerDay, setShowAllSpellsPerDay] = useState(false);
   const [prepareSpellModalIsOpen, setPrepareSpellModalIsOpen] = useState(false);
   const [preparingSpell, setPreparingSpell] = useState({});
-  const { openedCharacter, addSpell, deleteSpell, spellUse, prepareSpell, deletePreparedSpell } =
-    charactersStore;
+  const {
+    openedCharacter,
+    addSpell,
+    deleteSpell,
+    spellUse,
+    prepareSpell,
+    deletePreparedSpell,
+    changeFreeSlotsForLevel,
+    changeMaxSpellsPerDay,
+  } = charactersStore;
   const { user } = authStore;
   const [api, contextHolder] = notification.useNotification();
 
@@ -221,7 +241,6 @@ const CharacterSpells = observer(({ charId, userId }) => {
   const handleUseSpell = async (event, spellData) => {
     event.stopPropagation();
     await spellUse(userId || user.uid, charId, spellData);
-    console.log(toJS(spellData));
   };
 
   const handleAddFreeSpellSlot = async (spellValue) => {
@@ -231,6 +250,15 @@ const CharacterSpells = observer(({ charId, userId }) => {
   const handleDeletedPreparedSpell = async (event, spellData) => {
     event.stopPropagation();
     await deletePreparedSpell(userId || user.uid, charId, spellData);
+  };
+
+  const handleFreeSpells = async (value, className, level) => {
+    await changeFreeSlotsForLevel(userId || user.uid, charId, value, className, level);
+  };
+
+  const handleChangeMaxSpellsPerDay = async (newValue, className, level) => {
+    // console.log(userId || user.uid, charId, newValue, className, level);
+    await changeMaxSpellsPerDay(userId || user.uid, charId, newValue, className, level);
   };
 
   return (
@@ -430,15 +458,57 @@ const CharacterSpells = observer(({ charId, userId }) => {
                               items={[
                                 {
                                   key: level,
-                                  label: `${level} ${
-                                    level === 'supernatural ability'
-                                      ? ''
-                                      : `${
-                                          levelData.spells
-                                            ? Object.keys(levelData.spells).length
-                                            : 0
-                                        }/${levelData.maxCountPerDay}`
-                                  }`,
+                                  label: (
+                                    <div
+                                      style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                      }}
+                                    >
+                                      <span>
+                                        {`${level} ${
+                                          level === 'supernatural ability'
+                                            ? ''
+                                            : `${
+                                                levelData.spells
+                                                  ? Object.keys(levelData.spells).length
+                                                  : 0
+                                              }/${levelData.maxCountPerDay}`
+                                        }`}
+                                      </span>
+                                      {user.dm && level !== 'supernatural ability' && (
+                                        <div
+                                          style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '5px',
+                                          }}
+                                          onClick={(event) => event.stopPropagation()}
+                                        >
+                                          <Tooltip title='New max spells per day'>
+                                            <InputNumber
+                                              controls={false}
+                                              style={{ width: '40px' }}
+                                              onChange={(value) =>
+                                                handleChangeMaxSpellsPerDay(value, className, level)
+                                              }
+                                            />
+                                          </Tooltip>
+
+                                          <Switch
+                                            checkedChildren='free slots'
+                                            unCheckedChildren='free slots'
+                                            size='small'
+                                            checked={levelData.freeSpells}
+                                            onChange={(value) =>
+                                              handleFreeSpells(value, className, level)
+                                            }
+                                          />
+                                        </div>
+                                      )}
+                                    </div>
+                                  ),
                                   children: (
                                     <SpellsList>
                                       {openedCharacter.spellsPerDay[className][level].spells &&
@@ -466,7 +536,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                             />
                                           </SpellsListItem>
                                         ))}
-                                      {level !== 'supernatural ability' && (
+                                      {level !== 'supernatural ability' && levelData.freeSpells && (
                                         <AddFreeSpellSlotButton
                                           className={className}
                                           level={level}

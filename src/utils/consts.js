@@ -82,17 +82,17 @@ const availableSpellsSavingThrow = {
 };
 
 const availableSpellLevels = {
-  'supernatural ability': { maxCountPerDay: 'infinity', freSpells: false },
-  '0 lvl': { maxCountPerDay: 0, freSpells: false },
-  '1 lvl': { maxCountPerDay: 0, freSpells: false },
-  '2 lvl': { maxCountPerDay: 0, freSpells: false },
-  '3 lvl': { maxCountPerDay: 0, freSpells: false },
-  '4 lvl': { maxCountPerDay: 0, freSpells: false },
-  '5 lvl': { maxCountPerDay: 0, freSpells: false },
-  '6 lvl': { maxCountPerDay: 0, freSpells: false },
-  '7 lvl': { maxCountPerDay: 0, freSpells: false },
-  '8 lvl': { maxCountPerDay: 0, freSpells: false },
-  '9 lvl': { maxCountPerDay: 0, freSpells: false },
+  'supernatural ability': { maxCountPerDay: 'infinity', freeSpells: false },
+  '0 lvl': { maxCountPerDay: 0, freeSpells: false },
+  '1 lvl': { maxCountPerDay: 0, freeSpells: false },
+  '2 lvl': { maxCountPerDay: 0, freeSpells: false },
+  '3 lvl': { maxCountPerDay: 0, freeSpells: false },
+  '4 lvl': { maxCountPerDay: 0, freeSpells: false },
+  '5 lvl': { maxCountPerDay: 0, freeSpells: false },
+  '6 lvl': { maxCountPerDay: 0, freeSpells: false },
+  '7 lvl': { maxCountPerDay: 0, freeSpells: false },
+  '8 lvl': { maxCountPerDay: 0, freeSpells: false },
+  '9 lvl': { maxCountPerDay: 0, freeSpells: false },
 };
 
 export {
