@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import { memo, useEffect } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import authStore from '../../store/authStore';
 import charactersStore, { initialUserData } from '../../store/charactersStore';
@@ -15,6 +15,9 @@ import SavingThrows from '../SavingThrows';
 import Attack from '../Attack';
 import Skills from '../Skills';
 import CharacterFeats from '../CharacterFeats';
+import TextArea from 'antd/es/input/TextArea';
+import AddClassModal from '../AddClassModal';
+import CharacterSpells from '../CharacterSpells';
 
 const StyledTabs = styled(Tabs)`
   width: 100%;
@@ -94,8 +97,8 @@ const CharacterPageContainer = styled.div`
 
 const BaseInfo = styled.div`
   display: grid;
-  grid-template-columns: 120px 40px 140px;
-  grid-template-areas: 'race level alignment';
+  grid-template-columns: 120px 140px 1fr;
+  grid-template-areas: 'race alignment';
   grid-area: baseInfo;
   width: 100%;
   gap: 5px;
@@ -104,6 +107,8 @@ const BaseInfo = styled.div`
 `;
 
 const CharacterPage = observer(() => {
+  const [addClassModalIsOpen, setAddClassModalIsOpen] = useState(false);
+
   const { user } = authStore;
   const { subscribeCharacter, openedCharacter, clearOpenedCharacter } = charactersStore;
 
@@ -138,57 +143,81 @@ const CharacterPage = observer(() => {
   }, [openedCharacter]);
 
   return (
-    <FormInstance form={form}>
-      <h3>{openedCharacter.name}</h3>
-      <BaseInfo>
-        <FormItem name='race' label='race' gridArea='race'>
-          <Input style={{ width: '100%' }} />
-        </FormItem>
-        <FormItem gridArea='level' label='lvl' name='level'>
-          <InputNumber controls={false} style={{ width: '100%' }} />
-        </FormItem>
-        <FormItem gridArea='alignment' label='alignment' name='alignment'>
-          <Select options={alignmentSelectOptions} style={{ width: '100%' }} />
-        </FormItem>
-      </BaseInfo>
-      <StyledTabs
-        size='small'
-        type='card'
-        items={[
-          {
-            label: `Stats`,
-            key: 1,
-            children: (
-              <CharacterPageContainer>
-                <Abilities gridArea='abilities' charId={charId} userId={userId} />
-                <HitPointsInitiativeArmor charId={charId} userId={userId} />
-                <SavingThrows charId={charId} userId={userId} />
-                <Attack charId={charId} userId={userId} />
-                <Skills charId={charId} userId={userId} />
-
-                <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
-                  <FormItem>
-                    <Button type='default' htmlType='submit'>
-                      Create
-                    </Button>
-                  </FormItem>
-                </div>
-              </CharacterPageContainer>
-            ),
-          },
-          {
-            label: `Feats`,
-            key: 'Feats',
-            children: <CharacterFeats charId={charId} userId={userId} />,
-          },
-          {
-            label: `Spells`,
-            key: 'Spells',
-            children: <div>Spells</div>,
-          },
-        ]}
+    <>
+      <AddClassModal
+        addClassModalIsOpen={addClassModalIsOpen}
+        setAddClassModalIsOpen={setAddClassModalIsOpen}
+        charId={charId}
+        userId={userId}
       />
-    </FormInstance>
+      <FormInstance form={form}>
+        <h3>{openedCharacter.name}</h3>
+        <BaseInfo>
+          <FormItem name='race' label='race' gridArea='race'>
+            <Input style={{ width: '100%' }} />
+          </FormItem>
+          <FormItem gridArea='alignment' label='alignment' name='alignment'>
+            <Select options={alignmentSelectOptions} style={{ width: '100%' }} />
+          </FormItem>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <span>
+              {openedCharacter.classes &&
+                Object.entries(openedCharacter.classes).map(([className, { levels }]) => (
+                  <span key={className}>{`${className} ${levels} / `}</span>
+                ))}
+              {openedCharacter.classes &&
+                `[${Object.values(openedCharacter.classes).reduce(
+                  (acc, curr) => acc + curr.levels,
+                  0
+                )}]`}
+            </span>
+            <Button
+              onClick={() => setAddClassModalIsOpen(true)}
+              style={{ width: '25px', height: '25px', padding: 0 }}
+            >
+              +
+            </Button>
+          </div>
+        </BaseInfo>
+        <StyledTabs
+          size='small'
+          type='card'
+          items={[
+            {
+              label: `Stats`,
+              key: 1,
+              children: (
+                <CharacterPageContainer>
+                  <Abilities gridArea='abilities' charId={charId} userId={userId} />
+                  <HitPointsInitiativeArmor charId={charId} userId={userId} />
+                  <SavingThrows charId={charId} userId={userId} />
+                  <Attack charId={charId} userId={userId} />
+                  <Skills charId={charId} userId={userId} />
+
+                  <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
+                    <FormItem>
+                      <Button type='default' htmlType='submit'>
+                        Create
+                      </Button>
+                    </FormItem>
+                  </div>
+                </CharacterPageContainer>
+              ),
+            },
+            {
+              label: `Feats`,
+              key: 'Feats',
+              children: <CharacterFeats charId={charId} userId={userId} />,
+            },
+            {
+              label: `Spells`,
+              key: 'Spells',
+              children: <CharacterSpells charId={charId} userId={userId} />,
+            },
+          ]}
+        />
+      </FormInstance>
+    </>
   );
 });
 

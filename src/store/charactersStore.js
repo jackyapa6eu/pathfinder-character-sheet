@@ -2,6 +2,7 @@ import { makeAutoObservable, runInAction, toJS } from 'mobx';
 import { getDatabase, ref, set, get, onValue, update } from 'firebase/database';
 import { message } from 'antd';
 import { debounce } from 'lodash';
+import { availableSpellLevels } from '../utils/consts';
 
 const savingThrowsAbilities = {
   fortitude: 'con',
@@ -11,7 +12,8 @@ const savingThrowsAbilities = {
 
 export const initialUserData = {
   race: '',
-  level: 1,
+  classes: {},
+
   alignment: '',
 
   abilities: {
@@ -261,23 +263,8 @@ export const initialUserData = {
     },
   },
 
-  spells: {
-    ranger: {
-      0: {
-        maxCountPerDay: 0,
-        spells: {},
-      },
-      1: {
-        maxCountPerDay: 1,
-        spells: {
-          'spell-ref': {
-            name: '',
-            isUsed: false,
-          },
-        },
-      },
-    },
-  },
+  spells: {},
+  spellsPerDay: {},
 };
 
 class CharactersStore {
@@ -333,14 +320,19 @@ class CharactersStore {
     }
   };
 
-  createCharacter = async (uid, charData, callBack = false) => {
+  createCharacter = async (uid, charData, hasSpells, callBack = false) => {
     const db = getDatabase();
     const charRef = charData.name.replace(/\s+/g, '-').toLowerCase();
 
     const dataRef = ref(db, `users/${uid}/characters/${charRef}`);
 
     try {
-      await set(dataRef, { ...initialUserData, ...charData });
+      await set(dataRef, {
+        ...initialUserData,
+        ...charData,
+        classes: { [charData.classes]: { levels: 1, hasSpells } },
+        spellsPerDay: { [charData.classes]: availableSpellLevels },
+      });
       message.success('Character created!');
       if (callBack) callBack();
     } catch (e) {
@@ -483,21 +475,23 @@ class CharactersStore {
     const db = getDatabase();
     const updates = {};
 
-    Object.entries(this.openedCharacter.savingThrows).forEach(([name, data]) => {
-      const { total = 0, ...otherThrows } = data || {};
-      const tempAbilityMod =
-        this.openedCharacter.abilities?.[savingThrowsAbilities[name]]?.tempModifier;
-      const abilityMod = this.openedCharacter.abilities?.[savingThrowsAbilities[name]]?.modifier;
-      const newTotal =
-        (tempAbilityMod ?? abilityMod) +
-        Object.values(otherThrows).reduce((acc, curr) => acc + curr, 0);
-      updates[`users/${uid}/characters/${charRef}/savingThrows/${name}/total`] =
-        Math.floor(newTotal);
-    });
-    try {
-      await update(ref(db), updates);
-    } catch (e) {
-      console.log(e);
+    if (this.openedCharacter.savingThrows) {
+      Object.entries(this.openedCharacter.savingThrows).forEach(([name, data]) => {
+        const { total = 0, ...otherThrows } = data || {};
+        const tempAbilityMod =
+          this.openedCharacter.abilities?.[savingThrowsAbilities[name]]?.tempModifier;
+        const abilityMod = this.openedCharacter.abilities?.[savingThrowsAbilities[name]]?.modifier;
+        const newTotal =
+          (tempAbilityMod ?? abilityMod) +
+          Object.values(otherThrows).reduce((acc, curr) => acc + curr, 0);
+        updates[`users/${uid}/characters/${charRef}/savingThrows/${name}/total`] =
+          Math.floor(newTotal);
+      });
+      try {
+        await update(ref(db), updates);
+      } catch (e) {
+        console.log(e);
+      }
     }
   });
 
@@ -528,6 +522,23 @@ class CharactersStore {
     }
   };
 
+  addClass = async (uid, charRef, classesData, newClass) => {
+    const db = getDatabase();
+    const updates = {};
+
+    updates[`users/${uid}/characters/${charRef}/classes/`] = classesData;
+    if (!this.openedCharacter.spellsPerDay[newClass]) {
+      updates[`users/${uid}/characters/${charRef}/spellsPerDay/${newClass}`] = availableSpellLevels;
+    }
+    try {
+      await update(ref(db), updates);
+      message.success('Class added!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
   deleteFeat = async (uid, charRef, featRef) => {
     const db = getDatabase();
 
@@ -536,6 +547,95 @@ class CharactersStore {
     try {
       await set(dataRef, null);
       message.success('Feat deleted!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
+  addSpell = async (uid, charRef, spellData) => {
+    const db = getDatabase();
+    const spellRef = spellData.name.replace(/\s+/g, '-').toLowerCase();
+
+    const dataRef = ref(
+      db,
+      `users/${uid}/characters/${charRef}/spells/${spellData.class}/${spellData.level}/${spellRef}`
+    );
+
+    console.log(dataRef);
+
+    try {
+      await set(dataRef, spellData);
+      message.success('Spell added!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
+  deleteSpell = async (uid, charRef, spellRef, spellData) => {
+    const db = getDatabase();
+
+    const dataRef = ref(
+      db,
+      `users/${uid}/characters/${charRef}/spells/${spellData.class}/${spellData.level}/${spellRef}`
+    );
+
+    try {
+      await set(dataRef, null);
+      message.success('Spell deleted!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
+  prepareSpell = async (uid, charRef, spellData, justSlot = false) => {
+    const db = getDatabase();
+    const spellRef = `${spellData.name.replace(/\s+/g, '-').toLowerCase()}_${Date.now()}`;
+
+    const path = `users/${uid}/characters/${charRef}/spellsPerDay/${spellData.class}/${spellData.level}/spells/${spellRef}`;
+    const dataRef = ref(db, path);
+
+    const spell = {
+      ...spellData,
+      freeSlot: justSlot,
+      name: `${spellData.name} ${spellData.metamagic ? '(metamagic)' : ''}`,
+      metamagic: spellData.metamagic ?? false,
+      isUsed: false,
+      ref: path,
+    };
+
+    try {
+      console.log(spell, dataRef);
+      await set(dataRef, spell);
+      message.success('Spell prepared!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
+  spellUse = async (uid, charRef, spellData) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `${spellData.ref}/isUsed`);
+
+    try {
+      await set(dataRef, !spellData.isUsed);
+      message.success(`Spell ${spellData.name} ${spellData.isUsed ? 'un' : ''}used!`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
+  deletePreparedSpell = async (uid, charRef, spellData) => {
+    const db = getDatabase();
+    const dataRef = ref(db, spellData.ref);
+
+    try {
+      await set(dataRef, null);
+      message.success(`Spell deleted!`);
     } catch (e) {
       console.log(e);
       message.error('Error!');

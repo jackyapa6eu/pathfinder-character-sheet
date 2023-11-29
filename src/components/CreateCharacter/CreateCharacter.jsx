@@ -1,11 +1,11 @@
-import { Button, Form, Input, InputNumber, Select } from 'antd';
-import { memo } from 'react';
+import { Button, Checkbox, Form, Input, Select } from 'antd';
+import { memo, useState } from 'react';
 import styled from 'styled-components';
 import authStore from '../../store/authStore';
 import { observer } from 'mobx-react';
 import charactersStore from '../../store/charactersStore';
 import { useNavigate } from 'react-router-dom';
-import { alignmentSelectOptions } from '../../utils/consts';
+import { alignmentSelectOptions, availableClasses } from '../../utils/consts';
 
 const StyledForm = styled(Form)`
   display: grid;
@@ -15,6 +15,7 @@ const StyledForm = styled(Form)`
     'title title title'
     'name name name'
     'alignment alignment alignment'
+    'classes classes classes'
     'level level level'
     'race race race'
     '. . submit';
@@ -44,13 +45,14 @@ const StyledHeader = styled.h3`
 `;
 
 const CreateCharacter = observer(() => {
+  const [hasSpells, setHasSpells] = useState(false);
   const { user } = authStore;
   const { createCharacter } = charactersStore;
 
   const navigate = useNavigate();
 
   const handleFinish = async (values) => {
-    await createCharacter(user.uid, values, () => navigate('/'));
+    await createCharacter(user.uid, values, hasSpells, () => navigate('/'));
   };
 
   return (
@@ -80,8 +82,12 @@ const CreateCharacter = observer(() => {
         <Select options={alignmentSelectOptions} allowClear />
       </StyledFormItem>
 
-      <StyledFormItem gridarea='level' name='level' label='level' rules={[{ required: true }]}>
-        <InputNumber style={{ width: '100%' }} />
+      <StyledFormItem gridarea='classes' name='classes' label='class' rules={[{ required: true }]}>
+        <Select
+          showSearch
+          options={Object.keys(availableClasses).map((el) => ({ value: el }))}
+          allowClear
+        />
       </StyledFormItem>
 
       <StyledFormItem gridarea='race' name='race' label='race' rules={[{ required: true }]}>

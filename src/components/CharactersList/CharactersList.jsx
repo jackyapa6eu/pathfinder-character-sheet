@@ -75,7 +75,7 @@ const CharactersList = observer(() => {
   return (
     <CharacterListContainer>
       <h3 style={{ margin: 0, marginBottom: '15px' }}>Characters</h3>
-      {Object.keys(characters) && (
+      {characters && Object.keys(characters) && (
         <CardsContainer>
           {Object.entries(characters).map(([charRef, charData]) => (
             <CharacterCard key={charRef} onClick={() => navigate(`/chars/${charRef}`)}>
@@ -103,24 +103,25 @@ const CharactersList = observer(() => {
               </h3>
               {Object.keys(characters) && (
                 <CardsContainer>
-                  {Object.entries(user.characters).map(([charRef, charData]) => (
-                    <CharacterCard
-                      key={charRef}
-                      onClick={() => navigate(`dm/${user.userData.uid}/chars/${charRef}`)}
-                    >
-                      <h4>{charData.name}</h4>
-                      <p>
-                        <span>level</span>
-                        <span>{charData.level}</span>
-                      </p>
-                      <p>
-                        <span>{charData.race}</span>
-                      </p>
-                      <p>
-                        <span>{charData.alignment}</span>
-                      </p>
-                    </CharacterCard>
-                  ))}
+                  {user.characters &&
+                    Object.entries(user.characters).map(([charRef, charData]) => (
+                      <CharacterCard
+                        key={charRef}
+                        onClick={() => navigate(`dm/${user.userData.uid}/chars/${charRef}`)}
+                      >
+                        <h4>{charData.name}</h4>
+                        <p>
+                          <span>level</span>
+                          <span>{charData.level}</span>
+                        </p>
+                        <p>
+                          <span>{charData.race}</span>
+                        </p>
+                        <p>
+                          <span>{charData.alignment}</span>
+                        </p>
+                      </CharacterCard>
+                    ))}
                 </CardsContainer>
               )}
             </div>

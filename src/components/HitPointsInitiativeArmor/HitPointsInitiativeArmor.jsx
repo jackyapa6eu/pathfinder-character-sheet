@@ -59,20 +59,24 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
     const tempDexMod = openedCharacter.abilities?.dex?.tempModifier;
     const dexMod = openedCharacter.abilities?.dex?.modifier;
 
-    const initiative = (openedCharacter.initiative?.miscModifier || 0) + (tempDexMod ?? dexMod);
-    const ac =
-      10 +
-      (openedCharacter.ac?.armorBonus || 0) +
-      (openedCharacter.ac?.shieldBonus || 0) +
-      (openedCharacter.ac?.naturalArmor || 0) +
-      (openedCharacter.ac?.deflectionModifier || 0) +
-      (openedCharacter.ac?.miscModifier || 0) +
-      (tempDexMod ?? dexMod);
-    const touchArmor =
-      10 +
-      (openedCharacter.ac?.deflectionModifier || 0) +
-      (openedCharacter.ac?.miscModifier || 0) +
-      (tempDexMod ?? dexMod);
+    const initiative = openedCharacter.abilities?.dex
+      ? (openedCharacter.initiative?.miscModifier || 0) + (tempDexMod ?? dexMod)
+      : null;
+    const ac = openedCharacter.abilities?.dex
+      ? 10 +
+        (openedCharacter.ac?.armorBonus || 0) +
+        (openedCharacter.ac?.shieldBonus || 0) +
+        (openedCharacter.ac?.naturalArmor || 0) +
+        (openedCharacter.ac?.deflectionModifier || 0) +
+        (openedCharacter.ac?.miscModifier || 0) +
+        (tempDexMod ?? dexMod)
+      : null;
+    const touchArmor = openedCharacter.abilities?.dex
+      ? 10 +
+        (openedCharacter.ac?.deflectionModifier || 0) +
+        (openedCharacter.ac?.miscModifier || 0) +
+        (tempDexMod ?? dexMod)
+      : null;
     const flatArmor =
       10 +
       (openedCharacter.ac?.armorBonus || 0) +

@@ -6,6 +6,7 @@ import { Checkbox, InputNumber, Tooltip } from 'antd';
 import charactersStore from '../../../store/charactersStore';
 import authStore from '../../../store/authStore';
 import { observer } from 'mobx-react';
+import { toJS } from 'mobx';
 
 const FeatContainer = styled.div`
   display: grid;
@@ -35,25 +36,24 @@ const Skill = observer(({ name, title, ability, charId, userId, showLabels, trai
   const [total, setTotal] = useState(null);
 
   useEffect(() => {
-    const tempAbilityMod = openedCharacter.abilities?.[ability]?.tempModifier;
-    const abilityMod = openedCharacter.abilities?.[ability]?.modifier;
-    const ranks = openedCharacter.skills?.[name]?.ranks;
-    const miscMod = openedCharacter.skills?.[name]?.miscMod;
-    const featTotal =
-      (tempAbilityMod ?? abilityMod) +
-      (ranks || 0) +
-      (miscMod || 0) +
-      (openedCharacter.skills?.[name]?.classSkill && ranks > 0 ? 3 : 0);
-    setTotal(trainedOnly && ranks === undefined ? null : featTotal);
+    if (!openedCharacter.abilities?.[ability]) {
+      setTotal(null);
+    } else {
+      const tempAbilityMod = openedCharacter.abilities?.[ability]?.tempModifier;
+      const abilityMod = openedCharacter.abilities?.[ability]?.modifier;
+      const ranks = openedCharacter.skills?.[name]?.ranks;
+      const miscMod = openedCharacter.skills?.[name]?.miscMod;
+      const featTotal =
+        (tempAbilityMod ?? abilityMod) +
+        (ranks || 0) +
+        (miscMod || 0) +
+        (openedCharacter.skills?.[name]?.classSkill && ranks > 0 ? 3 : 0);
+      setTotal(trainedOnly && ranks === undefined ? null : featTotal);
+    }
   }, [openedCharacter]);
   return (
     <FeatContainer>
-      <FormItem
-        // name={['skills', name, 'classSkill']}
-        label={showLabels && 'class skill'}
-        textAlign='center'
-        noBgLabel
-      >
+      <FormItem label={showLabels && 'class skill'} textAlign='center' noBgLabel>
         <Checkbox
           onChange={(value) =>
             changeSkills(userId || user.uid, charId, name, 'classSkill', value.target.checked)
