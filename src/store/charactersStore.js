@@ -385,6 +385,19 @@ class CharactersStore {
     await this.changeAbility(uid, charRef, abilityName, abilityType, abilityValue);
   }, 700);
 
+  changeBaseInfo = debounce(async (uid, charRef, dataName, newValue) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/${dataName}`);
+    console.log(newValue);
+    try {
+      await set(dataRef, newValue);
+      message.success('Changed!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error');
+    }
+  }, 700);
+
   changeHitPoints = debounce(async (uid, charRef, hpType, hpValue) => {
     const db = getDatabase();
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/hitPoints/${hpType}`);

@@ -396,12 +396,23 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                         key={spellName}
                                         onClick={() => handleOpenSpell(spellData)}
                                       >
-                                        <PrepareSpellButton
-                                          onClick={(event) => handleAddSpell(event, spellData)}
-                                          className='add-spell-button'
-                                        >
-                                          +
-                                        </PrepareSpellButton>
+                                        {level === 'supernatural ability' ||
+                                        (openedCharacter.spellsPerDay[className][level]
+                                          .maxCountPerDay > 0 &&
+                                          (!openedCharacter.spellsPerDay[className][level].spells ||
+                                            Object.keys(
+                                              openedCharacter.spellsPerDay[className][level].spells
+                                            ).length <
+                                              openedCharacter.spellsPerDay[className][level]
+                                                .maxCountPerDay)) ? (
+                                          <PrepareSpellButton
+                                            onClick={(event) => handleAddSpell(event, spellData)}
+                                            className='add-spell-button'
+                                          >
+                                            +
+                                          </PrepareSpellButton>
+                                        ) : null}
+
                                         <DeleteSpellButton
                                           className='delete-feat-button'
                                           onClick={(event) =>
@@ -501,6 +512,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                               onChange={(value) =>
                                                 handleChangeMaxSpellsPerDay(value, className, level)
                                               }
+                                              size='small'
                                             />
                                           </Tooltip>
 

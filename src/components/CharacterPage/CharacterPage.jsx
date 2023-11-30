@@ -131,14 +131,18 @@ const CharacterPage = observer(() => {
   const [addClassModalIsOpen, setAddClassModalIsOpen] = useState(false);
 
   const { user } = authStore;
-  const { subscribeCharacter, openedCharacter, clearOpenedCharacter, makeFullRest } =
-    charactersStore;
+  const {
+    subscribeCharacter,
+    openedCharacter,
+    clearOpenedCharacter,
+    makeFullRest,
+    changeBaseInfo,
+  } = charactersStore;
 
   const { charId, userId } = useParams();
   const [form] = useForm();
 
   useEffect(() => {
-    // console.log('Данные обновлены:', toJS(openedCharacter));
     if (openedCharacter) {
       form.setFieldsValue({ ...initialUserData });
       form.setFieldsValue({ ...openedCharacter });
@@ -168,6 +172,10 @@ const CharacterPage = observer(() => {
     await makeFullRest(userId || user.uid, charId);
   };
 
+  const handleChangeBaseInfo = async (dataName, newValue) => {
+    await changeBaseInfo(userId || user.uid, charId, dataName, newValue.target?.value || newValue);
+  };
+
   return (
     <>
       <AddClassModal
@@ -184,10 +192,17 @@ const CharacterPage = observer(() => {
 
         <BaseInfo>
           <FormItem name='race' label='race' gridArea='race'>
-            <Input style={{ width: '100%' }} />
+            <Input
+              onChange={(value) => handleChangeBaseInfo('race', value)}
+              style={{ width: '100%' }}
+            />
           </FormItem>
           <FormItem gridArea='alignment' label='alignment' name='alignment'>
-            <Select options={alignmentSelectOptions} style={{ width: '100%' }} />
+            <Select
+              onChange={(value) => handleChangeBaseInfo('alignment', value)}
+              options={alignmentSelectOptions}
+              style={{ width: '100%' }}
+            />
           </FormItem>
           <CharClassesContainer>
             <span>
