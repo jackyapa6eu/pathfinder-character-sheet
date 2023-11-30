@@ -29,6 +29,7 @@ import { filterUndefinedToNull } from '../../utils/helpers';
 import PrepareSpellModal from '../PrepareSpellModal';
 import IsUsedCheckbox from '../IsUsedCheckbox';
 import AddFreeSpellSlotButton from '../AddFreeSpellSlotButton';
+import CampIcon from '../../icons/CampIcon';
 
 const StyledFormItem = styled(Form.Item)`
   margin: 0;
@@ -56,6 +57,10 @@ const SpellListContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 5px;
+
+  @media screen and (max-width: 492px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const SpellList = styled.div`
@@ -160,6 +165,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
     deletePreparedSpell,
     changeFreeSlotsForLevel,
     changeMaxSpellsPerDay,
+    makeFullRest,
   } = charactersStore;
   const { user } = authStore;
   const [api, contextHolder] = notification.useNotification();
@@ -235,7 +241,6 @@ const CharacterSpells = observer(({ charId, userId }) => {
     event.stopPropagation();
     setPrepareSpellModalIsOpen(true);
     setPreparingSpell(spellData);
-    console.log(toJS(spellData));
   };
 
   const handleUseSpell = async (event, spellData) => {
@@ -257,7 +262,6 @@ const CharacterSpells = observer(({ charId, userId }) => {
   };
 
   const handleChangeMaxSpellsPerDay = async (newValue, className, level) => {
-    // console.log(userId || user.uid, charId, newValue, className, level);
     await changeMaxSpellsPerDay(userId || user.uid, charId, newValue, className, level);
   };
 
@@ -355,16 +359,19 @@ const CharacterSpells = observer(({ charId, userId }) => {
         <Button size='small' style={{ width: '80px' }} onClick={() => setAddSpellModalIsOpen(true)}>
           Add +
         </Button>
-        <Switch
-          checkedChildren='all'
-          size='small'
-          checked={showAllSpellsPerDay}
-          onChange={setShowAllSpellsPerDay}
-        />
+        <div style={{ display: 'flex', gap: '5px', width: 'max-content', alignItems: 'center' }}>
+          <Switch
+            checkedChildren='all'
+            size='small'
+            checked={showAllSpellsPerDay}
+            onChange={setShowAllSpellsPerDay}
+          />
+        </div>
       </div>
 
       <SpellListContainer>
         <SpellList>
+          <h4 style={{ margin: 0 }}>Learned</h4>
           {openedCharacter.spells &&
             Object.keys(openedCharacter.spells).map((className) => (
               <Collapse
@@ -423,6 +430,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
             ))}
         </SpellList>
         <SpellList>
+          <h4 style={{ margin: 0 }}>Prepared</h4>
           <SpellList>
             {openedCharacter.classes &&
               Object.keys(openedCharacter.classes).map((className) => (
@@ -517,7 +525,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                         ).map(([spellName, spellData]) => (
                                           <SpellsListItem
                                             key={spellName}
-                                            onClick={() => handleOpenSpell(spellData)}
+                                            // onClick={() => handleOpenSpell(spellData)}
                                           >
                                             <DeleteSpellButton
                                               className='delete-feat-button'

@@ -341,7 +341,7 @@ class CharactersStore {
     }
   };
 
-  changeAbility = debounce(async (uid, charRef, abilityName, abilityType, abilityValue) => {
+  changeAbility = async (uid, charRef, abilityName, abilityType, abilityValue) => {
     const db = getDatabase();
     if (abilityType === 'score') {
       try {
@@ -379,6 +379,10 @@ class CharactersStore {
     }
     this.recalcTotalSavingThrows(uid, charRef);
     this.changeAttack(uid, charRef);
+  };
+
+  changeAbilityDebounce = debounce(async (uid, charRef, abilityName, abilityType, abilityValue) => {
+    await this.changeAbility(uid, charRef, abilityName, abilityType, abilityValue);
   }, 700);
 
   changeHitPoints = debounce(async (uid, charRef, hpType, hpValue) => {
@@ -562,8 +566,6 @@ class CharactersStore {
       `users/${uid}/characters/${charRef}/spells/${spellData.class}/${spellData.level}/${spellRef}`
     );
 
-    console.log(dataRef);
-
     try {
       await set(dataRef, spellData);
       message.success('Spell added!');
@@ -607,7 +609,6 @@ class CharactersStore {
     };
 
     try {
-      console.log(spell, dataRef);
       await set(dataRef, spell);
       message.success('Spell prepared!');
     } catch (e) {
@@ -673,6 +674,46 @@ class CharactersStore {
       message.error('Error!');
     }
   }, 700);
+
+  makeFullRest = async (uid, charRef) => {
+    const db = getDatabase();
+
+    const updates = {};
+    Object.entries(this.openedCharacter.spellsPerDay).forEach(([className, levelsObj]) => {
+      Object.entries(levelsObj).forEach(([level, levelData]) => {
+        if (levelData.spells) {
+          Object.keys(levelData.spells).forEach((spellRef) => {
+            updates[
+              `users/${uid}/characters/${charRef}/spellsPerDay/${className}/${level}/spells/${spellRef}/isUsed`
+            ] = false;
+          });
+        }
+      });
+    });
+    try {
+      await update(ref(db), updates);
+      console.log(toJS(this.openedCharacter.abilities));
+      await Object.entries(toJS(this.openedCharacter.abilities)).forEach(
+        ([abilityName, abilityObj]) => {
+          if (abilityObj.adjustment && abilityObj.adjustment < 0) {
+            console.log(abilityName);
+            this.changeAbility(
+              uid,
+              charRef,
+              abilityName,
+              'adjustment',
+              abilityObj.adjustment + 1 === 0 ? null : abilityObj.adjustment + 1
+            );
+          }
+        }
+      );
+      message.success('Zzzz... full rest...');
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+    // `users/${uid}/characters/${charRef}/spellsPerDay/${className}/${level}/maxCountPerDay`
+  };
 }
 
 const charactersStore = new CharactersStore();

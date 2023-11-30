@@ -18,6 +18,7 @@ import CharacterFeats from '../CharacterFeats';
 import TextArea from 'antd/es/input/TextArea';
 import AddClassModal from '../AddClassModal';
 import CharacterSpells from '../CharacterSpells';
+import CampIcon from '../../icons/CampIcon';
 
 const StyledTabs = styled(Tabs)`
   width: 100%;
@@ -43,8 +44,13 @@ const FormInstance = styled(Form)`
   align-items: start;
   width: 100%;
 
-  & h3 {
+  & .char-name-container {
     grid-area: title;
+    display: flex;
+    gap: 5px;
+  }
+
+  & h3 {
     margin: 0;
   }
 `;
@@ -98,19 +104,35 @@ const CharacterPageContainer = styled.div`
 const BaseInfo = styled.div`
   display: grid;
   grid-template-columns: 120px 140px 1fr;
-  grid-template-areas: 'race alignment';
+  grid-template-areas: 'race alignment classes';
   grid-area: baseInfo;
   width: 100%;
   gap: 5px;
   margin: 0;
   height: max-content;
+
+  @media screen and (max-width: 400px) {
+    grid-template-columns: 120px 140px;
+    grid-template-areas:
+      'race alignment'
+      'classes classes';
+  }
+  padding-bottom: 5px;
+`;
+
+const CharClassesContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  grid-area: classes;
 `;
 
 const CharacterPage = observer(() => {
   const [addClassModalIsOpen, setAddClassModalIsOpen] = useState(false);
 
   const { user } = authStore;
-  const { subscribeCharacter, openedCharacter, clearOpenedCharacter } = charactersStore;
+  const { subscribeCharacter, openedCharacter, clearOpenedCharacter, makeFullRest } =
+    charactersStore;
 
   const { charId, userId } = useParams();
   const [form] = useForm();
@@ -142,6 +164,10 @@ const CharacterPage = observer(() => {
     };
   }, [openedCharacter]);
 
+  const handleMakeFullRest = async () => {
+    await makeFullRest(userId || user.uid, charId);
+  };
+
   return (
     <>
       <AddClassModal
@@ -151,7 +177,11 @@ const CharacterPage = observer(() => {
         userId={userId}
       />
       <FormInstance form={form}>
-        <h3>{openedCharacter.name}</h3>
+        <div className='char-name-container'>
+          <h3>{openedCharacter.name}</h3>
+          <CampIcon size='20px' handleClick={handleMakeFullRest} />
+        </div>
+
         <BaseInfo>
           <FormItem name='race' label='race' gridArea='race'>
             <Input style={{ width: '100%' }} />
@@ -159,7 +189,7 @@ const CharacterPage = observer(() => {
           <FormItem gridArea='alignment' label='alignment' name='alignment'>
             <Select options={alignmentSelectOptions} style={{ width: '100%' }} />
           </FormItem>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <CharClassesContainer>
             <span>
               {openedCharacter.classes &&
                 Object.entries(openedCharacter.classes).map(([className, { levels }]) => (
@@ -177,7 +207,7 @@ const CharacterPage = observer(() => {
             >
               +
             </Button>
-          </div>
+          </CharClassesContainer>
         </BaseInfo>
         <StyledTabs
           size='small'

@@ -15,11 +15,11 @@ const AbilityContainer = styled.div`
 `;
 
 const Ability = observer(({ name = '', showLabel = false, abilityDesc, charId, userId }) => {
-  const { changeAbility } = charactersStore;
+  const { changeAbilityDebounce } = charactersStore;
   const { user } = authStore;
 
   const handleScoreChange = async (value, name, type) => {
-    await changeAbility(userId || user.uid, charId, name, type, value);
+    await changeAbilityDebounce(userId || user.uid, charId, name, type, value);
   };
 
   return (
