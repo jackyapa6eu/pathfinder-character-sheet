@@ -703,13 +703,20 @@ class CharactersStore {
         }
       });
     });
+    if (
+      this.openedCharacter.hitPoints.wounds &&
+      this.openedCharacter.hitPoints.wounds <= this.openedCharacter.hitPoints.total
+    ) {
+      updates[`users/${uid}/characters/${charRef}/hitPoints/wounds`] =
+        this.openedCharacter.hitPoints.wounds + 1 === this.openedCharacter.hitPoints.total
+          ? null
+          : this.openedCharacter.hitPoints.wounds + 1;
+    }
     try {
       await update(ref(db), updates);
-      console.log(toJS(this.openedCharacter.abilities));
       await Object.entries(toJS(this.openedCharacter.abilities)).forEach(
         ([abilityName, abilityObj]) => {
           if (abilityObj.adjustment && abilityObj.adjustment < 0) {
-            console.log(abilityName);
             this.changeAbility(
               uid,
               charRef,
@@ -725,7 +732,6 @@ class CharactersStore {
       console.log(e);
       message.error('Error!');
     }
-    // `users/${uid}/characters/${charRef}/spellsPerDay/${className}/${level}/maxCountPerDay`
   };
 }
 
