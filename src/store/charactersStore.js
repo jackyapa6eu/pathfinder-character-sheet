@@ -101,6 +101,7 @@ export const initialUserData = {
     bab: null,
     cmb: null,
     cmd: null,
+    perRound: 0,
   },
 
   feats: {},
@@ -264,7 +265,34 @@ export const initialUserData = {
   },
 
   spells: {},
+
   spellsPerDay: {},
+  // name
+  // weaponAttack
+  // attackMod
+  // attackMisc
+  // damageMod (may be null)
+  // damageMisc
+  // type
+  // range
+  // critical
+  weapons: {},
+  // weapons: {
+  //   'composite longbow +3': {
+  //     name: '',
+  //     weaponAttack: '',
+  //     attackMod: 'str/dex/wis',
+  //     attackMisc: 0,
+  //     damageMod: 'str/null',
+  //     damageMisc: 0,
+  //     type: 'slashing',
+  //     range: 0,
+  //     critical: '',
+  //     onHit: {
+  //       bleed: {},
+  //     },
+  //   },
+  // },
 };
 
 class CharactersStore {
@@ -485,6 +513,18 @@ class CharactersStore {
       if (!isUpdate) message.success(`Base attack bonus changed!`);
     } catch (e) {
       console.log(e);
+    }
+  }, 700);
+
+  changeAttackPerRound = debounce(async (uid, charRef, newValue) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/attack/perRound`);
+    try {
+      await set(dataRef, newValue);
+      message.success('Attacks per round changed!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error on character creation');
     }
   }, 700);
 
@@ -733,6 +773,35 @@ class CharactersStore {
       message.error('Error!');
     }
   };
+
+  createWeapon = async (uid, charRef, weaponName) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/weapons/${weaponName.name}`);
+
+    try {
+      await set(dataRef, weaponName);
+      message.success(`Weapon created!`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
+  changeWeaponData = debounce(async (uid, charRef, weaponName, fieldName, newValue) => {
+    const db = getDatabase();
+    const dataRef = ref(
+      db,
+      `users/${uid}/characters/${charRef}/weapons/${weaponName}/${fieldName}`
+    );
+
+    try {
+      await set(dataRef, newValue);
+      message.success(`Weapon edited!`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  }, 700);
 }
 
 const charactersStore = new CharactersStore();

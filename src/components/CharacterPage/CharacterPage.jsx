@@ -19,6 +19,7 @@ import TextArea from 'antd/es/input/TextArea';
 import AddClassModal from '../AddClassModal';
 import CharacterSpells from '../CharacterSpells';
 import CampIcon from '../../icons/CampIcon';
+import Weapons from '../Weapons';
 
 const StyledTabs = styled(Tabs)`
   width: 100%;
@@ -65,7 +66,8 @@ const CharacterPageContainer = styled.div`
     'abilities HitPointsInitiativeArmor feats'
     'abilities savingThrows feats'
     'attack savingThrows feats'
-    'attack . feats'
+    '. savingThrows feats'
+    'weapons weapons feats'
     '. . feats';
   box-shadow: 0 0 3px rgba(128, 128, 128, 0.5);
   padding: 0 5px;
@@ -238,6 +240,7 @@ const CharacterPage = observer(() => {
                   <SavingThrows charId={charId} userId={userId} />
                   <Attack charId={charId} userId={userId} />
                   <Skills charId={charId} userId={userId} />
+                  <Weapons charId={charId} userId={userId} />
 
                   <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
                     <FormItem>

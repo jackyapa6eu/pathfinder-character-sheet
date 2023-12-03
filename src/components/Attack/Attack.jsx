@@ -24,6 +24,13 @@ const BaseAttackBonus = styled.div`
   align-items: center;
 `;
 
+const AttacksPerRound = styled.div`
+  display: grid;
+  grid-template-columns: 170px 44px;
+  justify-items: center;
+  align-items: center;
+`;
+
 const Cmb = styled.div`
   display: grid;
   grid-template-columns: 38px 44px;
@@ -39,7 +46,7 @@ const Cmd = styled.div`
 `;
 
 const Attack = observer(({ charId, userId }) => {
-  const { changeAttack } = charactersStore;
+  const { changeAttack, changeAttackPerRound } = charactersStore;
   const { user } = authStore;
 
   return (
@@ -54,6 +61,16 @@ const Attack = observer(({ charId, userId }) => {
           />
         </FormItem>
       </BaseAttackBonus>
+      <AttacksPerRound>
+        <CharSheetRowLabel label='attack per round' />
+        <FormItem textAlign='center' noBgLabel name={['attack', 'perRound']}>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAttackPerRound(userId || user.uid, charId, value)}
+          />
+        </FormItem>
+      </AttacksPerRound>
       <Cmb>
         <CharSheetRowLabel label='cmb' />
         <FormItem textAlign='center' noBgLabel name={['attack', 'cmb']}>
