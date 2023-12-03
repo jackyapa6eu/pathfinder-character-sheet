@@ -222,7 +222,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
           <span>{savingThrow ? 'Yes' : 'No'}</span>
         </div>
 
-        <div>{description}</div>
+        <div style={{ maxHeight: '45vh', overflowY: 'auto' }}>{description}</div>
       </div>
     );
     api.open({

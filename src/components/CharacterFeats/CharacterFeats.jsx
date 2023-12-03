@@ -84,7 +84,7 @@ const CharacterFeats = observer(({ charId, userId }) => {
   const handleOpenFeat = ({ name, description }) => {
     api.open({
       message: name,
-      description,
+      description: <div style={{ maxHeight: '45vh', overflowY: 'auto' }}>{description}</div>,
       duration: 0,
     });
   };
