@@ -61,6 +61,10 @@ const availableClasses = {
   Loremaster: true,
   'Mystic Theurge': true,
   Shadowdancer: true,
+  Eidolon: true,
+  Familiar: true,
+  'Animal companion': true,
+  'Fantastic beast': true,
 };
 
 const availableSchools = {
