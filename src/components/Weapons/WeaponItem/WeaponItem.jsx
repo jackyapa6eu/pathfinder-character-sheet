@@ -1,11 +1,13 @@
 import { observer } from 'mobx-react';
 import { memo, useEffect, useState } from 'react';
 import FormItem from '../../FormItem';
-import { Button, Input, InputNumber, Select, Tooltip } from 'antd';
+import { Button, Form, Input, InputNumber, Modal, notification, Select, Tooltip } from 'antd';
 import styled from 'styled-components';
 import CharSheetRowLabel from '../../CharlSheetRowLabel/CharSheetRowLabel';
 import charactersStore from '../../../store/charactersStore';
 import authStore from '../../../store/authStore';
+import TextArea from 'antd/es/input/TextArea';
+import { ButtonBox, StyledFormItem } from '../../../uiComponents/uiComponents';
 
 const generateAttackString = (attacksPerRound, isMonk = false, attackBonus = 0) => {
   if (attacksPerRound <= 0) {
@@ -27,7 +29,8 @@ const Weapon = styled.div`
   grid-template-areas:
     'name attackBonus'
     'typeAndRange damageBonus'
-    '. critical';
+    '. critical'
+    'onHit onHit';
   gap: 10px;
   padding: 15px 0;
   box-shadow: 0px 0px 1px rgba(128, 128, 128, 1);
@@ -97,6 +100,48 @@ const Critical = styled.div`
   }
 `;
 
+const OnHitList = styled.div`
+  display: flex;
+  grid-area: onHit;
+  flex-wrap: wrap;
+  row-gap: 5px;
+  column-gap: 10px;
+`;
+
+const OnHitListItem = styled.p`
+  margin: 0;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 5px;
+  transition: all 0.3s ease;
+  position: relative;
+
+  &:hover {
+    background: black;
+    color: white;
+
+    & .delete-onHit-button {
+      display: flex;
+    }
+  }
+`;
+
+const DeleteOnHitButton = styled(Button)`
+  position: absolute;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+  top: -3px;
+  right: -3px;
+  background: white;
+  color: black;
+  padding: 0;
+  border-radius: 0px;
+  font-size: 6px;
+`;
+
 const DeleteWeaponButton = styled(Button)`
   position: absolute;
   display: none;
@@ -115,7 +160,6 @@ const DeleteWeaponButton = styled(Button)`
 `;
 
 const AddOnHitButton = styled(Button)`
-  display: flex;
   display: none;
   align-items: center;
   justify-content: center;
@@ -131,17 +175,51 @@ const AddOnHitButton = styled(Button)`
 
 const WeaponItem = observer(({ weaponData, userId, charId }) => {
   const [totalAttackBonus, setTotalAttackBonus] = useState('');
-  const { openedCharacter, changeWeaponData, deleteWeapon } = charactersStore;
+  const [resultDamage, setResultDamage] = useState('');
+  const [addOnHitProperty, setAddOnHitProperty] = useState(false);
+  const {
+    openedCharacter,
+    changeWeaponData,
+    deleteWeapon,
+    addWeaponPropertyOnHit,
+    deleteWeaponPropertyOnHit,
+  } = charactersStore;
   const { user } = authStore;
+  const [api, contextHolder] = notification.useNotification();
+
+  const damageMod =
+    openedCharacter.abilities?.[weaponData.damageBonus]?.tempModifier !== undefined
+      ? openedCharacter.abilities?.[weaponData.damageBonus]?.tempModifier
+      : openedCharacter.abilities?.[weaponData.damageBonus]?.modifier;
 
   const handleDeleteWeapon = async (event) => {
     event.stopPropagation();
     await deleteWeapon(userId || user.uid, charId, weaponData.name);
   };
 
+  const handleAddPropertyOnHit = async (values) => {
+    await addWeaponPropertyOnHit(userId || user.uid, charId, weaponData.name, values);
+    setAddOnHitProperty(false);
+  };
+
+  const handleOpenOnHit = ({ name, description }) => {
+    api.open({
+      message: name,
+      description: <div style={{ maxHeight: '45vh', overflowY: 'auto' }}>{description}</div>,
+      duration: 0,
+    });
+  };
+
+  const handleDeleteOnHit = async (event, onHitName) => {
+    event.stopPropagation();
+    await deleteWeaponPropertyOnHit(userId || user.uid, charId, weaponData.name, onHitName);
+    console.log(onHitName);
+  };
+
   useEffect(() => {
     const tempMod = openedCharacter.abilities?.[weaponData.attackBonus]?.tempModifier;
     const mod = openedCharacter.abilities?.[weaponData.attackBonus]?.modifier;
+
     const firstAttackBonus =
       (openedCharacter.attack.bab || 0) +
       (tempMod ?? mod) +
@@ -153,11 +231,51 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
       Object.keys(openedCharacter.classes).includes('Monk'),
       firstAttackBonus
     );
+
+    const damageBonus =
+      (weaponData.maxDamageBonus && weaponData.maxDamageBonus < damageMod
+        ? weaponData.maxDamageBonus
+        : weaponData.damageBonus
+          ? damageMod
+          : 0) +
+      (weaponData.weaponDamageBonus || 0) +
+      (weaponData.damageMisc || 0);
+
     setTotalAttackBonus(totalAttBonus);
+    setResultDamage(`${weaponData.weaponDamage}  ${damageBonus > 0 ? '+' : '-'}${damageBonus}`);
   }, [openedCharacter]);
 
   return (
     <Weapon>
+      <Modal
+        title='Add property on hit'
+        open={addOnHitProperty}
+        onCancel={() => setAddOnHitProperty(false)}
+        footer={null}
+        destroyOnClose
+      >
+        <Form layout='vertical' labelAlign='left' onFinish={handleAddPropertyOnHit}>
+          <StyledFormItem gridarea='name' name='name' label='name' rules={[{ required: true }]}>
+            <Input allowClear />
+          </StyledFormItem>
+          <StyledFormItem
+            gridarea='description'
+            name='description'
+            label='description'
+            rules={[{ required: true }]}
+          >
+            <TextArea allowClear />
+          </StyledFormItem>
+          <ButtonBox>
+            <StyledFormItem>
+              <Button type='default' htmlType='submit'>
+                Create
+              </Button>
+            </StyledFormItem>
+          </ButtonBox>
+        </Form>
+      </Modal>
+      {contextHolder}
       <DeleteWeaponButton className='delete-weapon-button' onClick={handleDeleteWeapon}>
         X
       </DeleteWeaponButton>
@@ -197,7 +315,7 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
         </FormItem>
       </AttackBonusContainer>
       <DamageBonusContainer>
-        <CharSheetRowLabel label='damage bonus' />
+        <CharSheetRowLabel label='damage bonus' desc={resultDamage} />
         <FormItem
           name={['weapons', weaponData.name, 'weaponDamage']}
           label='weapon damage'
@@ -218,9 +336,11 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
         </FormItem>
         <FormItem
           name={
-            openedCharacter.abilities?.[weaponData.damageBonus]?.tempModifier !== undefined
-              ? ['abilities', weaponData.damageBonus, 'tempModifier']
-              : ['abilities', weaponData.damageBonus, 'modifier']
+            weaponData.maxDamageBonus && weaponData.maxDamageBonus < damageMod
+              ? ['weapons', weaponData.name, 'maxDamageBonus']
+              : openedCharacter.abilities?.[weaponData.damageBonus]?.tempModifier !== undefined
+                ? ['abilities', weaponData.damageBonus, 'tempModifier']
+                : ['abilities', weaponData.damageBonus, 'modifier']
           }
           label={weaponData.damageBonus ? `${weaponData.damageBonus} modifier` : ''}
           textAlign='center'
@@ -296,10 +416,7 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
         </FormItem>
       </TypeAndRange>
       <Tooltip title='Добавить свойство при попадании'>
-        <AddOnHitButton
-          // onClick={() => setAddWeaponModalIsOpen(true)}
-          className='add-on-hit-property'
-        >
+        <AddOnHitButton onClick={() => setAddOnHitProperty(true)} className='add-on-hit-property'>
           +
         </AddOnHitButton>
       </Tooltip>
@@ -344,6 +461,20 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
           />
         </FormItem>
       </Critical>
+      <OnHitList>
+        {weaponData.onHit &&
+          Object.values(weaponData.onHit).map((prop) => (
+            <OnHitListItem key={prop.name} onClick={() => handleOpenOnHit(prop)}>
+              <DeleteOnHitButton
+                className='delete-onHit-button'
+                onClick={(event) => handleDeleteOnHit(event, prop.name)}
+              >
+                X
+              </DeleteOnHitButton>
+              {prop.name}
+            </OnHitListItem>
+          ))}
+      </OnHitList>
     </Weapon>
   );
 });

@@ -104,9 +104,9 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
         </FormItem>
         <FormItem
           name={['hitPoints', 'wounds']}
-          label='wounds'
+          label='current'
           textAlign='center'
-          labelDesc='Нанесенный урон / текущее количество хп'
+          labelDesc='Текущее количество хп'
           noBgLabel
         >
           <InputNumber

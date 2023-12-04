@@ -44,7 +44,7 @@ const StyledForm = styled(Form)`
   grid-template-columns: 1fr 1fr 1fr 1fr;
   column-gap: 5px;
   grid-template-areas:
-    'name name . .'
+    'name name maxDamageBonus maxDamageBonus'
     'attackBonus attackBonus weaponAttackBonus weaponAttackBonus'
     'damageBonus damageBonus weaponDamageBonus weaponDamageBonus'
     '. . . submit';
@@ -87,7 +87,7 @@ const Weapons = observer(({ charId, userId }) => {
           <StyledFormItem
             gridarea='weaponAttackBonus'
             name='weaponAttackBonus'
-            label='weapon attack bonus'
+            label='weapon enchantment bonus'
             rules={[{ required: true }]}
           >
             <InputNumber controls={false} style={{ width: '100%' }} />
@@ -100,6 +100,14 @@ const Weapons = observer(({ charId, userId }) => {
             rules={[{ required: true }]}
           >
             <Select allowClear options={[{ value: 'str' }, { value: false, label: 'none' }]} />
+          </StyledFormItem>
+
+          <StyledFormItem
+            gridarea='maxDamageBonus'
+            name='maxDamageBonus'
+            label='max damage bonus mod'
+          >
+            <InputNumber controls={false} style={{ width: '100%' }} />
           </StyledFormItem>
 
           <StyledFormItem

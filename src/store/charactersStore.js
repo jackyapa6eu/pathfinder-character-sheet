@@ -803,6 +803,38 @@ class CharactersStore {
     }
   }, 700);
 
+  addWeaponPropertyOnHit = async (uid, charRef, weaponName, propertyData) => {
+    const db = getDatabase();
+    const dataRef = ref(
+      db,
+      `users/${uid}/characters/${charRef}/weapons/${weaponName}/onHit/${propertyData.name}`
+    );
+
+    try {
+      await set(dataRef, propertyData);
+      message.success(`On hit property added!`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
+  deleteWeaponPropertyOnHit = async (uid, charRef, weaponName, propertyName) => {
+    const db = getDatabase();
+    const dataRef = ref(
+      db,
+      `users/${uid}/characters/${charRef}/weapons/${weaponName}/onHit/${propertyName}`
+    );
+
+    try {
+      await set(dataRef, null);
+      message.success(`On hit property deleted!`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
   deleteWeapon = async (uid, charRef, weaponName) => {
     const db = getDatabase();
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/weapons/${weaponName}`);
