@@ -82,7 +82,7 @@ const DamageBonusContainer = styled.div`
 const TypeAndRange = styled.div`
   display: grid;
   width: 100%;
-  grid-template-columns: 126px 88px;
+  grid-template-columns: 170px 44px;
   grid-area: typeAndRange;
   grid-template-areas: 'type range';
 `;
@@ -386,6 +386,8 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
       <TypeAndRange>
         <FormItem name={['weapons', weaponData.name, 'type']} label='type' gridArea='type'>
           <Select
+            mode='multiple'
+            maxTagCount='responsive'
             style={{ width: '100%' }}
             options={[
               { value: 'Piercing' },

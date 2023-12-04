@@ -24,3 +24,8 @@ code {
 .ant-notification-notice-description {
   white-space: pre-line;
 }
+
+.ant-input-number-input-wrap input {
+  padding-left: 0!important;
+  padding-right: 0!important;
+}
