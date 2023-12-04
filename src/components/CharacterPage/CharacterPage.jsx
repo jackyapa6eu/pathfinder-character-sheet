@@ -72,6 +72,7 @@ const CharacterPageContainer = styled.div`
   box-shadow: 0 0 3px rgba(128, 128, 128, 0.5);
   padding: 0 5px;
   gap: 10px;
+  overflow-x: hidden;
 
   @media screen and (max-width: 950px) {
     grid-template-columns: 215px 1fr;
@@ -79,7 +80,8 @@ const CharacterPageContainer = styled.div`
       'abilities HitPointsInitiativeArmor'
       'abilities savingThrows'
       'attack savingThrows'
-      'attack feats'
+      'attack .'
+      'weapons weapons'
       '.  feats';
   }
 
@@ -89,6 +91,7 @@ const CharacterPageContainer = styled.div`
       'abilities abilities attack'
       'HitPointsInitiativeArmor HitPointsInitiativeArmor HitPointsInitiativeArmor'
       'savingThrows savingThrows savingThrows'
+      'weapons weapons weapons'
       'feats feats feats';
   }
 
@@ -99,6 +102,7 @@ const CharacterPageContainer = styled.div`
       'HitPointsInitiativeArmor'
       'savingThrows'
       'attack'
+      'weapons'
       'feats';
   }
 `;

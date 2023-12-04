@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 import { memo, useEffect, useState } from 'react';
 import FormItem from '../../FormItem';
-import { Input, InputNumber, Select } from 'antd';
+import { Button, Input, InputNumber, Select, Tooltip } from 'antd';
 import styled from 'styled-components';
 import CharSheetRowLabel from '../../CharlSheetRowLabel/CharSheetRowLabel';
 import charactersStore from '../../../store/charactersStore';
@@ -22,6 +22,7 @@ const generateAttackString = (attacksPerRound, isMonk = false, attackBonus = 0) 
 
 const Weapon = styled.div`
   display: grid;
+  position: relative;
   grid-template-columns: 215px 345px;
   grid-template-areas:
     'name attackBonus'
@@ -30,6 +31,33 @@ const Weapon = styled.div`
   gap: 10px;
   padding: 15px 0;
   box-shadow: 0px 0px 1px rgba(128, 128, 128, 1);
+  cursor: pointer;
+  &:hover {
+    .delete-weapon-button {
+      display: flex;
+    }
+    .add-on-hit-property {
+      display: flex;
+    }
+  }
+
+  @media screen and (max-width: 595px) {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'name name'
+      'attackBonus attackBonus'
+      'damageBonus damageBonus'
+      'typeAndRange critical';
+  }
+
+  @media screen and (max-width: 595px) {
+    grid-template-areas:
+      'name name'
+      'attackBonus attackBonus'
+      'damageBonus damageBonus'
+      'typeAndRange .'
+      'critical .';
+  }
 `;
 
 const AttackBonusContainer = styled.div`
@@ -59,21 +87,61 @@ const TypeAndRange = styled.div`
 const Critical = styled.div`
   display: grid;
   width: 100%;
-  grid-template-columns: 88px 88px;
+  grid-template-columns: 88px 87px;
   justify-content: end;
   grid-area: critical;
   grid-template-areas: 'criticalRange criticalMultiplier';
+
+  @media screen and (max-width: 510px) {
+    justify-content: start;
+  }
+`;
+
+const DeleteWeaponButton = styled(Button)`
+  position: absolute;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  top: -10px;
+  right: -10px;
+  background: white;
+  color: black;
+  padding: 0;
+  border-radius: 0px;
+  font-size: 12px;
+  line-height: 12px;
+`;
+
+const AddOnHitButton = styled(Button)`
+  display: flex;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: white;
+  color: black;
+  padding: 0;
+  border-radius: 0px;
+  font-size: 20px;
+  line-height: 16px;
 `;
 
 const WeaponItem = observer(({ weaponData, userId, charId }) => {
   const [totalAttackBonus, setTotalAttackBonus] = useState('');
-  const { openedCharacter, changeWeaponData } = charactersStore;
+  const { openedCharacter, changeWeaponData, deleteWeapon } = charactersStore;
   const { user } = authStore;
+
+  const handleDeleteWeapon = async (event) => {
+    event.stopPropagation();
+    await deleteWeapon(userId || user.uid, charId, weaponData.name);
+  };
 
   useEffect(() => {
     const tempMod = openedCharacter.abilities?.[weaponData.attackBonus]?.tempModifier;
     const mod = openedCharacter.abilities?.[weaponData.attackBonus]?.modifier;
-    // (tempDexMod ?? dexMod)
     const firstAttackBonus =
       (openedCharacter.attack.bab || 0) +
       (tempMod ?? mod) +
@@ -90,6 +158,9 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
 
   return (
     <Weapon>
+      <DeleteWeaponButton className='delete-weapon-button' onClick={handleDeleteWeapon}>
+        X
+      </DeleteWeaponButton>
       <FormItem name={['weapons', weaponData.name, 'name']} label='weapon' gridArea='name'>
         <Input style={{ width: '100%', color: 'black' }} disabled />
       </FormItem>
@@ -224,6 +295,14 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
           />
         </FormItem>
       </TypeAndRange>
+      <Tooltip title='Добавить свойство при попадании'>
+        <AddOnHitButton
+          // onClick={() => setAddWeaponModalIsOpen(true)}
+          className='add-on-hit-property'
+        >
+          +
+        </AddOnHitButton>
+      </Tooltip>
       <Critical>
         <FormItem
           name={['weapons', weaponData.name, 'criticalRange']}

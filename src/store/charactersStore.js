@@ -802,6 +802,19 @@ class CharactersStore {
       message.error('Error!');
     }
   }, 700);
+
+  deleteWeapon = async (uid, charRef, weaponName) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/weapons/${weaponName}`);
+
+    try {
+      await set(dataRef, null);
+      message.success(`Weapon deleted!`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
 }
 
 const charactersStore = new CharactersStore();

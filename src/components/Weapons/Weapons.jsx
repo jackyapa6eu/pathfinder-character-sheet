@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { memo, useEffect, useState } from 'react';
 import charactersStore from '../../store/charactersStore';
-import { Button, Form, Input, InputNumber, Modal, Select } from 'antd';
+import { Button, Form, Input, InputNumber, Modal, Select, Tooltip } from 'antd';
 import { ButtonBox, StyledFormItem } from '../../uiComponents/uiComponents';
 import authStore from '../../store/authStore';
 import WeaponItem from './WeaponItem';
@@ -90,7 +90,7 @@ const Weapons = observer(({ charId, userId }) => {
             label='weapon attack bonus'
             rules={[{ required: true }]}
           >
-            <InputNumber allowClear controls={false} style={{ width: '100%' }} />
+            <InputNumber controls={false} style={{ width: '100%' }} />
           </StyledFormItem>
 
           <StyledFormItem
@@ -126,7 +126,9 @@ const Weapons = observer(({ charId, userId }) => {
             <WeaponItem charId={charId} userId={userId} key={weaponName} weaponData={weaponData} />
           ))}
       </WeaponsList>
-      <AddWeaponButton onClick={() => setAddWeaponModalIsOpen(true)}>+</AddWeaponButton>
+      <Tooltip title='Добавить оружие'>
+        <AddWeaponButton onClick={() => setAddWeaponModalIsOpen(true)}>+</AddWeaponButton>
+      </Tooltip>
     </WeaponsContainer>
   );
 });
