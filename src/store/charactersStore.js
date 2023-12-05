@@ -774,12 +774,12 @@ class CharactersStore {
     }
   };
 
-  createWeapon = async (uid, charRef, weaponName) => {
+  createWeapon = async (uid, charRef, weaponData) => {
     const db = getDatabase();
-    const dataRef = ref(db, `users/${uid}/characters/${charRef}/weapons/${weaponName.name}`);
-
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/weapons/${weaponData.name}`);
+    if (!weaponData.maxDamageBonus) delete weaponData.maxDamageBonus;
     try {
-      await set(dataRef, weaponName);
+      await set(dataRef, weaponData);
       message.success(`Weapon created!`);
     } catch (e) {
       console.log(e);
