@@ -78,7 +78,7 @@ const Weapons = observer(({ charId, userId }) => {
           <StyledFormItem
             gridarea='attackBonus'
             name='attackBonus'
-            label='attack bonus mod'
+            label='ability attack mod'
             rules={[{ required: true }]}
           >
             <Select allowClear options={[{ value: 'dex' }, { value: 'str' }, { value: 'wis' }]} />
@@ -87,7 +87,7 @@ const Weapons = observer(({ charId, userId }) => {
           <StyledFormItem
             gridarea='weaponAttackBonus'
             name='weaponAttackBonus'
-            label='weapon enchantment bonus'
+            label='weapon attack bonus'
             rules={[{ required: true }]}
           >
             <InputNumber controls={false} style={{ width: '100%' }} />
@@ -96,7 +96,7 @@ const Weapons = observer(({ charId, userId }) => {
           <StyledFormItem
             gridarea='damageBonus'
             name='damageBonus'
-            label='damage bonus mod'
+            label='ability damage mod'
             rules={[{ required: true }]}
           >
             <Select allowClear options={[{ value: 'str' }, { value: false, label: 'none' }]} />
@@ -105,7 +105,7 @@ const Weapons = observer(({ charId, userId }) => {
           <StyledFormItem
             gridarea='maxDamageBonus'
             name='maxDamageBonus'
-            label='max damage bonus mod'
+            label='max ability damage mod'
           >
             <InputNumber controls={false} style={{ width: '100%' }} />
           </StyledFormItem>
