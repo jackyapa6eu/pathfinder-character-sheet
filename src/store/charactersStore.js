@@ -645,11 +645,20 @@ class CharactersStore {
     }
   };
 
-  prepareSpell = async (uid, charRef, spellData, justSlot = false) => {
+  prepareSpell = async (uid, charRef, spellData, justSlot = false, preparingSpell) => {
     const db = getDatabase();
     const spellRef = `${spellData.name.replace(/\s+/g, '-').toLowerCase()}_${Date.now()}`;
 
-    const path = `users/${uid}/characters/${charRef}/spellsPerDay/${spellData.class}/${spellData.level}/spells/${spellRef}`;
+    const spellLevelData = toJS(this.openedCharacter).spellsPerDay[spellData.class][
+      spellData.level
+    ];
+    const toDomain =
+      preparingSpell.isDomain &&
+      spellLevelData.maxDomainCountPerDay &&
+      spellLevelData.maxDomainCountPerDay > Object.keys(spellLevelData.domainSpells || {}).length;
+    const path = `users/${uid}/characters/${charRef}/spellsPerDay/${spellData.class}/${
+      spellData.level
+    }/${toDomain ? 'domainSpells' : 'spells'}/${spellRef}`;
     const dataRef = ref(db, path);
 
     const spell = {
@@ -657,10 +666,10 @@ class CharactersStore {
       freeSlot: justSlot,
       name: `${spellData.name} ${spellData.metamagic ? '(metamagic)' : ''}`,
       metamagic: spellData.metamagic ?? false,
+      asDomain: spellData.asDomain ?? false,
       isUsed: false,
       ref: path,
     };
-
     try {
       await set(dataRef, spell);
       message.success('Spell prepared!');
@@ -712,11 +721,13 @@ class CharactersStore {
     }
   };
 
-  changeMaxSpellsPerDay = debounce(async (uid, charRef, newCount, className, level) => {
+  changeMaxSpellsPerDay = debounce(async (uid, charRef, newCount, className, level, isDomain) => {
     const db = getDatabase();
     const dataRef = ref(
       db,
-      `users/${uid}/characters/${charRef}/spellsPerDay/${className}/${level}/maxCountPerDay`
+      `users/${uid}/characters/${charRef}/spellsPerDay/${className}/${level}/${
+        isDomain ? 'maxDomainCountPerDay' : 'maxCountPerDay'
+      }`
     );
 
     try {

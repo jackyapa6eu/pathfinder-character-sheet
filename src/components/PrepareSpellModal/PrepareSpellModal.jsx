@@ -21,7 +21,7 @@ const StyledForm = styled(Form)`
   column-gap: 5px;
   grid-template-areas:
     'name class'
-    'metamagic level'
+    'checkBoxes level'
     '. submit';
 `;
 
@@ -41,7 +41,7 @@ const PrepareSpellModal = observer(
     const { user } = authStore;
 
     const onFinish = async (values) => {
-      await prepareSpell(userId || user.uid, charId, values);
+      await prepareSpell(userId || user.uid, charId, values, false, preparingSpell);
       setPrepareSpellModalIsOpen(false);
     };
 
@@ -90,15 +90,27 @@ const PrepareSpellModal = observer(
               disabled={!isMetamagic}
             />
           </StyledFormItem>
-          <StyledFormItem
-            gridarea='metamagic'
-            label='is metamagic'
-            name='metamagic'
-            valuePropName='checked'
-            onChange={(event) => setIsMetamagic(event.target.checked)}
-          >
-            <Checkbox></Checkbox>
-          </StyledFormItem>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gridArea: 'checkBoxes' }}>
+            <StyledFormItem
+              gridarea='metamagic'
+              label='is metamagic'
+              name='metamagic'
+              valuePropName='checked'
+              onChange={(event) => setIsMetamagic(event.target.checked)}
+            >
+              <Checkbox></Checkbox>
+            </StyledFormItem>
+            {/*<StyledFormItem*/}
+            {/*  gridarea='asDomain'*/}
+            {/*  label='as domain'*/}
+            {/*  name='asDomain'*/}
+            {/*  valuePropName='checked'*/}
+            {/*  // onChange={(event) => setIsMetamagic(event.target.checked)}*/}
+            {/*>*/}
+            {/*  <Checkbox disabled={preparingSpell.isDomain}></Checkbox>*/}
+            {/*</StyledFormItem>*/}
+          </div>
+
           <ButtonBox>
             <StyledFormItem>
               <Button type='default' htmlType='submit'>

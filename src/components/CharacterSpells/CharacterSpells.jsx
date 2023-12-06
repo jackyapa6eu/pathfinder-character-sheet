@@ -77,7 +77,7 @@ const StyledForm = styled(Form)`
     'class castingTime'
     'school range'
     'target duration'
-    'savingThrow spellResistance'
+    'savingThrow checkBoxes'
     'description description'
     '. submit';
 `;
@@ -165,7 +165,6 @@ const CharacterSpells = observer(({ charId, userId }) => {
     deletePreparedSpell,
     changeFreeSlotsForLevel,
     changeMaxSpellsPerDay,
-    makeFullRest,
   } = charactersStore;
   const { user } = authStore;
   const [api, contextHolder] = notification.useNotification();
@@ -261,8 +260,8 @@ const CharacterSpells = observer(({ charId, userId }) => {
     await changeFreeSlotsForLevel(userId || user.uid, charId, value, className, level);
   };
 
-  const handleChangeMaxSpellsPerDay = async (newValue, className, level) => {
-    await changeMaxSpellsPerDay(userId || user.uid, charId, newValue, className, level);
+  const handleChangeMaxSpellsPerDay = async (newValue, className, level, isDomain = false) => {
+    await changeMaxSpellsPerDay(userId || user.uid, charId, newValue, className, level, isDomain);
   };
 
   return (
@@ -338,14 +337,22 @@ const CharacterSpells = observer(({ charId, userId }) => {
           >
             <TextArea allowClear />
           </StyledFormItem>
-          <StyledFormItem
-            gridarea='spellResistance'
-            label='spell resistance'
-            name='spellResistance'
-            valuePropName='checked'
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gridArea: 'checkBoxes',
+            }}
           >
-            <Checkbox></Checkbox>
-          </StyledFormItem>
+            <StyledFormItem label='spell resistance' name='spellResistance' valuePropName='checked'>
+              <Checkbox></Checkbox>
+            </StyledFormItem>
+            <StyledFormItem label='domain spell' name='isDomain' valuePropName='checked'>
+              <Checkbox></Checkbox>
+            </StyledFormItem>
+          </div>
+
           <ButtonBox>
             <StyledFormItem>
               <Button type='default' htmlType='submit'>
@@ -490,10 +497,16 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                           level === 'supernatural ability'
                                             ? ''
                                             : `${
-                                                levelData.spells
-                                                  ? Object.keys(levelData.spells).length
-                                                  : 0
-                                              }/${levelData.maxCountPerDay}`
+                                                levelData.spells &&
+                                                Object.keys(levelData.spells || {}).length
+                                              }/${levelData.maxCountPerDay} ${
+                                                levelData.maxDomainCountPerDay
+                                                  ? `+ ${
+                                                      Object.keys(levelData.domainSpells || {})
+                                                        .length
+                                                    }/${levelData.maxDomainCountPerDay}[domain]`
+                                                  : ''
+                                              }`
                                         }`}
                                       </span>
                                       {user.dm && level !== 'supernatural ability' && (
@@ -511,6 +524,22 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                               style={{ width: '40px' }}
                                               onChange={(value) =>
                                                 handleChangeMaxSpellsPerDay(value, className, level)
+                                              }
+                                              size='small'
+                                            />
+                                          </Tooltip>
+
+                                          <Tooltip title='New max domain spells per day'>
+                                            <InputNumber
+                                              controls={false}
+                                              style={{ width: '40px' }}
+                                              onChange={(value) =>
+                                                handleChangeMaxSpellsPerDay(
+                                                  value,
+                                                  className,
+                                                  level,
+                                                  true
+                                                )
                                               }
                                               size='small'
                                             />
@@ -543,6 +572,43 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                               className='delete-feat-button'
                                               onClick={(event) =>
                                                 handleDeletedPreparedSpell(event, spellData)
+                                              }
+                                            >
+                                              X
+                                            </DeleteSpellButton>
+                                            {!spellData.freeSlot && spellData.name}
+                                            <IsUsedCheckbox
+                                              checked={spellData.isUsed}
+                                              handleClick={(event) =>
+                                                handleUseSpell(event, spellData)
+                                              }
+                                            />
+                                          </SpellsListItem>
+                                        ))}
+                                      {openedCharacter.spellsPerDay[className][level]
+                                        .domainSpells &&
+                                        Object.entries(
+                                          openedCharacter.spellsPerDay[className][level]
+                                            .domainSpells
+                                        ).map(([spellName, spellData]) => (
+                                          <SpellsListItem
+                                            key={spellName}
+                                            // onClick={() => handleOpenSpell(spellData)}
+                                          >
+                                            <span
+                                              style={{
+                                                position: 'absolute',
+                                                left: 0,
+                                                top: 0,
+                                                fontSize: '6px',
+                                              }}
+                                            >
+                                              [domain]
+                                            </span>
+                                            <DeleteSpellButton
+                                              className='delete-feat-button'
+                                              onClick={(event) =>
+                                                handleDeletedPreparedSpell(event, spellData, true)
                                               }
                                             >
                                               X
