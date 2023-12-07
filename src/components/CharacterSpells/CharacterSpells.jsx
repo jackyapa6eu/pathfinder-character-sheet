@@ -248,7 +248,8 @@ const CharacterSpells = observer(({ charId, userId }) => {
   };
 
   const handleAddFreeSpellSlot = async (spellValue) => {
-    await prepareSpell(userId || user.uid, charId, spellValue, true);
+    console.log(spellValue);
+    await prepareSpell(userId || user.uid, charId, spellValue, true, { isDomain: false });
   };
 
   const handleDeletedPreparedSpell = async (event, spellData) => {
@@ -403,6 +404,19 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                         key={spellName}
                                         onClick={() => handleOpenSpell(spellData)}
                                       >
+                                        {spellData.isDomain && (
+                                          <span
+                                            style={{
+                                              position: 'absolute',
+                                              left: 0,
+                                              top: 0,
+                                              fontSize: '6px',
+                                            }}
+                                          >
+                                            [domain]
+                                          </span>
+                                        )}
+
                                         {level === 'supernatural ability' ||
                                         (openedCharacter.spellsPerDay[className][level]
                                           .maxCountPerDay > 0 &&
@@ -497,8 +511,9 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                           level === 'supernatural ability'
                                             ? ''
                                             : `${
-                                                levelData.spells &&
-                                                Object.keys(levelData.spells || {}).length
+                                                levelData.spells
+                                                  ? Object.keys(levelData.spells || {}).length
+                                                  : 0
                                               }/${levelData.maxCountPerDay} ${
                                                 levelData.maxDomainCountPerDay
                                                   ? `+ ${

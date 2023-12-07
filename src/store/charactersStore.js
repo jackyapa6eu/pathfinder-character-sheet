@@ -646,6 +646,7 @@ class CharactersStore {
   };
 
   prepareSpell = async (uid, charRef, spellData, justSlot = false, preparingSpell) => {
+    console.log(spellData);
     const db = getDatabase();
     const spellRef = `${spellData.name.replace(/\s+/g, '-').toLowerCase()}_${Date.now()}`;
 
