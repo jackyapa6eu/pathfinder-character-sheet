@@ -99,10 +99,34 @@ const availableSpellLevels = {
   '9 lvl': { maxCountPerDay: 0, freeSpells: false },
 };
 
+const itemTypes = [
+  {
+    label: 'Armor',
+    value: 'armor',
+  },
+  {
+    label: 'Magic item',
+    value: 'magicItem',
+  },
+  {
+    label: 'Consumables',
+    value: 'consumables',
+  },
+  {
+    label: 'Items',
+    value: 'items',
+  },
+  {
+    label: 'Weapon',
+    value: 'weapon',
+  },
+];
+
 export {
   alignmentSelectOptions,
   availableClasses,
   availableSchools,
   availableSpellsSavingThrow,
   availableSpellLevels,
+  itemTypes,
 };

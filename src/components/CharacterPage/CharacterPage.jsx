@@ -20,6 +20,7 @@ import AddClassModal from '../AddClassModal';
 import CharacterSpells from '../CharacterSpells';
 import CampIcon from '../../icons/CampIcon';
 import Weapons from '../Weapons';
+import CharacterInventory from '../CharacterInventory';
 
 const StyledTabs = styled(Tabs)`
   width: 100%;
@@ -265,6 +266,11 @@ const CharacterPage = observer(() => {
               label: `Spells`,
               key: 'Spells',
               children: <CharacterSpells charId={charId} userId={userId} />,
+            },
+            {
+              label: `Inventory`,
+              key: 'Inventory',
+              children: <CharacterInventory charId={charId} userId={userId} />,
             },
           ]}
         />

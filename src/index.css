@@ -16,7 +16,7 @@ code {
   color: black!important;
 }
 
-.ant-checkbox-checked .ant-checkbox-inner {
+.ant-checkbox-checked .ant-checkbox-inner, .ant-radio-button-wrapper-checked{
   background-color: black!important;
   border-color: black!important;
 }
@@ -29,3 +29,4 @@ code {
   padding-left: 0!important;
   padding-right: 0!important;
 }
+

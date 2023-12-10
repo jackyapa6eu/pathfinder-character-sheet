@@ -3,6 +3,7 @@ import { getDatabase, ref, set, get, onValue, update } from 'firebase/database';
 import { message } from 'antd';
 import { debounce } from 'lodash';
 import { availableSpellLevels } from '../utils/consts';
+import { filterUndefinedToNull, makeName } from '../utils/helpers';
 
 const savingThrowsAbilities = {
   fortitude: 'con',
@@ -267,32 +268,10 @@ export const initialUserData = {
   spells: {},
 
   spellsPerDay: {},
-  // name
-  // weaponAttack
-  // attackMod
-  // attackMisc
-  // damageMod (may be null)
-  // damageMisc
-  // type
-  // range
-  // critical
+
+  inventory: {},
+
   weapons: {},
-  // weapons: {
-  //   'composite longbow +3': {
-  //     name: '',
-  //     weaponAttack: '',
-  //     attackMod: 'str/dex/wis',
-  //     attackMisc: 0,
-  //     damageMod: 'str/null',
-  //     damageMisc: 0,
-  //     type: 'slashing',
-  //     range: 0,
-  //     critical: '',
-  //     onHit: {
-  //       bleed: {},
-  //     },
-  //   },
-  // },
 };
 
 class CharactersStore {
@@ -854,6 +833,42 @@ class CharactersStore {
     try {
       await set(dataRef, null);
       message.success(`Weapon deleted!`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
+  createInventoryItem = async (uid, charRef, itemData) => {
+    const db = getDatabase();
+
+    const clearedData = filterUndefinedToNull(itemData);
+    const itemName = makeName(itemData.name);
+    const itemRef = `users/${uid}/characters/${charRef}/inventory/${itemName}`;
+    clearedData.ref = itemRef;
+    if (clearedData.type === 'magicItem') {
+      clearedData.chargesLeft = clearedData.chargesMax;
+    }
+    const dataRef = ref(db, itemRef);
+    console.log('clearedData:', clearedData, dataRef);
+
+    try {
+      await set(dataRef, clearedData);
+      message.success(`Item added!`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
+  deleteInventoryItem = async (uid, charRef, itemData, sell = false) => {
+    const db = getDatabase();
+    const dataRef = ref(db, itemData.ref);
+
+    try {
+      await set(dataRef, null);
+      if (sell) message.success(`Item sold!`);
+      else message.success(`Item deleted!`);
     } catch (e) {
       console.log(e);
       message.error('Error!');
