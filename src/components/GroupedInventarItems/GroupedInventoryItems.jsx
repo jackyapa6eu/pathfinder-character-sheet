@@ -4,8 +4,9 @@ import charactersStore from '../../store/charactersStore';
 import { fieldsAndStrFilter } from '../../utils/helpers';
 import styled from 'styled-components';
 import { itemTemplate } from '../CharacterInventory/CharacterInventory';
-import { Button, Form, Tooltip } from 'antd';
+import { Button, Input, InputNumber, Tooltip } from 'antd';
 import authStore from '../../store/authStore';
+import FormItem from '../FormItem';
 
 const ItemsContainer = styled.div`
   display: flex;
@@ -13,7 +14,7 @@ const ItemsContainer = styled.div`
   gap: 2px;
 `;
 
-const Item = styled.p`
+const Item = styled.div`
   margin: 0;
   display: grid;
   grid-template-columns: ${(p) => p.template ?? ''};
@@ -34,15 +35,16 @@ const Item = styled.p`
     line-height: 15px;
     align-items: center;
     justify-content: center;
+    z-index: 15;
   }
 
   & .item-charges {
     margin-left: auto;
+    text-align: right;
   }
 
   & .item-name-container {
     display: flex;
-    padding-right: 10px;
   }
 
   &:hover .sell-button {
@@ -51,18 +53,25 @@ const Item = styled.p`
 
   & > span {
     position: relative;
+    display: flex;
+    align-items: center;
     text-align: center;
     padding: 0 3px;
     border-left: 1px solid rgba(0, 0, 0, 0.2);
   }
 
-  & > span:first-child {
+  & .magic-item {
+    padding-right: 10px;
+  }
+
+  & > span:first-child,
+  & > span:nth-child(2) {
     border-left: none;
   }
 `;
 
 const GroupedInventoryItems = observer(({ groupName, searchItemText, charId, userId }) => {
-  const { openedCharacter, deleteInventoryItem, magicItemUse } = charactersStore;
+  const { openedCharacter, deleteInventoryItem, magicItemUse, changeItemData } = charactersStore;
   const { user } = authStore;
 
   const handleSellItem = async (itemData) => {
@@ -77,6 +86,16 @@ const GroupedInventoryItems = observer(({ groupName, searchItemText, charId, use
     await magicItemUse(userId || user.uid, charId, itemData);
   };
 
+  const handleChangeItemData = async (itemData, type, value) => {
+    await changeItemData(
+      userId || user.uid,
+      charId,
+      itemData.itemName,
+      type,
+      value.target?.value || value
+    );
+  };
+
   return (
     <ItemsContainer>
       {openedCharacter.inventory &&
@@ -89,36 +108,82 @@ const GroupedInventoryItems = observer(({ groupName, searchItemText, charId, use
         ).map((el) => (
           <Item key={el.ref} template={itemTemplate}>
             <span className='item-name-container'>
-              {el.name}
-              {el.type === 'magicItem' && (
-                <>
-                  <Tooltip title='use item'>
-                    <Button onClick={() => handleUseMagicItem(el)} className='sell-button'>
-                      <span>?</span>
-                    </Button>
-                  </Tooltip>
-                  <span className='item-charges'>{`${el.chargesLeft}/${el.chargesMax}`}</span>
-                </>
-              )}
+              <FormItem name={['inventory', el.itemName, 'name']} textAlign='center' noBgLabel>
+                <Input
+                  style={{ width: '100%' }}
+                  onChange={(value) => handleChangeItemData(el, 'name', value)}
+                />
+              </FormItem>
             </span>
+            {el.count && (
+              <span>
+                <FormItem
+                  name={['inventory', el.itemName, 'count']}
+                  textAlign='center'
+                  noBgLabel
+                  label='count'
+                >
+                  <InputNumber
+                    controls={false}
+                    style={{ width: '100%' }}
+                    onChange={(value) => handleChangeItemData(el, 'count', value)}
+                  />
+                </FormItem>
+              </span>
+            )}
+            {el.type === 'magicItem' && (
+              <span className='magic-item'>
+                <Tooltip title='use item'>
+                  <Button onClick={() => handleUseMagicItem(el)} className='sell-button'>
+                    <span>🪄</span>
+                  </Button>
+                </Tooltip>
+                <span className='item-charges'>{`${el.chargesLeft}/${el.chargesMax}`}</span>
+              </span>
+            )}
+            {el.type !== 'magicItem' && !el.count && <span />}
             <span>
               <Tooltip title='delete item'>
                 <Button onClick={() => handleDeleteItem(el)} className='sell-button'>
-                  <span>X</span>
+                  <span>🗑️</span>
                 </Button>
               </Tooltip>
-              {el.weight}
+              <FormItem
+                name={['inventory', el.itemName, 'weight']}
+                labelDesc={`total: ${el.weight * (el.count || 1)} `}
+                textAlign='center'
+                noBgLabel
+                label='weight'
+              >
+                <InputNumber
+                  controls={false}
+                  style={{ width: '100%' }}
+                  onChange={(value) => handleChangeItemData(el, 'weight', value)}
+                />
+              </FormItem>
             </span>
             <span>
               {el.cost && (
-                <Tooltip title={`sell item for ${el.cost} ${el.currency}`}>
+                <Tooltip placement='topRight' title={`sell item for ${el.cost} ${el.currency}`}>
                   <Button onClick={() => handleSellItem(el)} className='sell-button'>
-                    <span>$</span>
+                    <span>🤑</span>
                   </Button>
                 </Tooltip>
               )}
 
-              {el.cost || 0}
+              <FormItem
+                name={['inventory', el.itemName, 'cost']}
+                labelDesc={`total: ${el.cost * (el.count || 1)} ${el.currency}`}
+                textAlign='center'
+                noBgLabel
+                label='cost'
+              >
+                <InputNumber
+                  controls={false}
+                  style={{ width: '100%' }}
+                  onChange={(value) => handleChangeItemData(el, 'cost', value)}
+                />
+              </FormItem>
             </span>
           </Item>
         ))}

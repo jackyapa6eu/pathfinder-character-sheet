@@ -12,7 +12,7 @@ import CoinIcon from '../../icons/CoinIcon';
 import FormItem from '../FormItem';
 import { useForm } from 'antd/es/form/Form';
 
-export const itemTemplate = '1fr 50px 50px';
+export const itemTemplate = '1fr 44px 44px 44px';
 
 const StyledCollapse = styled(Collapse)`
   display: grid;
@@ -42,7 +42,7 @@ const CollapseLabel = styled.p`
   }
 `;
 
-const SpellsContainer = styled.div`
+const CharacterInventoryContainer = styled.div`
   display: grid;
   width: 100%;
   align-content: start;
@@ -61,7 +61,7 @@ const InventoryPanelContainer = styled.div`
   }
 `;
 
-const MoneyForm = styled(Form)`
+const MoneyForm = styled.div`
   display: grid;
   grid-template-columns: 64px 64px 64px 64px;
   gap: 5px;
@@ -88,7 +88,6 @@ const CharacterInventory = observer(({ charId, userId }) => {
   const [searchItemText, setSearchItemText] = useState('');
   const { openedCharacter, editMoney } = charactersStore;
   const { user } = authStore;
-  const [form] = useForm();
 
   const handleSearch = (value) => {
     setSearchItemText(value.target.value);
@@ -98,15 +97,8 @@ const CharacterInventory = observer(({ charId, userId }) => {
     await editMoney(userId || user.uid, charId, type, amount);
   };
 
-  useEffect(() => {
-    if (openedCharacter) {
-      form.setFieldsValue({ ...initialUserData });
-      form.setFieldsValue({ ...openedCharacter });
-    }
-  }, [openedCharacter]);
-
   return (
-    <SpellsContainer>
+    <CharacterInventoryContainer>
       <AddItemModal
         charId={charId}
         userId={userId}
@@ -124,7 +116,7 @@ const CharacterInventory = observer(({ charId, userId }) => {
           onChange={handleSearch}
         />
 
-        <MoneyForm form={form}>
+        <MoneyForm>
           <CoinContainer>
             <FormItem name={['money', 'platinum']} label={'platinum'} textAlign='center' noBgLabel>
               <InputNumber
@@ -197,8 +189,8 @@ const CharacterInventory = observer(({ charId, userId }) => {
             label: (
               <CollapseLabel template={itemTemplate}>
                 {label}
-                <span>wt.</span>
-                <span>cost</span>
+                {/*<span>wt.</span>*/}
+                {/*<span>cost</span>*/}
               </CollapseLabel>
             ),
             children: (
@@ -212,7 +204,7 @@ const CharacterInventory = observer(({ charId, userId }) => {
           }))}
         />
       )}
-    </SpellsContainer>
+    </CharacterInventoryContainer>
   );
 });
 

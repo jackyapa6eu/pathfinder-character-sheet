@@ -853,6 +853,7 @@ class CharactersStore {
     const itemName = makeName(itemData.name);
     const itemRef = `users/${uid}/characters/${charRef}/inventory/${itemName}`;
     clearedData.ref = itemRef;
+    clearedData.itemName = itemName;
     if (clearedData.type === 'magicItem') {
       clearedData.chargesLeft = clearedData.chargesMax;
     }
@@ -914,6 +915,19 @@ class CharactersStore {
     try {
       await set(dataRef, amount);
       message.success(`Money (${moneyType}) changed!`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  }, 700);
+
+  changeItemData = debounce(async (uid, charRef, itemName, dataType, newValue) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/inventory/${itemName}/${dataType}`);
+
+    try {
+      await set(dataRef, newValue);
+      message.success(`Item changed!`);
     } catch (e) {
       console.log(e);
       message.error('Error!');
