@@ -185,7 +185,7 @@ const GroupedInventoryItems = observer(
                 {el.cost && (
                   <Tooltip placement='topRight' title={`sell item for ${el.cost} ${el.currency}`}>
                     <Button onClick={() => handleSellItem(el)} className='sell-button'>
-                      <span>🤑</span>
+                      <span>💰</span>
                     </Button>
                   </Tooltip>
                 )}
