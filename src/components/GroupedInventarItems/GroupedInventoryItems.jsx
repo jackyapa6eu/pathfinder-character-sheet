@@ -4,7 +4,7 @@ import charactersStore from '../../store/charactersStore';
 import { fieldsAndStrFilter } from '../../utils/helpers';
 import styled from 'styled-components';
 import { itemTemplate } from '../CharacterInventory/CharacterInventory';
-import { Button } from 'antd';
+import { Button, Form, Tooltip } from 'antd';
 import authStore from '../../store/authStore';
 
 const ItemsContainer = styled.div`
@@ -36,6 +36,15 @@ const Item = styled.p`
     justify-content: center;
   }
 
+  & .item-charges {
+    margin-left: auto;
+  }
+
+  & .item-name-container {
+    display: flex;
+    padding-right: 10px;
+  }
+
   &:hover .sell-button {
     display: flex;
   }
@@ -46,10 +55,14 @@ const Item = styled.p`
     padding: 0 3px;
     border-left: 1px solid rgba(0, 0, 0, 0.2);
   }
+
+  & > span:first-child {
+    border-left: none;
+  }
 `;
 
 const GroupedInventoryItems = observer(({ groupName, searchItemText, charId, userId }) => {
-  const { openedCharacter, deleteInventoryItem } = charactersStore;
+  const { openedCharacter, deleteInventoryItem, magicItemUse } = charactersStore;
   const { user } = authStore;
 
   const handleSellItem = async (itemData) => {
@@ -58,6 +71,10 @@ const GroupedInventoryItems = observer(({ groupName, searchItemText, charId, use
 
   const handleDeleteItem = async (itemData) => {
     await deleteInventoryItem(userId || user.uid, charId, itemData);
+  };
+
+  const handleUseMagicItem = async (itemData) => {
+    await magicItemUse(userId || user.uid, charId, itemData);
   };
 
   return (
@@ -71,18 +88,34 @@ const GroupedInventoryItems = observer(({ groupName, searchItemText, charId, use
           searchItemText
         ).map((el) => (
           <Item key={el.ref} template={itemTemplate}>
-            {el.name}
+            <span className='item-name-container'>
+              {el.name}
+              {el.type === 'magicItem' && (
+                <>
+                  <Tooltip title='use item'>
+                    <Button onClick={() => handleUseMagicItem(el)} className='sell-button'>
+                      <span>?</span>
+                    </Button>
+                  </Tooltip>
+                  <span className='item-charges'>{`${el.chargesLeft}/${el.chargesMax}`}</span>
+                </>
+              )}
+            </span>
             <span>
-              <Button onClick={() => handleDeleteItem(el)} className='sell-button'>
-                <span>X</span>
-              </Button>
+              <Tooltip title='delete item'>
+                <Button onClick={() => handleDeleteItem(el)} className='sell-button'>
+                  <span>X</span>
+                </Button>
+              </Tooltip>
               {el.weight}
             </span>
             <span>
-              <Button onClick={() => handleSellItem(el)} className='sell-button'>
-                <span>$</span>
-              </Button>
-              {el.cost}
+              <Tooltip title='sell item'>
+                <Button onClick={() => handleSellItem(el)} className='sell-button'>
+                  <span>$</span>
+                </Button>
+              </Tooltip>
+              {el.cost || 0}
             </span>
           </Item>
         ))}

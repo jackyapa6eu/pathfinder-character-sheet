@@ -1,13 +1,16 @@
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
-import { memo, useState } from 'react';
-import charactersStore from '../../store/charactersStore';
+import { memo, useEffect, useState } from 'react';
+import charactersStore, { initialUserData } from '../../store/charactersStore';
 import authStore from '../../store/authStore';
-import { Button, Collapse } from 'antd';
+import { Button, Collapse, Form, InputNumber, Tooltip } from 'antd';
 import AddItemModal from './AddItemModal';
 import { itemTypes } from '../../utils/consts';
 import GroupedInventoryItems from '../GroupedInventarItems/GroupedInventoryItems';
 import Search from 'antd/es/input/Search';
+import CoinIcon from '../../icons/CoinIcon';
+import FormItem from '../FormItem';
+import { useForm } from 'antd/es/form/Form';
 
 export const itemTemplate = '1fr 50px 50px';
 
@@ -30,6 +33,7 @@ const CollapseLabel = styled.p`
   display: grid;
   grid-template-columns: ${(p) => p.template ?? ''};
   align-items: end;
+  padding-right: 3px;
   & > span {
     text-align: center;
     font-size: 10px;
@@ -57,15 +61,49 @@ const InventoryPanelContainer = styled.div`
   }
 `;
 
+const MoneyForm = styled(Form)`
+  display: grid;
+  grid-template-columns: 64px 64px 64px 64px;
+  gap: 5px;
+  align-items: center;
+`;
+
+const CoinContainer = styled.div`
+  display: flex;
+  align-items: center;
+  position: relative;
+`;
+
+const CoinIconContainer = styled.div`
+  display: flex;
+  align-items: center;
+  border-radius: 50%;
+  background: black;
+  position: relative;
+  left: -5px;
+`;
+
 const CharacterInventory = observer(({ charId, userId }) => {
   const [addItemModalIsOpen, setAddItemModalIsOpen] = useState(false);
   const [searchItemText, setSearchItemText] = useState('');
-  const { openedCharacter } = charactersStore;
+  const { openedCharacter, editMoney } = charactersStore;
   const { user } = authStore;
+  const [form] = useForm();
 
   const handleSearch = (value) => {
     setSearchItemText(value.target.value);
   };
+
+  const handleChangeMoney = async (type, amount) => {
+    await editMoney(userId || user.uid, charId, type, amount);
+  };
+
+  useEffect(() => {
+    if (openedCharacter) {
+      form.setFieldsValue({ ...initialUserData });
+      form.setFieldsValue({ ...openedCharacter });
+    }
+  }, [openedCharacter]);
 
   return (
     <SpellsContainer>
@@ -76,16 +114,77 @@ const CharacterInventory = observer(({ charId, userId }) => {
         setAddItemModalIsOpen={setAddItemModalIsOpen}
       />
       <InventoryPanelContainer>
-        <Button size='small' style={{ width: '80px' }} onClick={() => setAddItemModalIsOpen(true)}>
+        <Button style={{ width: '80px' }} onClick={() => setAddItemModalIsOpen(true)}>
           Add +
         </Button>
         <Search
           allowClear
-          size='small'
           className='inventory-panel-search-input'
           value={searchItemText}
           onChange={handleSearch}
         />
+
+        <MoneyForm form={form}>
+          <CoinContainer>
+            <FormItem name={['money', 'platinum']} label={'platinum'} textAlign='center' noBgLabel>
+              <InputNumber
+                controls={false}
+                style={{ width: '100%' }}
+                onChange={(value) => handleChangeMoney('platinum', value)}
+              />
+            </FormItem>
+            <Tooltip title='Platinum coins'>
+              <CoinIconContainer>
+                <CoinIcon size='20px' color='#E5E4E2' /> {/* платина */}
+              </CoinIconContainer>
+            </Tooltip>
+          </CoinContainer>
+
+          <CoinContainer>
+            <FormItem name={['money', 'gold']} label='gold' textAlign='center' noBgLabel>
+              <InputNumber
+                controls={false}
+                style={{ width: '100%' }}
+                onChange={(value) => handleChangeMoney('gold', value)}
+              />
+            </FormItem>
+            <Tooltip title='Gold coins'>
+              <CoinIconContainer>
+                <CoinIcon size='20px' color='#FFD700' /> {/* золото  */}
+              </CoinIconContainer>
+            </Tooltip>
+          </CoinContainer>
+
+          <CoinContainer>
+            <FormItem name={['money', 'silver']} label='silver' textAlign='center' noBgLabel>
+              <InputNumber
+                controls={false}
+                style={{ width: '100%' }}
+                onChange={(value) => handleChangeMoney('silver', value)}
+              />
+            </FormItem>
+            <Tooltip title='Silver coins'>
+              <CoinIconContainer>
+                <CoinIcon size='20px' color='#C0C0C0' /> {/* серебро  */}
+              </CoinIconContainer>
+            </Tooltip>
+          </CoinContainer>
+
+          <CoinContainer>
+            <FormItem name={['money', 'copper']} label='copper' textAlign='center' noBgLabel>
+              <InputNumber
+                controls={false}
+                style={{ width: '100%' }}
+                onChange={(value) => handleChangeMoney('copper', value)}
+              />
+            </FormItem>
+            <Tooltip title='Copper coins'>
+              <CoinIconContainer>
+                <CoinIcon size='20px' color='#B87333' /> {/* медь  */}
+              </CoinIconContainer>
+            </Tooltip>
+          </CoinContainer>
+        </MoneyForm>
       </InventoryPanelContainer>
 
       {openedCharacter.inventory && (

@@ -272,6 +272,13 @@ export const initialUserData = {
   inventory: {},
 
   weapons: {},
+
+  money: {
+    gold: 0,
+    Silver: 0,
+    copper: 0,
+    platinum: 0,
+  },
 };
 
 class CharactersStore {
@@ -874,6 +881,37 @@ class CharactersStore {
       message.error('Error!');
     }
   };
+
+  magicItemUse = async (uid, charRef, itemData) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `${itemData.ref}/chargesLeft`);
+
+    if (itemData.chargesLeft <= 0) {
+      message.warning(`No charges left.`);
+      return;
+    }
+    try {
+      await set(dataRef, itemData.chargesLeft - 1);
+
+      message.success(`Item used!`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
+  editMoney = debounce(async (uid, charRef, moneyType, amount) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/money/${moneyType}`);
+
+    try {
+      await set(dataRef, amount);
+      message.success(`Money (${moneyType}) changed!`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  }, 700);
 }
 
 const charactersStore = new CharactersStore();
