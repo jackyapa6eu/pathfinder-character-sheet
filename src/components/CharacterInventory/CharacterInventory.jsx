@@ -10,7 +10,6 @@ import GroupedInventoryItems from '../GroupedInventarItems/GroupedInventoryItems
 import Search from 'antd/es/input/Search';
 import CoinIcon from '../../icons/CoinIcon';
 import FormItem from '../FormItem';
-import { useForm } from 'antd/es/form/Form';
 
 export const itemTemplate = '1fr 44px 44px 44px';
 
