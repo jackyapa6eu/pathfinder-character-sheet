@@ -846,23 +846,22 @@ class CharactersStore {
     }
   };
 
-  createInventoryItem = async (uid, charRef, itemData) => {
+  createInventoryItem = async (uid, charRef, itemData, name) => {
     const db = getDatabase();
 
     const clearedData = filterUndefinedToNull(itemData);
     const itemName = makeName(itemData.name);
-    const itemRef = `users/${uid}/characters/${charRef}/inventory/${itemName}`;
+    const itemRef = `users/${uid}/characters/${charRef}/inventory/${name ?? itemName}`;
     clearedData.ref = itemRef;
-    clearedData.itemName = itemName;
+    clearedData.itemName = name ?? itemName;
     if (clearedData.type === 'magicItem') {
       clearedData.chargesLeft = clearedData.chargesMax;
     }
     const dataRef = ref(db, itemRef);
-    console.log('clearedData:', clearedData, dataRef);
 
     try {
       await set(dataRef, clearedData);
-      message.success(`Item added!`);
+      message.success(name ? 'Item Edited' : `Item added!`);
     } catch (e) {
       console.log(e);
       message.error('Error!');

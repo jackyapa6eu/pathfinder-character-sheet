@@ -7,6 +7,7 @@ import { itemTemplate } from '../CharacterInventory/CharacterInventory';
 import { Button, Input, InputNumber, Tooltip } from 'antd';
 import authStore from '../../store/authStore';
 import FormItem from '../FormItem';
+import { toJS } from 'mobx';
 
 const ItemsContainer = styled.div`
   display: flex;
@@ -70,125 +71,144 @@ const Item = styled.div`
   }
 `;
 
-const GroupedInventoryItems = observer(({ groupName, searchItemText, charId, userId }) => {
-  const { openedCharacter, deleteInventoryItem, magicItemUse, changeItemData } = charactersStore;
-  const { user } = authStore;
+const GroupedInventoryItems = observer(
+  ({ groupName, searchItemText, charId, userId, setEditingItem, setAddItemModalIsOpen }) => {
+    const { openedCharacter, deleteInventoryItem, magicItemUse, changeItemData } = charactersStore;
+    const { user } = authStore;
 
-  const handleSellItem = async (itemData) => {
-    await deleteInventoryItem(userId || user.uid, charId, itemData, true);
-  };
+    const handleSellItem = async (itemData) => {
+      await deleteInventoryItem(userId || user.uid, charId, itemData, true);
+    };
 
-  const handleDeleteItem = async (itemData) => {
-    await deleteInventoryItem(userId || user.uid, charId, itemData);
-  };
+    const handleDeleteItem = async (itemData) => {
+      await deleteInventoryItem(userId || user.uid, charId, itemData);
+    };
 
-  const handleUseMagicItem = async (itemData) => {
-    await magicItemUse(userId || user.uid, charId, itemData);
-  };
+    const handleUseMagicItem = async (itemData) => {
+      await magicItemUse(userId || user.uid, charId, itemData);
+    };
 
-  const handleChangeItemData = async (itemData, type, value) => {
-    await changeItemData(
-      userId || user.uid,
-      charId,
-      itemData.itemName,
-      type,
-      value.target?.value || value
-    );
-  };
+    const openEditItemData = async (itemData) => {
+      setEditingItem(itemData);
+      setAddItemModalIsOpen(true);
+    };
 
-  return (
-    <ItemsContainer>
-      {openedCharacter.inventory &&
-        fieldsAndStrFilter(
-          Object.values(openedCharacter.inventory),
-          'type',
-          groupName,
-          ['name', 'description'],
-          searchItemText
-        ).map((el) => (
-          <Item key={el.ref} template={itemTemplate}>
-            <span className='item-name-container'>
-              <FormItem name={['inventory', el.itemName, 'name']} textAlign='center' noBgLabel>
-                <Input
-                  style={{ width: '100%' }}
-                  onChange={(value) => handleChangeItemData(el, 'name', value)}
-                />
-              </FormItem>
-            </span>
-            {el.count && (
+    const handleChangeItemData = async (itemData, type, value) => {
+      await changeItemData(
+        userId || user.uid,
+        charId,
+        itemData.itemName,
+        type,
+        value.target?.value || value
+      );
+    };
+
+    return (
+      <ItemsContainer>
+        {openedCharacter.inventory &&
+          fieldsAndStrFilter(
+            Object.values(openedCharacter.inventory),
+            'type',
+            groupName,
+            ['name', 'description'],
+            searchItemText
+          ).map((el) => (
+            <Item key={el.ref} template={itemTemplate}>
+              <span className='item-name-container'>
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                  }}
+                >
+                  <Tooltip placement='topLeft' title='edit item'>
+                    <Button onClick={() => openEditItemData(el)} className='sell-button'>
+                      <span>⚙️</span>
+                    </Button>
+                  </Tooltip>
+                </div>
+                <FormItem name={['inventory', el.itemName, 'name']} textAlign='center' noBgLabel>
+                  <Input
+                    style={{ width: '100%' }}
+                    onChange={(value) => handleChangeItemData(el, 'name', value)}
+                  />
+                </FormItem>
+              </span>
+              {el.count && (
+                <span>
+                  <FormItem
+                    name={['inventory', el.itemName, 'count']}
+                    textAlign='center'
+                    noBgLabel
+                    label='count'
+                  >
+                    <InputNumber
+                      controls={false}
+                      style={{ width: '100%' }}
+                      onChange={(value) => handleChangeItemData(el, 'count', value)}
+                    />
+                  </FormItem>
+                </span>
+              )}
+              {el.type === 'magicItem' && (
+                <span className='magic-item'>
+                  <Tooltip title='use item'>
+                    <Button onClick={() => handleUseMagicItem(el)} className='sell-button'>
+                      <span>🪄</span>
+                    </Button>
+                  </Tooltip>
+                  <span className='item-charges'>{`${el.chargesLeft}/${el.chargesMax}`}</span>
+                </span>
+              )}
+              {el.type !== 'magicItem' && !el.count && <span />}
               <span>
+                <Tooltip title='delete item'>
+                  <Button onClick={() => handleDeleteItem(el)} className='sell-button'>
+                    <span>🗑️</span>
+                  </Button>
+                </Tooltip>
                 <FormItem
-                  name={['inventory', el.itemName, 'count']}
+                  name={['inventory', el.itemName, 'weight']}
+                  labelDesc={`total: ${el.weight * (el.count || 1)} `}
                   textAlign='center'
                   noBgLabel
-                  label='count'
+                  label='weight'
                 >
                   <InputNumber
                     controls={false}
                     style={{ width: '100%' }}
-                    onChange={(value) => handleChangeItemData(el, 'count', value)}
+                    onChange={(value) => handleChangeItemData(el, 'weight', value)}
                   />
                 </FormItem>
               </span>
-            )}
-            {el.type === 'magicItem' && (
-              <span className='magic-item'>
-                <Tooltip title='use item'>
-                  <Button onClick={() => handleUseMagicItem(el)} className='sell-button'>
-                    <span>🪄</span>
-                  </Button>
-                </Tooltip>
-                <span className='item-charges'>{`${el.chargesLeft}/${el.chargesMax}`}</span>
-              </span>
-            )}
-            {el.type !== 'magicItem' && !el.count && <span />}
-            <span>
-              <Tooltip title='delete item'>
-                <Button onClick={() => handleDeleteItem(el)} className='sell-button'>
-                  <span>🗑️</span>
-                </Button>
-              </Tooltip>
-              <FormItem
-                name={['inventory', el.itemName, 'weight']}
-                labelDesc={`total: ${el.weight * (el.count || 1)} `}
-                textAlign='center'
-                noBgLabel
-                label='weight'
-              >
-                <InputNumber
-                  controls={false}
-                  style={{ width: '100%' }}
-                  onChange={(value) => handleChangeItemData(el, 'weight', value)}
-                />
-              </FormItem>
-            </span>
-            <span>
-              {el.cost && (
-                <Tooltip placement='topRight' title={`sell item for ${el.cost} ${el.currency}`}>
-                  <Button onClick={() => handleSellItem(el)} className='sell-button'>
-                    <span>🤑</span>
-                  </Button>
-                </Tooltip>
-              )}
+              <span>
+                {el.cost && (
+                  <Tooltip placement='topRight' title={`sell item for ${el.cost} ${el.currency}`}>
+                    <Button onClick={() => handleSellItem(el)} className='sell-button'>
+                      <span>🤑</span>
+                    </Button>
+                  </Tooltip>
+                )}
 
-              <FormItem
-                name={['inventory', el.itemName, 'cost']}
-                labelDesc={`total: ${el.cost * (el.count || 1)} ${el.currency}`}
-                textAlign='center'
-                noBgLabel
-                label='cost'
-              >
-                <InputNumber
-                  controls={false}
-                  style={{ width: '100%' }}
-                  onChange={(value) => handleChangeItemData(el, 'cost', value)}
-                />
-              </FormItem>
-            </span>
-          </Item>
-        ))}
-    </ItemsContainer>
-  );
-});
+                <FormItem
+                  name={['inventory', el.itemName, 'cost']}
+                  labelDesc={`total: ${el.cost * (el.count || 1)} ${el.currency}`}
+                  textAlign='center'
+                  noBgLabel
+                  label='cost'
+                >
+                  <InputNumber
+                    controls={false}
+                    style={{ width: '100%' }}
+                    onChange={(value) => handleChangeItemData(el, 'cost', value)}
+                  />
+                </FormItem>
+              </span>
+            </Item>
+          ))}
+      </ItemsContainer>
+    );
+  }
+);
 
 export default memo(GroupedInventoryItems);

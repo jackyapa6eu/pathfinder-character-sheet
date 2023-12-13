@@ -85,6 +85,7 @@ const CoinIconContainer = styled.div`
 const CharacterInventory = observer(({ charId, userId }) => {
   const [addItemModalIsOpen, setAddItemModalIsOpen] = useState(false);
   const [searchItemText, setSearchItemText] = useState('');
+  const [editingItem, setEditingItem] = useState(null);
   const { openedCharacter, editMoney } = charactersStore;
   const { user } = authStore;
 
@@ -103,6 +104,8 @@ const CharacterInventory = observer(({ charId, userId }) => {
         userId={userId}
         addItemModalIsOpen={addItemModalIsOpen}
         setAddItemModalIsOpen={setAddItemModalIsOpen}
+        editingItem={editingItem}
+        setEditingItem={setEditingItem}
       />
       <InventoryPanelContainer>
         <Button style={{ width: '80px' }} onClick={() => setAddItemModalIsOpen(true)}>
@@ -185,19 +188,15 @@ const CharacterInventory = observer(({ charId, userId }) => {
           size='small'
           items={itemTypes.map(({ label, value }) => ({
             key: value,
-            label: (
-              <CollapseLabel template={itemTemplate}>
-                {label}
-                {/*<span>wt.</span>*/}
-                {/*<span>cost</span>*/}
-              </CollapseLabel>
-            ),
+            label: <CollapseLabel template={itemTemplate}>{label}</CollapseLabel>,
             children: (
               <GroupedInventoryItems
                 charId={charId}
                 userId={userId}
                 groupName={value}
                 searchItemText={searchItemText}
+                setEditingItem={setEditingItem}
+                setAddItemModalIsOpen={setAddItemModalIsOpen}
               />
             ),
           }))}
