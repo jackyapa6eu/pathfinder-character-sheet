@@ -275,7 +275,7 @@ export const initialUserData = {
 
   money: {
     gold: 0,
-    Silver: 0,
+    silver: 0,
     copper: 0,
     platinum: 0,
   },
@@ -874,8 +874,15 @@ class CharactersStore {
 
     try {
       await set(dataRef, null);
-      if (sell) message.success(`Item sold!`);
-      else message.success(`Item deleted!`);
+      if (sell) {
+        await this.editMoney(
+          uid,
+          charRef,
+          itemData.currency,
+          (this.openedCharacter.money[itemData.currency] || 0) + (itemData.cost || 0)
+        );
+        message.success(`Item sold!`);
+      } else message.success(`Item deleted!`);
     } catch (e) {
       console.log(e);
       message.error('Error!');

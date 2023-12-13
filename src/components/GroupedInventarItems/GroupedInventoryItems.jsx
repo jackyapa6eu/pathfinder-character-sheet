@@ -110,11 +110,14 @@ const GroupedInventoryItems = observer(({ groupName, searchItemText, charId, use
               {el.weight}
             </span>
             <span>
-              <Tooltip title='sell item'>
-                <Button onClick={() => handleSellItem(el)} className='sell-button'>
-                  <span>$</span>
-                </Button>
-              </Tooltip>
+              {el.cost && (
+                <Tooltip title={`sell item for ${el.cost} ${el.currency}`}>
+                  <Button onClick={() => handleSellItem(el)} className='sell-button'>
+                    <span>$</span>
+                  </Button>
+                </Tooltip>
+              )}
+
               {el.cost || 0}
             </span>
           </Item>

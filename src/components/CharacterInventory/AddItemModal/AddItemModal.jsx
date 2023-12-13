@@ -48,7 +48,7 @@ const initialFormValues = {
 
 const AddItemModal = observer(({ charId, userId, addItemModalIsOpen, setAddItemModalIsOpen }) => {
   const [selectedType, setSelectedType] = useState(null);
-
+  const [cost, setCost] = useState(null);
   const { createInventoryItem } = charactersStore;
   const { user } = authStore;
   const data = {
@@ -121,9 +121,29 @@ const AddItemModal = observer(({ charId, userId, addItemModalIsOpen, setAddItemM
         <StyledFormItem name='weight' label='weight' rules={[{ required: true }]}>
           <InputNumber controls={false} style={{ width: '100%' }} />
         </StyledFormItem>
-        <StyledFormItem name='cost' label='cost'>
-          <InputNumber controls={false} style={{ width: '100%' }} />
-        </StyledFormItem>
+        <div style={{ display: 'flex' }}>
+          <StyledFormItem name='cost' label='cost' style={{ width: cost ? '40%' : '100%' }}>
+            <InputNumber controls={false} style={{ width: '100%' }} onChange={setCost} />
+          </StyledFormItem>
+          {cost && (
+            <StyledFormItem
+              name='currency'
+              label='currency'
+              rules={[{ required: true }]}
+              style={{ width: '60%' }}
+            >
+              <Select
+                allowClear
+                options={[
+                  { value: 'gold' },
+                  { value: 'silver' },
+                  { value: 'copper' },
+                  { value: 'platinum' },
+                ]}
+              />
+            </StyledFormItem>
+          )}
+        </div>
 
         <StyledFormItem gridarea='description' name='description' label='description'>
           <TextArea autoSize />
