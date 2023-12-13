@@ -4,7 +4,7 @@ import charactersStore from '../../store/charactersStore';
 import { fieldsAndStrFilter } from '../../utils/helpers';
 import styled from 'styled-components';
 import { itemTemplate } from '../CharacterInventory/CharacterInventory';
-import { Button, Input, InputNumber, Tooltip } from 'antd';
+import { Button, Input, InputNumber, notification, Tooltip } from 'antd';
 import authStore from '../../store/authStore';
 import FormItem from '../FormItem';
 import { toJS } from 'mobx';
@@ -75,6 +75,7 @@ const GroupedInventoryItems = observer(
   ({ groupName, searchItemText, charId, userId, setEditingItem, setAddItemModalIsOpen }) => {
     const { openedCharacter, deleteInventoryItem, magicItemUse, changeItemData } = charactersStore;
     const { user } = authStore;
+    const [api, contextHolder] = notification.useNotification();
 
     const handleSellItem = async (itemData) => {
       await deleteInventoryItem(userId || user.uid, charId, itemData, true);
@@ -88,9 +89,30 @@ const GroupedInventoryItems = observer(
       await magicItemUse(userId || user.uid, charId, itemData);
     };
 
-    const openEditItemData = async (itemData) => {
+    const openEditItemData = async (event, itemData) => {
+      event.stopPropagation();
       setEditingItem(itemData);
       setAddItemModalIsOpen(true);
+    };
+
+    const handleShowItemDescription = (itemData) => {
+      const { name, ref, itemName, chargesMax, ...otherData } = itemData;
+      if (itemData.description) {
+        api.open({
+          message: name,
+          description: (
+            <div style={{ maxHeight: '45vh', overflowY: 'auto' }}>
+              {Object.entries(otherData).map(([dataName, data]) => (
+                <p style={{ margin: 0 }} key={dataName}>
+                  <span style={{ fontWeight: 500 }}>{dataName}: </span>
+                  <span>{data}</span>
+                </p>
+              ))}
+            </div>
+          ),
+          duration: 0,
+        });
+      }
     };
 
     const handleChangeItemData = async (itemData, type, value) => {
@@ -105,6 +127,7 @@ const GroupedInventoryItems = observer(
 
     return (
       <ItemsContainer>
+        {contextHolder}
         {openedCharacter.inventory &&
           fieldsAndStrFilter(
             Object.values(openedCharacter.inventory),
@@ -113,7 +136,12 @@ const GroupedInventoryItems = observer(
             ['name', 'description'],
             searchItemText
           ).map((el) => (
-            <Item key={el.ref} template={itemTemplate}>
+            <Item
+              title={el.description ?? ''}
+              key={el.ref}
+              template={itemTemplate}
+              onClick={() => handleShowItemDescription(el)}
+            >
               <span className='item-name-container'>
                 <div
                   style={{
@@ -122,7 +150,10 @@ const GroupedInventoryItems = observer(
                   }}
                 >
                   <Tooltip placement='topLeft' title='edit item'>
-                    <Button onClick={() => openEditItemData(el)} className='sell-button'>
+                    <Button
+                      onClick={(event) => openEditItemData(event, el)}
+                      className='sell-button'
+                    >
                       <span>⚙️</span>
                     </Button>
                   </Tooltip>

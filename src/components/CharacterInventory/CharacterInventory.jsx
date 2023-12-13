@@ -11,7 +11,7 @@ import Search from 'antd/es/input/Search';
 import CoinIcon from '../../icons/CoinIcon';
 import FormItem from '../FormItem';
 
-export const itemTemplate = '1fr 44px 44px 44px';
+export const itemTemplate = '1fr 50px 44px 44px';
 
 const StyledCollapse = styled(Collapse)`
   display: grid;

@@ -72,7 +72,7 @@ const AddItemModal = observer(
 
     const onFinish = useCallback(
       async (values) => {
-        await createInventoryItem(userId || user.uid, charId, values, editingItem.itemName);
+        await createInventoryItem(userId || user.uid, charId, values, editingItem?.itemName);
         setAddItemModalIsOpen(false);
       },
       [editingItem]
