@@ -242,9 +242,9 @@ const CharacterSpells = observer(({ charId, userId }) => {
     setPreparingSpell(spellData);
   };
 
-  const handleUseSpell = async (event, spellData) => {
+  const handleUseSpell = async (event, spellData, slotKey) => {
     event.stopPropagation();
-    await spellUse(userId || user.uid, charId, spellData);
+    await spellUse(userId || user.uid, charId, spellData, slotKey);
   };
 
   const handleAddFreeSpellSlot = async (spellValue) => {
@@ -512,14 +512,21 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                             ? ''
                                             : `${
                                                 levelData.spells
-                                                  ? Object.keys(levelData.spells || {}).length
+                                                  ? Object.values(levelData.spells || {}).reduce(
+                                                      (acc, curr) =>
+                                                        acc + Object.keys(curr.slots || {}).length,
+                                                      0
+                                                    )
                                                   : 0
                                               }/${levelData.maxCountPerDay} ${
                                                 levelData.maxDomainCountPerDay
-                                                  ? `+ ${
-                                                      Object.keys(levelData.domainSpells || {})
-                                                        .length
-                                                    }/${levelData.maxDomainCountPerDay}[domain]`
+                                                  ? `+ ${Object.values(
+                                                      levelData.domainSpells || {}
+                                                    ).reduce(
+                                                      (acc, curr) =>
+                                                        acc + Object.keys(curr.slots || {}).length,
+                                                      0
+                                                    )}/${levelData.maxDomainCountPerDay}[domain]`
                                                   : ''
                                               }`
                                         }`}
@@ -579,10 +586,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                         Object.entries(
                                           openedCharacter.spellsPerDay[className][level].spells
                                         ).map(([spellName, spellData]) => (
-                                          <SpellsListItem
-                                            key={spellName}
-                                            // onClick={() => handleOpenSpell(spellData)}
-                                          >
+                                          <SpellsListItem key={spellName}>
                                             <DeleteSpellButton
                                               className='delete-feat-button'
                                               onClick={(event) =>
@@ -592,12 +596,15 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                               X
                                             </DeleteSpellButton>
                                             {!spellData.freeSlot && spellData.name}
-                                            <IsUsedCheckbox
-                                              checked={spellData.isUsed}
-                                              handleClick={(event) =>
-                                                handleUseSpell(event, spellData)
-                                              }
-                                            />
+                                            {Object.keys(spellData.slots).map((slotKey) => (
+                                              <IsUsedCheckbox
+                                                key={slotKey}
+                                                checked={spellData.slots[slotKey].isUsed}
+                                                handleClick={(event) =>
+                                                  handleUseSpell(event, spellData, slotKey)
+                                                }
+                                              />
+                                            ))}
                                           </SpellsListItem>
                                         ))}
                                       {openedCharacter.spellsPerDay[className][level]
@@ -606,10 +613,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                           openedCharacter.spellsPerDay[className][level]
                                             .domainSpells
                                         ).map(([spellName, spellData]) => (
-                                          <SpellsListItem
-                                            key={spellName}
-                                            // onClick={() => handleOpenSpell(spellData)}
-                                          >
+                                          <SpellsListItem key={spellName}>
                                             <span
                                               style={{
                                                 position: 'absolute',
@@ -629,12 +633,15 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                               X
                                             </DeleteSpellButton>
                                             {!spellData.freeSlot && spellData.name}
-                                            <IsUsedCheckbox
-                                              checked={spellData.isUsed}
-                                              handleClick={(event) =>
-                                                handleUseSpell(event, spellData)
-                                              }
-                                            />
+                                            {Object.keys(spellData.slots).map((slotKey) => (
+                                              <IsUsedCheckbox
+                                                key={slotKey}
+                                                checked={spellData.slots[slotKey].isUsed}
+                                                handleClick={(event) =>
+                                                  handleUseSpell(event, spellData, slotKey)
+                                                }
+                                              />
+                                            ))}
                                           </SpellsListItem>
                                         ))}
                                       {level !== 'supernatural ability' && levelData.freeSpells && (

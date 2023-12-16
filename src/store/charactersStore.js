@@ -634,29 +634,47 @@ class CharactersStore {
   prepareSpell = async (uid, charRef, spellData, justSlot = false, preparingSpell) => {
     console.log(spellData);
     const db = getDatabase();
-    const spellRef = `${spellData.name.replace(/\s+/g, '-').toLowerCase()}_${Date.now()}`;
+    const spellRef = `${spellData.name.replace(/\s+/g, '-').toLowerCase()}${
+      spellData.metamagic ? '(metamagic)' : ''
+    }`;
 
     const spellLevelData = toJS(this.openedCharacter).spellsPerDay[spellData.class][
       spellData.level
     ];
+
     const toDomain =
       preparingSpell.isDomain &&
       spellLevelData.maxDomainCountPerDay &&
-      spellLevelData.maxDomainCountPerDay > Object.keys(spellLevelData.domainSpells || {}).length;
-    const path = `users/${uid}/characters/${charRef}/spellsPerDay/${spellData.class}/${
-      spellData.level
-    }/${toDomain ? 'domainSpells' : 'spells'}/${spellRef}`;
+      spellLevelData.maxDomainCountPerDay >
+        Object.values(spellLevelData.domainSpells || {}).reduce((acc, curr) => {
+          return Object.keys(curr.slots).length;
+        }, 0);
+    // spellLevelData.maxDomainCountPerDay > Object.keys(spellLevelData.domainSpells || {}).length;
+
+    const domainRef = toDomain ? 'domainSpells' : 'spells';
+    let path = `users/${uid}/characters/${charRef}/spellsPerDay/${spellData.class}/${spellData.level}/${domainRef}/${spellRef}`;
+    let spell;
+    if (spellLevelData?.[toDomain ? 'domainSpells' : 'spells']?.[spellRef]) {
+      path += `/slots/${Date.now()}`;
+      spell = { isUsed: false };
+    } else {
+      spell = {
+        ...spellData,
+        freeSlot: justSlot,
+        name: `${spellData.name} ${spellData.metamagic ? '(metamagic)' : ''}`,
+        metamagic: spellData.metamagic ?? false,
+        asDomain: spellData.asDomain ?? false,
+        slots: {
+          [Date.now()]: {
+            isUsed: false,
+          },
+        },
+        ref: path,
+      };
+    }
+
     const dataRef = ref(db, path);
 
-    const spell = {
-      ...spellData,
-      freeSlot: justSlot,
-      name: `${spellData.name} ${spellData.metamagic ? '(metamagic)' : ''}`,
-      metamagic: spellData.metamagic ?? false,
-      asDomain: spellData.asDomain ?? false,
-      isUsed: false,
-      ref: path,
-    };
     try {
       await set(dataRef, spell);
       message.success('Spell prepared!');
@@ -666,13 +684,15 @@ class CharactersStore {
     }
   };
 
-  spellUse = async (uid, charRef, spellData) => {
+  spellUse = async (uid, charRef, spellData, slotKey) => {
     const db = getDatabase();
-    const dataRef = ref(db, `${spellData.ref}/isUsed`);
+    const dataRef = ref(db, `${spellData.ref}/slots/${slotKey}/isUsed`);
 
     try {
-      await set(dataRef, !spellData.isUsed);
-      message.success(`Spell ${spellData.name} ${spellData.isUsed ? 'un' : ''}used!`);
+      await set(dataRef, !spellData.slots[slotKey].isUsed);
+      message.success(
+        `Spell ${spellData.name} ${spellData.slots[slotKey].isUsed ? 'un' : ''}used!`
+      );
     } catch (e) {
       console.log(e);
       message.error('Error!');
@@ -681,7 +701,14 @@ class CharactersStore {
 
   deletePreparedSpell = async (uid, charRef, spellData) => {
     const db = getDatabase();
-    const dataRef = ref(db, spellData.ref);
+    const keys = Object.keys(spellData.slots);
+
+    const dataRef = ref(
+      db,
+      `${spellData.ref}${
+        keys.length > 1 ? `/slots/${keys[Math.floor(Math.random() * keys.length)]}` : ''
+      }`
+    );
 
     try {
       await set(dataRef, null);
@@ -733,10 +760,21 @@ class CharactersStore {
     Object.entries(this.openedCharacter.spellsPerDay).forEach(([className, levelsObj]) => {
       Object.entries(levelsObj).forEach(([level, levelData]) => {
         if (levelData.spells) {
-          Object.keys(levelData.spells).forEach((spellRef) => {
-            updates[
-              `users/${uid}/characters/${charRef}/spellsPerDay/${className}/${level}/spells/${spellRef}/isUsed`
-            ] = false;
+          Object.entries(levelData.spells).forEach(([spellRef, data]) => {
+            Object.keys(data.slots).forEach((slotKey) => {
+              updates[
+                `users/${uid}/characters/${charRef}/spellsPerDay/${className}/${level}/spells/${spellRef}/slots/${slotKey}/isUsed`
+              ] = false;
+            });
+          });
+        }
+        if (levelData.domainSpells) {
+          Object.entries(levelData.domainSpells).forEach(([spellRef, data]) => {
+            Object.keys(data.slots).forEach((slotKey) => {
+              updates[
+                `users/${uid}/characters/${charRef}/spellsPerDay/${className}/${level}/domainSpells/${spellRef}/slots/${slotKey}/isUsed`
+              ] = false;
+            });
           });
         }
       });
