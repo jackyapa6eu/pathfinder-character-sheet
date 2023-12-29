@@ -788,6 +788,12 @@ class CharactersStore {
           ? null
           : this.openedCharacter.hitPoints.wounds + 1;
     }
+    // откатывает магические предметы
+    Object.values(this.openedCharacter.inventory).forEach((item) => {
+      if (item.type === 'magicItem') {
+        updates[`${item.ref}/chargesLeft`] = item.chargesMax;
+      }
+    });
     try {
       await update(ref(db), updates);
       await Object.entries(toJS(this.openedCharacter.abilities)).forEach(
@@ -884,21 +890,32 @@ class CharactersStore {
     }
   };
 
-  createInventoryItem = async (uid, charRef, itemData, name) => {
+  createInventoryItem = async (uid, charRef, itemData, name, addKnownItemModalIsOpen) => {
     const db = getDatabase();
-
+    const updates = {};
     const clearedData = filterUndefinedToNull(itemData);
+    const knownClearedData = JSON.parse(JSON.stringify(clearedData));
     const itemName = makeName(itemData.name);
     const itemRef = `users/${uid}/characters/${charRef}/inventory/${name ?? itemName}`;
+    const knownItemRef = `users/${uid}/characters/${charRef}/knownItems/${name ?? itemName}`;
     clearedData.ref = itemRef;
     clearedData.itemName = name ?? itemName;
-    if (clearedData.type === 'magicItem') {
+    knownClearedData.ref = knownItemRef;
+    knownClearedData.itemName = name ?? itemName;
+    if (clearedData.type === 'magicStick' || knownClearedData.type === 'magicStick') {
+      clearedData.chargesLeft = clearedData.chargesMax;
+      clearedData.chargesMax = 50;
+    }
+    if (clearedData.type === 'magicItem' || knownClearedData.type === 'magicStick') {
       clearedData.chargesLeft = clearedData.chargesMax;
     }
-    const dataRef = ref(db, itemRef);
+    // const dataRef = ref(db, itemRef);
 
     try {
-      await set(dataRef, clearedData);
+      if (!addKnownItemModalIsOpen) updates[itemRef] = clearedData;
+      updates[knownItemRef] = knownClearedData;
+      // await set(dataRef, clearedData);
+      await update(ref(db), updates);
       message.success(name ? 'Item Edited' : `Item added!`);
     } catch (e) {
       console.log(e);
@@ -913,11 +930,16 @@ class CharactersStore {
     try {
       await set(dataRef, null);
       if (sell) {
+        let cost = itemData.cost;
+        if (itemData.type === 'magicStick') {
+          cost = (cost / itemData.chargesMax) * itemData.chargesLeft;
+        }
+        const itemCost = Math.floor(cost / 2);
         await this.editMoney(
           uid,
           charRef,
           itemData.currency,
-          (this.openedCharacter.money[itemData.currency] || 0) + (itemData.cost || 0)
+          (this.openedCharacter.money[itemData.currency] || 0) + itemCost || 0
         );
         message.success(`Item sold!`);
       } else message.success(`Item deleted!`);
@@ -958,12 +980,28 @@ class CharactersStore {
     }
   }, 700);
 
-  changeItemData = debounce(async (uid, charRef, itemName, dataType, newValue) => {
+  changeItemData = debounce(async (uid, charRef, itemName, dataType, newValue, isKnown) => {
     const db = getDatabase();
-    const dataRef = ref(db, `users/${uid}/characters/${charRef}/inventory/${itemName}/${dataType}`);
-
+    const dataRef = `users/${uid}/characters/${charRef}/inventory/${itemName}/${dataType}`;
+    const dataKnownRef = `users/${uid}/characters/${charRef}/knownItems/${itemName}`;
+    let knownItem;
+    if (this.openedCharacter.inventory[itemName]) {
+      knownItem = JSON.parse(JSON.stringify(this.openedCharacter.inventory[itemName]));
+    } else {
+      knownItem = JSON.parse(JSON.stringify(this.openedCharacter.knownItems[itemName]));
+    }
+    knownItem[dataType] = newValue;
+    knownItem.ref = dataKnownRef;
+    const updates = {};
     try {
-      await set(dataRef, newValue);
+      if (!isKnown) {
+        updates[dataRef] = newValue;
+      }
+      console.log(knownItem);
+      updates[dataKnownRef] = knownItem;
+      // await set(dataRef, clearedData);
+      await update(ref(db), updates);
+      // await set(dataRef, newValue);
       message.success(`Item changed!`);
     } catch (e) {
       console.log(e);

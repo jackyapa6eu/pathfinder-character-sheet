@@ -158,7 +158,10 @@ const CharacterPage = observer(() => {
 
   useEffect(() => {
     const unsubscribe = subscribeCharacter(userId || user.uid, charId);
-
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
     return () => {
       unsubscribe();
       clearOpenedCharacter();

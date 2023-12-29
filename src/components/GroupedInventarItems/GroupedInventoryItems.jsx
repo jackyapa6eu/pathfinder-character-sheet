@@ -72,7 +72,15 @@ const Item = styled.div`
 `;
 
 const GroupedInventoryItems = observer(
-  ({ groupName, searchItemText, charId, userId, setEditingItem, setAddItemModalIsOpen }) => {
+  ({
+    groupName,
+    searchItemText,
+    charId,
+    userId,
+    setEditingItem,
+    setAddItemModalIsOpen,
+    isKnown,
+  }) => {
     const { openedCharacter, deleteInventoryItem, magicItemUse, changeItemData } = charactersStore;
     const { user } = authStore;
     const [api, contextHolder] = notification.useNotification();
@@ -85,7 +93,8 @@ const GroupedInventoryItems = observer(
       await deleteInventoryItem(userId || user.uid, charId, itemData);
     };
 
-    const handleUseMagicItem = async (itemData) => {
+    const handleUseMagicItem = async (itemData, event) => {
+      event.stopPropagation();
       await magicItemUse(userId || user.uid, charId, itemData);
     };
 
@@ -121,16 +130,20 @@ const GroupedInventoryItems = observer(
         charId,
         itemData.itemName,
         type,
-        value.target?.value || value
+        value.target?.value || value,
+        isKnown
       );
     };
+
+    console.log('isKnown:', isKnown);
+    console.log('GROUPED: ', toJS(openedCharacter[isKnown ? 'knownItems' : 'inventory']));
 
     return (
       <ItemsContainer>
         {contextHolder}
-        {openedCharacter.inventory &&
+        {openedCharacter[isKnown ? 'knownItems' : 'inventory'] &&
           fieldsAndStrFilter(
-            Object.values(openedCharacter.inventory),
+            Object.values(openedCharacter[isKnown ? 'knownItems' : 'inventory']),
             'type',
             groupName,
             ['name', 'description'],
@@ -158,8 +171,13 @@ const GroupedInventoryItems = observer(
                     </Button>
                   </Tooltip>
                 </div>
-                <FormItem name={['inventory', el.itemName, 'name']} textAlign='center' noBgLabel>
+                <FormItem
+                  name={[isKnown ? 'knownItems' : 'inventory', el.itemName, 'name']}
+                  textAlign='center'
+                  noBgLabel
+                >
                   <Input
+                    onClick={(event) => event.stopPropagation()}
                     style={{ width: '100%' }}
                     onChange={(value) => handleChangeItemData(el, 'name', value)}
                   />
@@ -168,12 +186,13 @@ const GroupedInventoryItems = observer(
               {el.count && (
                 <span>
                   <FormItem
-                    name={['inventory', el.itemName, 'count']}
+                    name={[isKnown ? 'knownItems' : 'inventory', el.itemName, 'count']}
                     textAlign='center'
                     noBgLabel
                     label='count'
                   >
                     <InputNumber
+                      onClick={(event) => event.stopPropagation()}
                       controls={false}
                       style={{ width: '100%' }}
                       onChange={(value) => handleChangeItemData(el, 'count', value)}
@@ -181,17 +200,22 @@ const GroupedInventoryItems = observer(
                   </FormItem>
                 </span>
               )}
-              {el.type === 'magicItem' && (
+              {(el.type === 'magicItem' || el.type === 'magicStick') && (
                 <span className='magic-item'>
-                  <Tooltip title='use item'>
-                    <Button onClick={() => handleUseMagicItem(el)} className='sell-button'>
-                      <span>🪄</span>
-                    </Button>
-                  </Tooltip>
+                  {!isKnown && (
+                    <Tooltip title='use item'>
+                      <Button
+                        onClick={(event) => handleUseMagicItem(el, event)}
+                        className='sell-button'
+                      >
+                        <span>🪄</span>
+                      </Button>
+                    </Tooltip>
+                  )}
                   <span className='item-charges'>{`${el.chargesLeft}/${el.chargesMax}`}</span>
                 </span>
               )}
-              {el.type !== 'magicItem' && !el.count && <span />}
+              {el.type !== 'magicItem' && el.type !== 'magicStick' && !el.count && <span />}
               <span>
                 <Tooltip title='delete item'>
                   <Button onClick={() => handleDeleteItem(el)} className='sell-button'>
@@ -199,13 +223,14 @@ const GroupedInventoryItems = observer(
                   </Button>
                 </Tooltip>
                 <FormItem
-                  name={['inventory', el.itemName, 'weight']}
+                  name={[isKnown ? 'knownItems' : 'inventory', el.itemName, 'weight']}
                   labelDesc={`total: ${el.weight * (el.count || 1)} `}
                   textAlign='center'
                   noBgLabel
                   label='weight'
                 >
                   <InputNumber
+                    onClick={(event) => event.stopPropagation()}
                     controls={false}
                     style={{ width: '100%' }}
                     onChange={(value) => handleChangeItemData(el, 'weight', value)}
@@ -213,7 +238,7 @@ const GroupedInventoryItems = observer(
                 </FormItem>
               </span>
               <span>
-                {el.cost && (
+                {el.cost && !isKnown && (
                   <Tooltip placement='topRight' title={`sell item for ${el.cost} ${el.currency}`}>
                     <Button onClick={() => handleSellItem(el)} className='sell-button'>
                       <span>💰</span>
@@ -222,13 +247,14 @@ const GroupedInventoryItems = observer(
                 )}
 
                 <FormItem
-                  name={['inventory', el.itemName, 'cost']}
+                  name={[isKnown ? 'knownItems' : 'inventory', el.itemName, 'cost']}
                   labelDesc={`total: ${el.cost * (el.count || 1)} ${el.currency}`}
                   textAlign='center'
                   noBgLabel
                   label='cost'
                 >
                   <InputNumber
+                    onClick={(event) => event.stopPropagation()}
                     controls={false}
                     style={{ width: '100%' }}
                     onChange={(value) => handleChangeItemData(el, 'cost', value)}

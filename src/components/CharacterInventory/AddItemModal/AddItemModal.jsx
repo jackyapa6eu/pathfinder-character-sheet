@@ -42,14 +42,16 @@ const StyledModal = styled(Modal)`
   width: 600px !important;
 `;
 
-const initialFormValues = {
-  cost: null,
-  description: null,
-  count: null,
-};
-
 const AddItemModal = observer(
-  ({ charId, userId, addItemModalIsOpen, setAddItemModalIsOpen, editingItem, setEditingItem }) => {
+  ({
+    charId,
+    userId,
+    addItemModalIsOpen,
+    setAddItemModalIsOpen,
+    editingItem,
+    setEditingItem,
+    addKnownItemModalIsOpen,
+  }) => {
     const [selectedType, setSelectedType] = useState(null);
     const [cost, setCost] = useState(null);
     const { createInventoryItem } = charactersStore;
@@ -72,7 +74,13 @@ const AddItemModal = observer(
 
     const onFinish = useCallback(
       async (values) => {
-        await createInventoryItem(userId || user.uid, charId, values, editingItem?.itemName);
+        await createInventoryItem(
+          userId || user.uid,
+          charId,
+          values,
+          editingItem?.itemName,
+          addKnownItemModalIsOpen
+        );
         setAddItemModalIsOpen(false);
       },
       [editingItem]
@@ -80,10 +88,9 @@ const AddItemModal = observer(
 
     return (
       <StyledModal
-        title='Add item to your inventory'
+        title={editingItem ? 'Edit item' : 'Add item to your inventory'}
         open={addItemModalIsOpen}
         onCancel={() => setAddItemModalIsOpen(false)}
-        initialValues={initialFormValues}
         footer={null}
         destroyOnClose
         centered
@@ -161,9 +168,9 @@ const AddItemModal = observer(
 
           {/* Armor */}
 
-          {/* magicItem */}
+          {/* magicStick magicItem */}
 
-          {selectedType === 'magicItem' && (
+          {(selectedType === 'magicStick' || selectedType === 'magicItem') && (
             <StyledFormItem
               name='chargesMax'
               label='charges'
@@ -174,7 +181,7 @@ const AddItemModal = observer(
             </StyledFormItem>
           )}
 
-          {/* magicItem */}
+          {/* magicStick magicItem*/}
 
           <div style={{ gridArea: 'afterDesc' }}></div>
 
@@ -236,7 +243,7 @@ const AddItemModal = observer(
           <ButtonBox>
             <StyledFormItem>
               <Button type='default' htmlType='submit'>
-                Add item
+                {editingItem ? 'Edit item' : 'Add item'}
               </Button>
             </StyledFormItem>
           </ButtonBox>

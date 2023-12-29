@@ -109,6 +109,10 @@ const itemTypes = [
     value: 'magicItem',
   },
   {
+    label: 'Magic stick',
+    value: 'magicStick',
+  },
+  {
     label: 'Consumables',
     value: 'consumables',
   },

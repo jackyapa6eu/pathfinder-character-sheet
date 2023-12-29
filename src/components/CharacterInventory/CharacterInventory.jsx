@@ -10,10 +10,11 @@ import GroupedInventoryItems from '../GroupedInventarItems/GroupedInventoryItems
 import Search from 'antd/es/input/Search';
 import CoinIcon from '../../icons/CoinIcon';
 import FormItem from '../FormItem';
+import AddKnownItemModal from './AddKnownItemModal';
 
 export const itemTemplate = '1fr 50px 44px 44px';
 
-const StyledCollapse = styled(Collapse)`
+export const StyledCollapse = styled(Collapse)`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 10px;
@@ -27,7 +28,7 @@ const StyledCollapse = styled(Collapse)`
   }
 `;
 
-const CollapseLabel = styled.p`
+export const CollapseLabel = styled.p`
   margin: 0;
   display: grid;
   grid-template-columns: ${(p) => p.template ?? ''};
@@ -84,6 +85,7 @@ const CoinIconContainer = styled.div`
 
 const CharacterInventory = observer(({ charId, userId }) => {
   const [addItemModalIsOpen, setAddItemModalIsOpen] = useState(false);
+  const [addKnownItemModalIsOpen, setAddKnownItemModalIsOpen] = useState(false);
   const [searchItemText, setSearchItemText] = useState('');
   const [editingItem, setEditingItem] = useState(null);
   const { openedCharacter, editMoney } = charactersStore;
@@ -104,12 +106,26 @@ const CharacterInventory = observer(({ charId, userId }) => {
         userId={userId}
         addItemModalIsOpen={addItemModalIsOpen}
         setAddItemModalIsOpen={setAddItemModalIsOpen}
+        addKnownItemModalIsOpen={addKnownItemModalIsOpen}
         editingItem={editingItem}
         setEditingItem={setEditingItem}
+      />
+      <AddKnownItemModal
+        charId={charId}
+        userId={userId}
+        addItemModalIsOpen={addItemModalIsOpen}
+        addKnownItemModalIsOpen={addKnownItemModalIsOpen}
+        setAddKnownItemModalIsOpen={setAddKnownItemModalIsOpen}
+        editingItem={editingItem}
+        setEditingItem={setEditingItem}
+        setAddItemModalIsOpen={setAddItemModalIsOpen}
       />
       <InventoryPanelContainer>
         <Button style={{ width: '80px' }} onClick={() => setAddItemModalIsOpen(true)}>
           Add +
+        </Button>
+        <Button style={{ width: '120px' }} onClick={() => setAddKnownItemModalIsOpen(true)}>
+          Add known +
         </Button>
         <Search
           allowClear
