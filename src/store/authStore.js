@@ -43,7 +43,6 @@ class AuthStore {
       const response = await get(dataRef);
       if (response.exists()) {
         const data = response.val();
-        console.log(data);
         this.setUser(data);
       }
     } catch (e) {

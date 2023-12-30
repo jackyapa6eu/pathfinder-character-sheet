@@ -82,12 +82,19 @@ const GroupedInventoryItems = observer(
     setAddItemModalIsOpen,
     isKnown,
   }) => {
-    const { openedCharacter, deleteInventoryItem, magicItemUse, changeItemData } = charactersStore;
+    const {
+      openedCharacter,
+      deleteInventoryItem,
+      magicItemUse,
+      changeItemData,
+      createInventoryItem,
+    } = charactersStore;
     const { user } = authStore;
     const { knownItems, changeItemData: changeKnown } = knownItemsStore;
     const [api, contextHolder] = notification.useNotification();
 
-    const handleSellItem = async (itemData) => {
+    const handleSellItem = async (itemData, event) => {
+      event.stopPropagation();
       await deleteInventoryItem(userId || user.uid, charId, itemData, true);
     };
 
@@ -99,6 +106,11 @@ const GroupedInventoryItems = observer(
     const handleUseMagicItem = async (itemData, event) => {
       event.stopPropagation();
       await magicItemUse(userId || user.uid, charId, itemData);
+    };
+
+    const handleCreateKnownItem = async (event, itemData) => {
+      event.stopPropagation();
+      await createInventoryItem(userId || user.uid, charId, itemData);
     };
 
     const openEditItemData = async (event, itemData) => {
@@ -129,7 +141,7 @@ const GroupedInventoryItems = observer(
 
     const handleChangeItemData = async (itemData, type, value) => {
       if (isKnown) {
-        await changeKnown(itemData, type, value);
+        await changeKnown(itemData, type, value.target?.value || value);
       } else {
         await changeItemData(
           userId || user.uid,
@@ -174,6 +186,24 @@ const GroupedInventoryItems = observer(
                     </Button>
                   </Tooltip>
                 </div>
+                {isKnown && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                    }}
+                  >
+                    <Tooltip placement='topLeft' title='add item to inventory'>
+                      <Button
+                        onClick={(event) => handleCreateKnownItem(event, el)}
+                        className='sell-button'
+                      >
+                        <span>✚</span>
+                      </Button>
+                    </Tooltip>
+                  </div>
+                )}
+
                 <FormItem
                   name={isKnown ? [el.itemName, 'name'] : ['inventory', el.itemName, 'name']}
                   textAlign='center'
@@ -241,9 +271,9 @@ const GroupedInventoryItems = observer(
                 </FormItem>
               </span>
               <span>
-                {el.cost && !isKnown && (
+                {!!el.cost && !isKnown && (
                   <Tooltip placement='topRight' title={`sell item for ${el.cost} ${el.currency}`}>
-                    <Button onClick={() => handleSellItem(el)} className='sell-button'>
+                    <Button onClick={(event) => handleSellItem(el, event)} className='sell-button'>
                       <span>💰</span>
                     </Button>
                   </Tooltip>

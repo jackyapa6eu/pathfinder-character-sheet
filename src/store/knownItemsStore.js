@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, toJS } from 'mobx';
 import { getDatabase, onValue, ref, update } from 'firebase/database';
 import { filterUndefinedToNull, makeName } from '../utils/helpers';
 import { message } from 'antd';

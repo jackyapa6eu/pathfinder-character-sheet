@@ -68,10 +68,6 @@ const CharactersList = observer(() => {
     getData();
   }, []);
 
-  useEffect(() => {
-    console.log(toJS(users));
-  }, [users]);
-
   return (
     <CharacterListContainer>
       <h3 style={{ margin: 0, marginBottom: '15px' }}>Characters</h3>
