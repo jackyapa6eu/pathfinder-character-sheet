@@ -13,6 +13,7 @@ import SignInForm from './components/SignInForm';
 import CreateCharacter from './components/CreateCharacter';
 import MainPage from './components/MainPage';
 import CharacterPage from './components/CharacterPage';
+import knownItemsStore from './store/knownItemsStore';
 
 const StyledApp = styled.div`
   display: grid;
@@ -42,10 +43,12 @@ const MainContainer = styled.main`
 const App = observer(() => {
   const auth = getAuth();
   const { getUserData, user, setUser, setAppMountedAuthLoadingState } = authStore;
+  const { setUserId } = knownItemsStore;
   useEffect(() => {
     setAppMountedAuthLoadingState('loading');
     auth.onAuthStateChanged(async (user) => {
       if (user) {
+        setUserId(user.uid);
         await getUserData(user.uid);
       } else setUser(null);
       setAppMountedAuthLoadingState('pending');

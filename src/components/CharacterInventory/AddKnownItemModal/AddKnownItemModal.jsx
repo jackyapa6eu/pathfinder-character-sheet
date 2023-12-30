@@ -1,11 +1,13 @@
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Modal } from 'antd';
+import { Form, Modal } from 'antd';
 import { observer } from 'mobx-react';
 import { itemTypes } from '../../../utils/consts';
 import GroupedInventoryItems from '../../GroupedInventarItems/GroupedInventoryItems';
 import { CollapseLabel, itemTemplate, StyledCollapse } from '../CharacterInventory';
-import charactersStore from '../../../store/charactersStore';
+import charactersStore, { initialUserData } from '../../../store/charactersStore';
+import knownItemsStore from '../../../store/knownItemsStore';
+import { useForm } from 'antd/es/form/Form';
 
 const StyledModal = styled(Modal)`
   width: 1920px !important;
@@ -23,7 +25,15 @@ const AddKnownItemModal = observer(
   }) => {
     const [searchItemText, setSearchItemText] = useState('');
 
-    const { openedCharacter, editMoney } = charactersStore;
+    const { knownItems } = knownItemsStore;
+    const [form] = useForm();
+
+    useEffect(() => {
+      if (knownItems) {
+        form.setFieldsValue({ ...{} });
+        form.setFieldsValue({ ...knownItems });
+      }
+    }, [knownItems]);
 
     return (
       <StyledModal
@@ -34,28 +44,30 @@ const AddKnownItemModal = observer(
         destroyOnClose
         centered
       >
-        {openedCharacter.knownItems && (
-          <StyledCollapse
-            defaultActiveKey={itemTypes.map((type) => type.value)}
-            ghost
-            size='small'
-            items={itemTypes.map(({ label, value }) => ({
-              key: value,
-              label: <CollapseLabel template={itemTemplate}>{label}</CollapseLabel>,
-              children: (
-                <GroupedInventoryItems
-                  charId={charId}
-                  userId={userId}
-                  groupName={value}
-                  searchItemText={searchItemText}
-                  setEditingItem={setEditingItem}
-                  setAddItemModalIsOpen={setAddItemModalIsOpen}
-                  isKnown
-                />
-              ),
-            }))}
-          />
-        )}
+        <Form form={form}>
+          {knownItems && (
+            <StyledCollapse
+              defaultActiveKey={itemTypes.map((type) => type.value)}
+              ghost
+              size='small'
+              items={itemTypes.map(({ label, value }) => ({
+                key: value,
+                label: <CollapseLabel template={itemTemplate}>{label}</CollapseLabel>,
+                children: (
+                  <GroupedInventoryItems
+                    charId={charId}
+                    userId={userId}
+                    groupName={value}
+                    searchItemText={searchItemText}
+                    setEditingItem={setEditingItem}
+                    setAddItemModalIsOpen={setAddItemModalIsOpen}
+                    isKnown
+                  />
+                ),
+              }))}
+            />
+          )}
+        </Form>
       </StyledModal>
     );
   }

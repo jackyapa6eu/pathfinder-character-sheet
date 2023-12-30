@@ -9,6 +9,7 @@ import authStore from '../../../store/authStore';
 import { itemTypes } from '../../../utils/consts';
 import { toJS } from 'mobx';
 import { useForm } from 'antd/es/form/Form';
+import knownItemsStore from '../../../store/knownItemsStore';
 
 const StyledForm = styled(Form)`
   display: grid;
@@ -55,11 +56,13 @@ const AddItemModal = observer(
     const [selectedType, setSelectedType] = useState(null);
     const [cost, setCost] = useState(null);
     const { createInventoryItem } = charactersStore;
+    const { createKnownItem } = knownItemsStore;
     const { user } = authStore;
 
     const [form] = useForm();
 
     useEffect(() => {
+      console.log(toJS(editingItem));
       if (addItemModalIsOpen) {
         if (editingItem) {
           form.setFieldsValue({ ...editingItem });
@@ -81,6 +84,7 @@ const AddItemModal = observer(
           editingItem?.itemName,
           addKnownItemModalIsOpen
         );
+        await createKnownItem(values, editingItem?.itemName);
         setAddItemModalIsOpen(false);
       },
       [editingItem]

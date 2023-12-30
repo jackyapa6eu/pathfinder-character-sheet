@@ -296,9 +296,7 @@ class CharactersStore {
 
   setOpenedCharacter = (newData) => {
     runInAction(() => {
-      runInAction(() => {
-        this.openedCharacter = newData;
-      });
+      this.openedCharacter = newData;
     });
   };
 
@@ -890,31 +888,25 @@ class CharactersStore {
     }
   };
 
-  createInventoryItem = async (uid, charRef, itemData, name, addKnownItemModalIsOpen) => {
+  createInventoryItem = async (uid, charRef, itemData, name) => {
     const db = getDatabase();
     const updates = {};
     const clearedData = filterUndefinedToNull(itemData);
-    const knownClearedData = JSON.parse(JSON.stringify(clearedData));
     const itemName = makeName(itemData.name);
     const itemRef = `users/${uid}/characters/${charRef}/inventory/${name ?? itemName}`;
-    const knownItemRef = `users/${uid}/characters/${charRef}/knownItems/${name ?? itemName}`;
     clearedData.ref = itemRef;
     clearedData.itemName = name ?? itemName;
-    knownClearedData.ref = knownItemRef;
-    knownClearedData.itemName = name ?? itemName;
-    if (clearedData.type === 'magicStick' || knownClearedData.type === 'magicStick') {
+
+    if (clearedData.type === 'magicStick') {
       clearedData.chargesLeft = clearedData.chargesMax;
       clearedData.chargesMax = 50;
     }
-    if (clearedData.type === 'magicItem' || knownClearedData.type === 'magicStick') {
+    if (clearedData.type === 'magicItem') {
       clearedData.chargesLeft = clearedData.chargesMax;
     }
-    // const dataRef = ref(db, itemRef);
 
     try {
-      if (!addKnownItemModalIsOpen) updates[itemRef] = clearedData;
-      updates[knownItemRef] = knownClearedData;
-      // await set(dataRef, clearedData);
+      updates[itemRef] = clearedData;
       await update(ref(db), updates);
       message.success(name ? 'Item Edited' : `Item added!`);
     } catch (e) {
@@ -980,28 +972,14 @@ class CharactersStore {
     }
   }, 700);
 
-  changeItemData = debounce(async (uid, charRef, itemName, dataType, newValue, isKnown) => {
+  changeItemData = debounce(async (uid, charRef, itemName, dataType, newValue) => {
     const db = getDatabase();
     const dataRef = `users/${uid}/characters/${charRef}/inventory/${itemName}/${dataType}`;
-    const dataKnownRef = `users/${uid}/characters/${charRef}/knownItems/${itemName}`;
-    let knownItem;
-    if (this.openedCharacter.inventory[itemName]) {
-      knownItem = JSON.parse(JSON.stringify(this.openedCharacter.inventory[itemName]));
-    } else {
-      knownItem = JSON.parse(JSON.stringify(this.openedCharacter.knownItems[itemName]));
-    }
-    knownItem[dataType] = newValue;
-    knownItem.ref = dataKnownRef;
+
     const updates = {};
     try {
-      if (!isKnown) {
-        updates[dataRef] = newValue;
-      }
-      console.log(knownItem);
-      updates[dataKnownRef] = knownItem;
-      // await set(dataRef, clearedData);
+      updates[dataRef] = newValue;
       await update(ref(db), updates);
-      // await set(dataRef, newValue);
       message.success(`Item changed!`);
     } catch (e) {
       console.log(e);

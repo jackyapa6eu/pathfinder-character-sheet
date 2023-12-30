@@ -21,6 +21,7 @@ import CharacterSpells from '../CharacterSpells';
 import CampIcon from '../../icons/CampIcon';
 import Weapons from '../Weapons';
 import CharacterInventory from '../CharacterInventory';
+import knownItemsStore from '../../store/knownItemsStore';
 
 const StyledTabs = styled(Tabs)`
   width: 100%;
@@ -145,6 +146,7 @@ const CharacterPage = observer(() => {
     makeFullRest,
     changeBaseInfo,
   } = charactersStore;
+  const { subscribeKnownItems, knownItems } = knownItemsStore;
 
   const { charId, userId } = useParams();
   const [form] = useForm();
@@ -158,12 +160,14 @@ const CharacterPage = observer(() => {
 
   useEffect(() => {
     const unsubscribe = subscribeCharacter(userId || user.uid, charId);
+    const unsubscribeKnownItems = subscribeKnownItems();
     window.scrollTo({
       top: 0,
       behavior: 'smooth',
     });
     return () => {
       unsubscribe();
+      unsubscribeKnownItems();
       clearOpenedCharacter();
     };
   }, []);

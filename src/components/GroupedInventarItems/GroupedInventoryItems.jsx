@@ -8,6 +8,7 @@ import { Button, Input, InputNumber, notification, Tooltip } from 'antd';
 import authStore from '../../store/authStore';
 import FormItem from '../FormItem';
 import { toJS } from 'mobx';
+import knownItemsStore from '../../store/knownItemsStore';
 
 const ItemsContainer = styled.div`
   display: flex;
@@ -83,13 +84,15 @@ const GroupedInventoryItems = observer(
   }) => {
     const { openedCharacter, deleteInventoryItem, magicItemUse, changeItemData } = charactersStore;
     const { user } = authStore;
+    const { knownItems, changeItemData: changeKnown } = knownItemsStore;
     const [api, contextHolder] = notification.useNotification();
 
     const handleSellItem = async (itemData) => {
       await deleteInventoryItem(userId || user.uid, charId, itemData, true);
     };
 
-    const handleDeleteItem = async (itemData) => {
+    const handleDeleteItem = async (itemData, event) => {
+      event.stopPropagation();
       await deleteInventoryItem(userId || user.uid, charId, itemData);
     };
 
@@ -125,25 +128,25 @@ const GroupedInventoryItems = observer(
     };
 
     const handleChangeItemData = async (itemData, type, value) => {
-      await changeItemData(
-        userId || user.uid,
-        charId,
-        itemData.itemName,
-        type,
-        value.target?.value || value,
-        isKnown
-      );
+      if (isKnown) {
+        await changeKnown(itemData, type, value);
+      } else {
+        await changeItemData(
+          userId || user.uid,
+          charId,
+          itemData.itemName,
+          type,
+          value.target?.value || value,
+          isKnown
+        );
+      }
     };
-
-    console.log('isKnown:', isKnown);
-    console.log('GROUPED: ', toJS(openedCharacter[isKnown ? 'knownItems' : 'inventory']));
-
     return (
       <ItemsContainer>
         {contextHolder}
-        {openedCharacter[isKnown ? 'knownItems' : 'inventory'] &&
+        {(isKnown ? knownItems : openedCharacter.inventory) &&
           fieldsAndStrFilter(
-            Object.values(openedCharacter[isKnown ? 'knownItems' : 'inventory']),
+            Object.values(isKnown ? knownItems : openedCharacter.inventory),
             'type',
             groupName,
             ['name', 'description'],
@@ -172,7 +175,7 @@ const GroupedInventoryItems = observer(
                   </Tooltip>
                 </div>
                 <FormItem
-                  name={[isKnown ? 'knownItems' : 'inventory', el.itemName, 'name']}
+                  name={isKnown ? [el.itemName, 'name'] : ['inventory', el.itemName, 'name']}
                   textAlign='center'
                   noBgLabel
                 >
@@ -186,7 +189,7 @@ const GroupedInventoryItems = observer(
               {el.count && (
                 <span>
                   <FormItem
-                    name={[isKnown ? 'knownItems' : 'inventory', el.itemName, 'count']}
+                    name={isKnown ? [el.itemName, 'count'] : ['inventory', el.itemName, 'count']}
                     textAlign='center'
                     noBgLabel
                     label='count'
@@ -218,12 +221,12 @@ const GroupedInventoryItems = observer(
               {el.type !== 'magicItem' && el.type !== 'magicStick' && !el.count && <span />}
               <span>
                 <Tooltip title='delete item'>
-                  <Button onClick={() => handleDeleteItem(el)} className='sell-button'>
+                  <Button onClick={(event) => handleDeleteItem(el, event)} className='sell-button'>
                     <span>🗑️</span>
                   </Button>
                 </Tooltip>
                 <FormItem
-                  name={[isKnown ? 'knownItems' : 'inventory', el.itemName, 'weight']}
+                  name={isKnown ? [el.itemName, 'weight'] : ['inventory', el.itemName, 'weight']}
                   labelDesc={`total: ${el.weight * (el.count || 1)} `}
                   textAlign='center'
                   noBgLabel
@@ -247,7 +250,7 @@ const GroupedInventoryItems = observer(
                 )}
 
                 <FormItem
-                  name={[isKnown ? 'knownItems' : 'inventory', el.itemName, 'cost']}
+                  name={isKnown ? [el.itemName, 'cost'] : ['inventory', el.itemName, 'cost']}
                   labelDesc={`total: ${el.cost * (el.count || 1)} ${el.currency}`}
                   textAlign='center'
                   noBgLabel
