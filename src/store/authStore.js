@@ -2,6 +2,7 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { getDatabase, ref, set, get } from 'firebase/database';
 import { message } from 'antd';
+import { getLSData, setLSData } from '../utils/helpers';
 
 class AuthStore {
   user = null;
@@ -11,6 +12,8 @@ class AuthStore {
   authLoadingState = 'pending';
 
   mountedAuthLoadingState = 'pending';
+
+  isPreviouslyLogged = getLSData('isPreviouslyLogged') || false;
 
   constructor() {
     makeAutoObservable(this);
@@ -44,10 +47,15 @@ class AuthStore {
       if (response.exists()) {
         const data = response.val();
         this.setUser(data);
+        runInAction(() => {
+          this.isPreviouslyLogged = true;
+        });
+        setLSData('isPreviouslyLogged', true);
       }
     } catch (e) {
       message.error('Getting user data error.');
       console.log(e);
+      setLSData('isPreviouslyLogged', false);
     }
   };
 

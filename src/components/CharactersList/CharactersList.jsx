@@ -9,31 +9,30 @@ import { toJS } from 'mobx';
 
 const CharacterListContainer = styled.div`
   display: flex;
+  flex-direction: column;
   width: 100%;
   min-width: 100%;
   height: 100%;
-  flex-direction: column;
-  align-items: start;
   padding: 0 10px;
 `;
 
 const CardsContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  grid-template-rows: repeat(auto-fill, 50px);
   width: 100%;
-  gap: 16px;
-  padding: 16px;
+  gap: 10px;
+  padding: 6px;
 `;
 
 const CharacterCard = styled.div`
-  display: flex;
+  display: ${({ owner }) => (owner ? 'none' : 'flex')};
   flex-direction: column;
   gap: 5px;
   box-shadow: 0 0 1px rgba(128, 128, 128, 0.5);
-  padding: 10px;
+  padding: 6px;
   border-radius: 6px;
-  width: 130px;
-  height: 130px;
+  width: 340px;
+  height: 50px;
   cursor: pointer;
   transition: all ease 0.5s;
   & p {
@@ -50,18 +49,35 @@ const CharacterCard = styled.div`
   &:hover {
     box-shadow: 0 0 3px rgba(128, 128, 128, 0.5);
   }
+
+  @media screen and (max-width: 420px) {
+    & {
+      width: 100%;
+    }
+  }
+`;
+
+const ListsContainer = styled.div`
+  display: flex;
+  gap: 20px;
+
+  @media screen and (max-width: 770px) {
+    & {
+      flex-direction: column;
+    }
+  }
 `;
 
 const CharactersList = observer(() => {
   const { getCharactersList, characters } = charactersStore;
   const { user } = authStore;
-  const { users, getUsers } = usersStore;
+  const { getUsers, usersCharacters } = usersStore;
 
   const navigate = useNavigate();
 
   const getData = async () => {
     await getCharactersList(user.uid);
-    if (user.dm) await getUsers();
+    if (user.dm) await getUsers(user.dm);
   };
 
   useEffect(() => {
@@ -71,59 +87,60 @@ const CharactersList = observer(() => {
   return (
     <CharacterListContainer>
       <h3 style={{ margin: 0, marginBottom: '15px' }}>Characters</h3>
-      {characters && Object.keys(characters) && (
-        <CardsContainer>
-          {Object.entries(characters).map(([charRef, charData]) => (
-            <CharacterCard key={charRef} onClick={() => navigate(`/chars/${charRef}`)}>
-              <h4>{charData.name}</h4>
-              <p>
-                <span>level</span>
-                <span>{charData.level}</span>
-              </p>
-              <p>
-                <span>{charData.race}</span>
-              </p>
-              <p>
-                <span>{charData.alignment}</span>
-              </p>
-            </CharacterCard>
-          ))}
-        </CardsContainer>
-      )}
-      {user.dm && (
-        <div>
-          {Object.values(users).map((user) => (
-            <div key={user.userData.uid}>
-              <h3 style={{ margin: 0, marginBottom: '15px' }}>
-                {user.userData.displayName} сharacters
-              </h3>
-              {Object.keys(characters) && (
-                <CardsContainer>
-                  {user.characters &&
-                    Object.entries(user.characters).map(([charRef, charData]) => (
-                      <CharacterCard
-                        key={charRef}
-                        onClick={() => navigate(`dm/${user.userData.uid}/chars/${charRef}`)}
-                      >
-                        <h4>{charData.name}</h4>
-                        <p>
-                          <span>level</span>
-                          <span>{charData.level}</span>
-                        </p>
-                        <p>
-                          <span>{charData.race}</span>
-                        </p>
-                        <p>
-                          <span>{charData.alignment}</span>
-                        </p>
-                      </CharacterCard>
-                    ))}
-                </CardsContainer>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      <ListsContainer>
+        {characters && Object.keys(characters) && (
+          <CardsContainer>
+            {Object.entries(characters).map(([charRef, charData]) => (
+              <CharacterCard
+                owner={charData.owner === user.uid ?? false}
+                key={charRef}
+                onClick={() => navigate(`/chars/${charRef}`)}
+              >
+                <h4>
+                  {charData.name} [
+                  {Object.values(charData.classes).reduce((acc, curr) => {
+                    return acc + curr.levels;
+                  }, 0)}
+                  ]
+                </h4>
+                <p>
+                  {Object.entries(charData.classes).map(([className, classData], index, array) => (
+                    <span key={className}>
+                      {className} {classData.levels} {index < array.length - 1 ? '/' : ''}
+                    </span>
+                  ))}
+                </p>
+              </CharacterCard>
+            ))}
+          </CardsContainer>
+        )}
+        {user.dm && (
+          <CardsContainer>
+            {Object.values(usersCharacters).map(({ owner, name, charName, classes }) => (
+              <CharacterCard
+                onClick={() => navigate(`dm/${owner}/chars/${charName}`)}
+                owner={owner === user.uid ?? false}
+                key={`${owner}__${name}`}
+              >
+                <h4>
+                  {name} [
+                  {Object.values(classes).reduce((acc, curr) => {
+                    return acc + curr.levels;
+                  }, 0)}
+                  ]
+                </h4>
+                <p>
+                  {Object.entries(classes).map(([className, classData], index, array) => (
+                    <span key={className}>
+                      {className} {classData.levels} {index < array.length - 1 ? '/' : ''}
+                    </span>
+                  ))}
+                </p>
+              </CharacterCard>
+            ))}
+          </CardsContainer>
+        )}
+      </ListsContainer>
     </CharacterListContainer>
   );
 });

@@ -159,35 +159,39 @@ const CharacterPage = observer(() => {
   }, [openedCharacter]);
 
   useEffect(() => {
-    const unsubscribe = subscribeCharacter(userId || user.uid, charId);
-    const unsubscribeKnownItems = subscribeKnownItems();
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-    return () => {
-      unsubscribe();
-      unsubscribeKnownItems();
-      clearOpenedCharacter();
-    };
-  }, []);
+    if (user) {
+      const unsubscribe = subscribeCharacter(userId || user?.uid, charId);
+      const unsubscribeKnownItems = subscribeKnownItems();
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+      return () => {
+        unsubscribe();
+        unsubscribeKnownItems();
+        clearOpenedCharacter();
+      };
+    }
+  }, [user]);
 
   useEffect(() => {
-    if (openedCharacter.name) {
-      document.title = openedCharacter.name;
-    }
+    if (openedCharacter && user) {
+      if (openedCharacter.name) {
+        document.title = openedCharacter.name;
+      }
 
-    return () => {
-      document.title = 'Olegators is Pathfinder';
-    };
-  }, [openedCharacter]);
+      return () => {
+        document.title = 'Olegators is Pathfinder';
+      };
+    }
+  }, [openedCharacter, user]);
 
   const handleMakeFullRest = async () => {
-    await makeFullRest(userId || user.uid, charId);
+    await makeFullRest(userId || user?.uid, charId);
   };
 
   const handleChangeBaseInfo = async (dataName, newValue) => {
-    await changeBaseInfo(userId || user.uid, charId, dataName, newValue.target?.value || newValue);
+    await changeBaseInfo(userId || user?.uid, charId, dataName, newValue.target?.value || newValue);
   };
 
   return (

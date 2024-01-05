@@ -42,7 +42,14 @@ const MainContainer = styled.main`
 
 const App = observer(() => {
   const auth = getAuth();
-  const { getUserData, user, setUser, setAppMountedAuthLoadingState } = authStore;
+  const {
+    getUserData,
+    user,
+    setUser,
+    isPreviouslyLogged,
+    mountedAuthLoadingState,
+    setAppMountedAuthLoadingState,
+  } = authStore;
   const { setUserId } = knownItemsStore;
   useEffect(() => {
     setAppMountedAuthLoadingState('loading');
@@ -51,9 +58,13 @@ const App = observer(() => {
         setUserId(user.uid);
         await getUserData(user.uid);
       } else setUser(null);
-      setAppMountedAuthLoadingState('pending');
+      setAppMountedAuthLoadingState('done');
     });
   }, []);
+
+  const isStayLogged =
+    isPreviouslyLogged &&
+    (mountedAuthLoadingState === 'pending' || mountedAuthLoadingState === 'loading');
 
   return (
     <StyledApp>
@@ -70,15 +81,33 @@ const App = observer(() => {
             path='/sign-up'
           />
           <Route
-            element={<ProtectedRoute component={<CreateCharacter />} to='/' condition={user} />}
+            element={
+              <ProtectedRoute
+                component={<CreateCharacter />}
+                to='/'
+                condition={isStayLogged || user}
+              />
+            }
             path='/create-character'
           />
           <Route
-            element={<ProtectedRoute component={<CharacterPage />} to='/' condition={user} />}
+            element={
+              <ProtectedRoute
+                component={<CharacterPage />}
+                to='/'
+                condition={isStayLogged || user}
+              />
+            }
             path='/chars/:charId'
           />
           <Route
-            element={<ProtectedRoute component={<CharacterPage />} to='/' condition={user?.dm} />}
+            element={
+              <ProtectedRoute
+                component={<CharacterPage />}
+                to='/'
+                condition={isStayLogged || user?.dm}
+              />
+            }
             path='dm/:userId/chars/:charId'
           />
           <Route element={<div>404 страница не найдена</div>} path='/*' />

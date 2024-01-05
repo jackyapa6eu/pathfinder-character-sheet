@@ -24,4 +24,19 @@ const fieldsAndStrFilter = (arr, fieldName, fieldData, fieldsForSearch, searchSt
   }
 };
 
-export { capitalizedFirstLetter, filterUndefinedToNull, makeName, fieldsAndStrFilter };
+const getLSData = (name) => {
+  return JSON.parse(localStorage.getItem(name));
+};
+
+const setLSData = (name, data) => {
+  localStorage.setItem(name, JSON.stringify(data));
+};
+
+export {
+  capitalizedFirstLetter,
+  filterUndefinedToNull,
+  makeName,
+  fieldsAndStrFilter,
+  getLSData,
+  setLSData,
+};

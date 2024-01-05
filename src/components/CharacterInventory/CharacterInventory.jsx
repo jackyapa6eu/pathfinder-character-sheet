@@ -26,6 +26,18 @@ export const StyledCollapse = styled(Collapse)`
     padding: 0 !important;
     padding-right: 5px !important;
   }
+
+  @media screen and (max-width: 1279px) {
+    & {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media screen and (max-width: 860px) {
+    & {
+      grid-template-columns: 1fr;
+    }
+  }
 `;
 
 export const CollapseLabel = styled.p`
@@ -55,6 +67,7 @@ const CharacterInventoryContainer = styled.div`
 const InventoryPanelContainer = styled.div`
   display: flex;
   gap: 5px;
+  flex-wrap: wrap;
 
   & .inventory-panel-search-input {
     width: 120px;
