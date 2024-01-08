@@ -1,47 +1,69 @@
 import { observer } from 'mobx-react';
 import { memo, useCallback, useEffect, useState } from 'react';
-import { Button, Form, Input, InputNumber, Modal, Radio, Select } from 'antd';
+import { Button, Form, Input, InputNumber, Modal, Select } from 'antd';
 import styled from 'styled-components';
 import { ButtonBox, StyledFormItem } from '../../../uiComponents/uiComponents';
 import TextArea from 'antd/es/input/TextArea';
 import charactersStore from '../../../store/charactersStore';
 import authStore from '../../../store/authStore';
-import { itemTypes } from '../../../utils/consts';
+import { equippedItem, itemTypes } from '../../../utils/consts';
 import { toJS } from 'mobx';
 import { useForm } from 'antd/es/form/Form';
 import knownItemsStore from '../../../store/knownItemsStore';
+import ChargesInputs from './inputs/ChargesInputs';
+import AcBonusInputs from './inputs/AcBonusInputs';
+import AttackInputs from './inputs/AttackInputs';
+import AbilityBonusInputs from './inputs/AbilityBonusInputs';
+import SavingThrowsInputs from './inputs/SavingThrowsInputs';
+import SkillsInputs from './inputs/SkillsInputs';
+import { filterUndefinedToNull, makeName } from '../../../utils/helpers';
 
 const StyledForm = styled(Form)`
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  max-height: 85vh;
+  overflow-y: auto;
+  grid-template-columns: 20px 1fr 1fr 1fr 1fr 1fr 1fr 32px;
   column-gap: 5px;
   grid-template-areas:
-    'type type type'
-    'name weight cost'
-    'description description afterDesc'
-    'acBonus checkPenalty maxDex'
-    'attackBonus weaponAttackBonus damageBonus'
-    'maxDamageBonus weaponDamageBonus .'
-    '. . submit';
+    '. type equipSlot cost cost weight count. '
+    '. name name name description description description. '
+    '. acBonusType acBonus checkPenalty checkPenalty maxDex . .'
+    '. attackBonus attackBonus weaponAttackBonus weaponAttackBonus damageBonus damageBonus.'
+    '. maxDamageBonus maxDamageBonus weaponDamageBonus weaponDamageBonus . . .'
+    '. chargesName chargesName chargesName charges chargesType chargesType .'
+    '. additionalFields additionalFields additionalFields additionalFields additionalFields additionalFields additionalFields'
+    '. . . . . selectAddField selectAddField addFieldButton'
+    '. . . . .  . submit .';
 
-  @media screen and (max-width: 560px) {
+  @media screen and (max-width: 660px) {
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
-      'type type'
-      'name weight'
-      'description cost'
-      'afterDesc .'
-      'acBonus checkPenalty '
+      'type equipSlot'
+      'cost weight'
+      '. count'
+      'name description'
+      'acBonus checkPenalty'
       'maxDex attackBonus'
       'weaponAttackBonus damageBonus'
       'maxDamageBonus weaponDamageBonus'
-      '.  submit';
+      'charges charges'
+      'additionalFields additionalFields'
+      '. submit';
   }
 `;
 
 const StyledModal = styled(Modal)`
-  width: 600px !important;
+  width: 900px !important;
 `;
+
+const componentDictionary = {
+  charges: ChargesInputs,
+  acBonus: AcBonusInputs,
+  attack: AttackInputs,
+  ability: AbilityBonusInputs,
+  savingThrow: SavingThrowsInputs,
+  skill: SkillsInputs,
+};
 
 const AddItemModal = observer(
   ({
@@ -55,6 +77,8 @@ const AddItemModal = observer(
   }) => {
     const [selectedType, setSelectedType] = useState(null);
     const [cost, setCost] = useState(null);
+    const [additionalInputs, setAdditionalInputs] = useState({});
+    const [newFieldType, setNewFieldType] = useState(null);
     const { createInventoryItem } = charactersStore;
     const { createKnownItem } = knownItemsStore;
     const { user } = authStore;
@@ -62,7 +86,6 @@ const AddItemModal = observer(
     const [form] = useForm();
 
     useEffect(() => {
-      console.log(toJS(editingItem));
       if (addItemModalIsOpen) {
         if (editingItem) {
           form.setFieldsValue({ ...editingItem });
@@ -75,16 +98,86 @@ const AddItemModal = observer(
       }
     }, [addItemModalIsOpen]);
 
+    const renderComponent = (type, props) => {
+      const Component = componentDictionary[type];
+
+      if (!Component) {
+        console.error(`Unknown component type: ${type}`);
+        return null;
+      }
+
+      return <Component {...props} />;
+    };
+
+    const addField = useCallback(() => {
+      if (newFieldType) {
+        setAdditionalInputs((prevInputs) => ({
+          ...prevInputs,
+          [new Date().getTime()]: newFieldType,
+        }));
+      }
+    }, [newFieldType]);
+
+    const deleteField = useCallback(
+      (fieldKey) => {
+        const copy = JSON.parse(JSON.stringify(additionalInputs));
+        delete copy[fieldKey];
+        setAdditionalInputs(copy);
+      },
+      [additionalInputs]
+    );
+
+    const handleInputs = (name) => {
+      setAdditionalInputs({ [new Date().getTime()]: name });
+    };
+
+    const handleChangeType = (value) => {
+      console.log(value);
+      setAdditionalInputs({});
+      if (value === 'armor') handleInputs('acBonus');
+      if (value === 'magicItem' || value === 'magicStick') handleInputs('charges');
+      if (value === 'weapon') handleInputs('attack');
+    };
+
     const onFinish = useCallback(
       async (values) => {
+        const result = Object.entries(values).reduce((acc, [fieldName, fieldData]) => {
+          if (['charges', 'skill', 'savingThrows', 'abilityBonus'].includes(fieldName)) {
+            acc[fieldName] = filterUndefinedToNull(
+              Object.values(fieldData).reduce((res, curr) => {
+                if (fieldName === 'charges') {
+                  if (curr.restorable) {
+                    curr.maxCharges = curr.count;
+                  } else {
+                    curr.maxCharges = 50;
+                  }
+                }
+                res[makeName(curr.name)] = filterUndefinedToNull(curr);
+                return res;
+              }, {})
+            );
+          } else if (['acBonus'].includes(fieldName)) {
+            acc[fieldName] = Object.values(fieldData).reduce((res, curr) => {
+              res[curr.acBonusType] = curr;
+              return res;
+            }, {});
+          } else if (['attack'].includes(fieldName)) {
+            acc[fieldName] = filterUndefinedToNull(Object.values(fieldData)[0]);
+          } else {
+            acc[fieldName] = fieldData;
+          }
+          return acc;
+        }, {});
+        console.log(result);
+
         await createInventoryItem(
           userId || user.uid,
           charId,
-          values,
+          result,
           editingItem?.itemName,
           addKnownItemModalIsOpen
         );
-        await createKnownItem(values, editingItem?.itemName);
+        await createKnownItem(result, editingItem?.itemName);
         setAddItemModalIsOpen(false);
       },
       [editingItem]
@@ -101,23 +194,32 @@ const AddItemModal = observer(
       >
         <StyledForm layout='vertical' labelAlign='left' onFinish={onFinish} form={form}>
           <StyledFormItem gridarea='type' name='type' label='type' rules={[{ required: true }]}>
-            <Radio.Group
-              buttonStyle='solid'
-              optionType='button'
-              options={itemTypes}
-              onChange={(event) => setSelectedType(event.target.value)}
-            />
+            <Select options={itemTypes} onChange={handleChangeType} />
+          </StyledFormItem>
+
+          <StyledFormItem
+            gridarea='equipSlot'
+            name='equipSlot'
+            label='equip slot'
+            rules={[{ required: true }]}
+          >
+            <Select options={Object.keys(equippedItem).map((el) => ({ value: el }))} />
           </StyledFormItem>
 
           <StyledFormItem gridarea='name' name='name' label='name' rules={[{ required: true }]}>
             <Input />
           </StyledFormItem>
 
-          <StyledFormItem name='weight' label='weight' rules={[{ required: true }]}>
+          <StyledFormItem
+            gridarea='weight'
+            name='weight'
+            label='weight'
+            rules={[{ required: true }]}
+          >
             <InputNumber controls={false} style={{ width: '100%' }} />
           </StyledFormItem>
-          <div style={{ display: 'flex' }}>
-            <StyledFormItem name='cost' label='cost' style={{ width: cost ? '40%' : '100%' }}>
+          <div style={{ display: 'flex', gridArea: 'cost' }}>
+            <StyledFormItem name='cost' label='cost' style={{ width: cost ? '50%' : '100%' }}>
               <InputNumber controls={false} style={{ width: '100%' }} onChange={setCost} />
             </StyledFormItem>
             {cost && (
@@ -144,109 +246,37 @@ const AddItemModal = observer(
             <TextArea autoSize />
           </StyledFormItem>
 
-          {['consumables'].includes(selectedType) && (
-            <StyledFormItem name='count' label='count' gridarea='afterDesc'>
-              <InputNumber controls={false} style={{ width: '100%' }} />
-            </StyledFormItem>
-          )}
+          <StyledFormItem name='count' label='count' gridarea='count'>
+            <InputNumber controls={false} style={{ width: '100%' }} />
+          </StyledFormItem>
 
-          {/* Armor */}
+          <div style={{ gridArea: 'additionalFields' }}>
+            {Object.entries(additionalInputs).map(([key, type]) => (
+              <div key={key}>{renderComponent(type, { inputKey: key, deleteField })}</div>
+            ))}
+          </div>
 
-          {selectedType === 'armor' && (
-            <>
-              <StyledFormItem name='acBonus' label='ac bonus' rules={[{ required: true }]}>
-                <InputNumber controls={false} style={{ width: '100%' }} />
-              </StyledFormItem>
-              <StyledFormItem
-                name='checkPenalty'
-                label='check penalty'
-                rules={[{ required: true }]}
-              >
-                <InputNumber controls={false} style={{ width: '100%' }} />
-              </StyledFormItem>
-              <StyledFormItem name='maxDex' label='max dex' rules={[{ required: true }]}>
-                <InputNumber controls={false} style={{ width: '100%' }} />
-              </StyledFormItem>
-            </>
-          )}
-
-          {/* Armor */}
-
-          {/* magicStick magicItem */}
-
-          {(selectedType === 'magicStick' || selectedType === 'magicItem') && (
-            <StyledFormItem
-              name='chargesMax'
-              label='charges'
-              gridarea='afterDesc'
-              rules={[{ required: true }]}
-            >
-              <InputNumber controls={false} style={{ width: '100%' }} />
-            </StyledFormItem>
-          )}
-
-          {/* magicStick magicItem*/}
-
-          <div style={{ gridArea: 'afterDesc' }}></div>
-
-          {/* weapon */}
-
-          {selectedType === 'weapon' && (
-            <>
-              <StyledFormItem
-                gridarea='attackBonus'
-                name='attackBonus'
-                label='ability attack mod'
-                rules={[{ required: true }]}
-              >
-                <Select
-                  allowClear
-                  options={[{ value: 'dex' }, { value: 'str' }, { value: 'wis' }]}
-                />
-              </StyledFormItem>
-
-              <StyledFormItem
-                gridarea='weaponAttackBonus'
-                name='weaponAttackBonus'
-                label='weapon attack bonus'
-                rules={[{ required: true }]}
-              >
-                <InputNumber controls={false} style={{ width: '100%' }} />
-              </StyledFormItem>
-
-              <StyledFormItem
-                gridarea='damageBonus'
-                name='damageBonus'
-                label='ability damage mod'
-                rules={[{ required: true }]}
-              >
-                <Select allowClear options={[{ value: 'str' }, { value: false, label: 'none' }]} />
-              </StyledFormItem>
-
-              <StyledFormItem
-                gridarea='maxDamageBonus'
-                name='maxDamageBonus'
-                label='max ability damage mod'
-              >
-                <InputNumber controls={false} style={{ width: '100%' }} />
-              </StyledFormItem>
-
-              <StyledFormItem
-                gridarea='weaponDamageBonus'
-                name='weaponDamageBonus'
-                label='weapon damage bonus'
-                rules={[{ required: true }]}
-              >
-                <InputNumber controls={false} style={{ width: '100%' }} />
-              </StyledFormItem>
-            </>
-          )}
+          <StyledFormItem gridarea='selectAddField' label='add item property'>
+            <Select
+              options={Object.keys(componentDictionary).map((el) => ({ value: el }))}
+              value={newFieldType}
+              onChange={setNewFieldType}
+            />
+          </StyledFormItem>
+          <Button
+            htmlType='button'
+            style={{ gridArea: 'addFieldButton', width: '100%', padding: 0, alignSelf: 'end' }}
+            onClick={addField}
+            disabled={!newFieldType}
+          >
+            +
+          </Button>
 
           {/* weapon */}
 
           <ButtonBox>
             <StyledFormItem>
-              <Button type='default' htmlType='submit'>
+              <Button type='default' htmlType='submit' style={{ width: '100%' }}>
                 {editingItem ? 'Edit item' : 'Add item'}
               </Button>
             </StyledFormItem>

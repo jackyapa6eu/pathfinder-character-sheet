@@ -35,7 +35,6 @@ class KnownItemsStore {
   };
 
   createKnownItem = async (itemData, name) => {
-    console.log(itemData, name);
     const db = getDatabase();
     const updates = {};
     const clearedData = filterUndefinedToNull(itemData);
@@ -43,18 +42,10 @@ class KnownItemsStore {
     const knownItemRef = `${this.getBasePath()}${name ?? itemName}`;
     clearedData.ref = knownItemRef;
     clearedData.itemName = name ?? itemName;
-    if (clearedData.type === 'magicStick') {
-      clearedData.chargesLeft = clearedData.chargesMax;
-      clearedData.chargesMax = 50;
-    }
-    if (clearedData.type === 'magicItem') {
-      clearedData.chargesLeft = clearedData.chargesMax;
-    }
+
     try {
-      console.log('clearedData: ', clearedData);
       updates[knownItemRef] = clearedData;
       await update(ref(db), updates);
-      // message.success(name ? 'Item Edited' : `Item added!`);
     } catch (e) {
       console.log(e);
       message.error('Error!');

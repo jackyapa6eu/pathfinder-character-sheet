@@ -3,6 +3,7 @@ import { Form } from 'antd';
 
 const StyledFormItem = styled(Form.Item)`
   margin: 0;
+  width: 100%;
   grid-area: ${(p) => p.gridarea ?? ''};
 `;
 

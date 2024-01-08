@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { observer } from 'mobx-react';
 import charactersStore from '../../store/charactersStore';
 import { fieldsAndStrFilter } from '../../utils/helpers';
@@ -9,6 +9,8 @@ import authStore from '../../store/authStore';
 import FormItem from '../FormItem';
 import { toJS } from 'mobx';
 import knownItemsStore from '../../store/knownItemsStore';
+import { EyeOutlined } from '@ant-design/icons';
+import ItemDescription from '../ItemDescription';
 
 const ItemsContainer = styled.div`
   display: flex;
@@ -67,8 +69,18 @@ const Item = styled.div`
   }
 
   & > span:first-child,
-  & > span:nth-child(2) {
+  & > span:nth-child(3) {
     border-left: none;
+  }
+
+  & .eye {
+    font-size: 20px;
+    opacity: 0;
+    transition: opacity ease 0.3s;
+  }
+
+  &:hover .eye {
+    opacity: 1;
   }
 `;
 
@@ -103,41 +115,30 @@ const GroupedInventoryItems = observer(
       await deleteInventoryItem(userId || user.uid, charId, itemData);
     };
 
-    const handleUseMagicItem = async (itemData, event) => {
-      event.stopPropagation();
-      await magicItemUse(userId || user.uid, charId, itemData);
-    };
-
     const handleCreateKnownItem = async (event, itemData) => {
       event.stopPropagation();
       await createInventoryItem(userId || user.uid, charId, itemData);
     };
 
-    const openEditItemData = async (event, itemData) => {
-      event.stopPropagation();
-      setEditingItem(itemData);
-      setAddItemModalIsOpen(true);
-    };
-
-    const handleShowItemDescription = (itemData) => {
-      const { name, ref, itemName, chargesMax, ...otherData } = itemData;
-      if (itemData.description) {
+    const handleShowItemDescription = useCallback(
+      (itemData) => {
         api.open({
-          message: name,
+          message: itemData.name,
           description: (
-            <div style={{ maxHeight: '45vh', overflowY: 'auto' }}>
-              {Object.entries(otherData).map(([dataName, data]) => (
-                <p style={{ margin: 0 }} key={dataName}>
-                  <span style={{ fontWeight: 500 }}>{dataName}: </span>
-                  <span>{data}</span>
-                </p>
-              ))}
+            <div>
+              <ItemDescription
+                itemName={itemData.itemName}
+                isKnown={isKnown}
+                userId={userId}
+                charId={charId}
+              />
             </div>
           ),
           duration: 0,
         });
-      }
-    };
+      },
+      [openedCharacter.inventory]
+    );
 
     const handleChangeItemData = async (itemData, type, value) => {
       if (isKnown) {
@@ -171,21 +172,6 @@ const GroupedInventoryItems = observer(
               onClick={() => handleShowItemDescription(el)}
             >
               <span className='item-name-container'>
-                <div
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                  }}
-                >
-                  <Tooltip placement='topLeft' title='edit item'>
-                    <Button
-                      onClick={(event) => openEditItemData(event, el)}
-                      className='sell-button'
-                    >
-                      <span>⚙️</span>
-                    </Button>
-                  </Tooltip>
-                </div>
                 {isKnown && (
                   <div
                     style={{
@@ -206,7 +192,7 @@ const GroupedInventoryItems = observer(
 
                 <FormItem
                   name={isKnown ? [el.itemName, 'name'] : ['inventory', el.itemName, 'name']}
-                  textAlign='center'
+                  textAlign='start'
                   noBgLabel
                 >
                   <Input
@@ -216,39 +202,34 @@ const GroupedInventoryItems = observer(
                   />
                 </FormItem>
               </span>
-              {el.count && (
-                <span>
-                  <FormItem
-                    name={isKnown ? [el.itemName, 'count'] : ['inventory', el.itemName, 'count']}
-                    textAlign='center'
-                    noBgLabel
-                    label='count'
-                  >
-                    <InputNumber
-                      onClick={(event) => event.stopPropagation()}
-                      controls={false}
-                      style={{ width: '100%' }}
-                      onChange={(value) => handleChangeItemData(el, 'count', value)}
-                    />
-                  </FormItem>
-                </span>
-              )}
-              {(el.type === 'magicItem' || el.type === 'magicStick') && (
-                <span className='magic-item'>
-                  {!isKnown && (
-                    <Tooltip title='use item'>
-                      <Button
-                        onClick={(event) => handleUseMagicItem(el, event)}
-                        className='sell-button'
-                      >
-                        <span>🪄</span>
-                      </Button>
-                    </Tooltip>
-                  )}
-                  <span className='item-charges'>{`${el.chargesLeft}/${el.chargesMax}`}</span>
-                </span>
-              )}
-              {el.type !== 'magicItem' && el.type !== 'magicStick' && !el.count && <span />}
+
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                }}
+              >
+                <EyeOutlined className='eye' />
+              </div>
+
+              <span>
+                <FormItem
+                  name={isKnown ? [el.itemName, 'count'] : ['inventory', el.itemName, 'count']}
+                  textAlign='center'
+                  noBgLabel
+                  label='count'
+                >
+                  <InputNumber
+                    onClick={(event) => event.stopPropagation()}
+                    controls={false}
+                    style={{ width: '100%' }}
+                    onChange={(value) => handleChangeItemData(el, 'count', value)}
+                  />
+                </FormItem>
+              </span>
+
               <span>
                 <Tooltip title='delete item'>
                   <Button onClick={(event) => handleDeleteItem(el, event)} className='sell-button'>

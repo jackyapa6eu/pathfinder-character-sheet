@@ -12,7 +12,7 @@ import CoinIcon from '../../icons/CoinIcon';
 import FormItem from '../FormItem';
 import AddKnownItemModal from './AddKnownItemModal';
 
-export const itemTemplate = '1fr 50px 44px 44px';
+export const itemTemplate = '1fr 26px 50px 50px 66px';
 
 export const StyledCollapse = styled(Collapse)`
   display: grid;

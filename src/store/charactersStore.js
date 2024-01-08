@@ -279,6 +279,21 @@ export const initialUserData = {
     copper: 0,
     platinum: 0,
   },
+
+  equippedItem: {
+    head: null, // circlets,crowns,hats,headbands,helmets, phylacteries.
+    face: null, // googles,lenses,masks,spectacles,third eyes.
+    shoulders: null, // capes, cloaks, mantles, shawls
+    throat: null, // amulets, badges, brooches, collars, medals, medallions, necklaces, pendants, periapts, scarabs,scarfs, torcs
+    body: null, // armor, robes
+    torso: null, //shirts,tunics,vests,vestments
+    arms: null, // armbands,bracelets,bracers
+    ringOne: null,
+    ringTwo: null,
+    hands: null, // gauntlets, gloves
+    waist: null, // belts, girdles, sashes
+    feet: null, // boots, sandals, shoes, slippers
+  },
 };
 
 class CharactersStore {
@@ -788,25 +803,28 @@ class CharactersStore {
     }
     // откатывает магические предметы
     Object.values(this.openedCharacter.inventory).forEach((item) => {
-      if (item.type === 'magicItem') {
-        updates[`${item.ref}/chargesLeft`] = item.chargesMax;
+      if (item.charges) {
+        Object.entries(item.charges).forEach(([chargesName, chargesData]) => {
+          console.log(chargesName, toJS(chargesData), item.ref);
+          if (chargesData.restorable) {
+            updates[`${item.ref}/charges/${chargesName}/count`] = chargesData.maxCharges;
+          }
+        });
       }
     });
     try {
       await update(ref(db), updates);
-      await Object.entries(toJS(this.openedCharacter.abilities)).forEach(
-        ([abilityName, abilityObj]) => {
-          if (abilityObj.adjustment && abilityObj.adjustment < 0) {
-            this.changeAbility(
-              uid,
-              charRef,
-              abilityName,
-              'adjustment',
-              abilityObj.adjustment + 1 === 0 ? null : abilityObj.adjustment + 1
-            );
-          }
+      await Object.entries(this.openedCharacter.abilities).forEach(([abilityName, abilityObj]) => {
+        if (abilityObj.adjustment && abilityObj.adjustment < 0) {
+          this.changeAbility(
+            uid,
+            charRef,
+            abilityName,
+            'adjustment',
+            abilityObj.adjustment + 1 === 0 ? null : abilityObj.adjustment + 1
+          );
         }
-      );
+      });
       message.success('Zzzz... full rest...');
     } catch (e) {
       console.log(e);
@@ -897,14 +915,6 @@ class CharactersStore {
     clearedData.ref = itemRef;
     clearedData.itemName = name ?? itemName;
 
-    if (clearedData.type === 'magicStick') {
-      clearedData.chargesLeft = clearedData.chargesMax;
-      clearedData.chargesMax = 50;
-    }
-    if (clearedData.type === 'magicItem') {
-      clearedData.chargesLeft = clearedData.chargesMax;
-    }
-
     try {
       updates[itemRef] = clearedData;
       await update(ref(db), updates);
@@ -941,16 +951,22 @@ class CharactersStore {
     }
   };
 
-  magicItemUse = async (uid, charRef, itemData) => {
+  magicItemUse = async (uid, charRef, itemName, chargesData) => {
     const db = getDatabase();
-    const dataRef = ref(db, `${itemData.ref}/chargesLeft`);
+    const dataRef = ref(
+      db,
+      `${this.openedCharacter.inventory[itemName].ref}/charges/${makeName(chargesData.name)}/count`
+    );
 
-    if (itemData.chargesLeft <= 0) {
+    console.log('MAGIC ITEM USE!');
+    console.log(toJS(this.openedCharacter.inventory[itemName]), toJS(chargesData.name));
+    console.log(chargesData.count);
+    if (chargesData.count <= 0) {
       message.warning(`No charges left.`);
       return;
     }
     try {
-      await set(dataRef, itemData.chargesLeft - 1);
+      await set(dataRef, chargesData.count - 1);
 
       message.success(`Item used!`);
     } catch (e) {
