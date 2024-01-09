@@ -132,7 +132,6 @@ const AddItemModal = observer(
     };
 
     const handleChangeType = (value) => {
-      console.log(value);
       setAdditionalInputs({});
       if (value === 'armor') handleInputs('acBonus');
       if (value === 'magicItem' || value === 'magicStick') handleInputs('charges');

@@ -22,6 +22,7 @@ import CampIcon from '../../icons/CampIcon';
 import Weapons from '../Weapons';
 import CharacterInventory from '../CharacterInventory';
 import knownItemsStore from '../../store/knownItemsStore';
+import CharacterEquippedGear from '../CharacterEquippedGear';
 
 const StyledTabs = styled(Tabs)`
   width: 100%;
@@ -145,6 +146,7 @@ const CharacterPage = observer(() => {
     clearOpenedCharacter,
     makeFullRest,
     changeBaseInfo,
+    calcEquippedBonuses,
   } = charactersStore;
   const { subscribeKnownItems, knownItems } = knownItemsStore;
 
@@ -155,6 +157,7 @@ const CharacterPage = observer(() => {
     if (openedCharacter) {
       form.setFieldsValue({ ...initialUserData });
       form.setFieldsValue({ ...openedCharacter });
+      calcEquippedBonuses();
     }
   }, [openedCharacter]);
 
@@ -202,7 +205,7 @@ const CharacterPage = observer(() => {
         charId={charId}
         userId={userId}
       />
-      <FormInstance form={form}>
+      <FormInstance form={form} layout='vertical'>
         <div className='char-name-container'>
           <h3>{openedCharacter.name}</h3>
           <CampIcon size='20px' handleClick={handleMakeFullRest} />
@@ -282,6 +285,11 @@ const CharacterPage = observer(() => {
               label: `Inventory`,
               key: 'Inventory',
               children: <CharacterInventory charId={charId} userId={userId} />,
+            },
+            {
+              label: `Equipped gear`,
+              key: 'equippedItems',
+              children: <CharacterEquippedGear charId={charId} userId={userId} />,
             },
           ]}
         />

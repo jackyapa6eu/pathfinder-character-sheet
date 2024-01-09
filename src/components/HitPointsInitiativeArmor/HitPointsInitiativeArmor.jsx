@@ -55,41 +55,41 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
   const [touch, setTouch] = useState(null);
   const [flat, setFlat] = useState(null);
 
+  const tempDexMod = openedCharacter.abilities?.dex?.tempModifier;
+  const dexMod = openedCharacter.abilities?.dex?.modifier;
+  const resultDex = Math.min(tempDexMod ?? dexMod, openedCharacter.equipBonuses?.maxDex || 99);
   useEffect(() => {
-    const tempDexMod = openedCharacter.abilities?.dex?.tempModifier;
-    const dexMod = openedCharacter.abilities?.dex?.modifier;
-
     const initiative = openedCharacter.abilities?.dex
       ? (openedCharacter.initiative?.miscModifier || 0) + (tempDexMod ?? dexMod)
       : null;
     const ac = openedCharacter.abilities?.dex
       ? 10 +
-        (openedCharacter.ac?.armorBonus || 0) +
-        (openedCharacter.ac?.shieldBonus || 0) +
-        (openedCharacter.ac?.naturalArmor || 0) +
-        (openedCharacter.ac?.deflectionModifier || 0) +
+        (openedCharacter.equipBonuses?.acBonus?.armor || 0) +
+        (openedCharacter.equipBonuses?.acBonus?.shield || 0) +
+        (openedCharacter.equipBonuses?.acBonus?.natural || 0) +
+        (openedCharacter.equipBonuses?.acBonus?.deflection || 0) +
         (openedCharacter.ac?.miscModifier || 0) +
-        (tempDexMod ?? dexMod)
+        resultDex
       : null;
     const touchArmor = openedCharacter.abilities?.dex
       ? 10 +
-        (openedCharacter.ac?.deflectionModifier || 0) +
+        (openedCharacter.equipBonuses?.acBonus?.deflection || 0) +
         (openedCharacter.ac?.miscModifier || 0) +
-        (tempDexMod ?? dexMod)
+        resultDex
       : null;
     const flatArmor =
       10 +
-      (openedCharacter.ac?.armorBonus || 0) +
-      (openedCharacter.ac?.shieldBonus || 0) +
-      (openedCharacter.ac?.naturalArmor || 0) +
-      (openedCharacter.ac?.deflectionModifier || 0) +
+      (openedCharacter.equipBonuses?.acBonus?.armor || 0) +
+      (openedCharacter.equipBonuses?.acBonus?.shield || 0) +
+      (openedCharacter.equipBonuses?.acBonus?.natural || 0) +
+      (openedCharacter.equipBonuses?.acBonus?.deflection || 0) +
       (openedCharacter.ac?.miscModifier || 0);
 
     setTotalInitiative(initiative);
     setTotalAc(ac);
     setTouch(touchArmor);
     setFlat(flatArmor);
-  }, [openedCharacter]);
+  }, [openedCharacter, openedCharacter.equipBonuses]);
 
   return (
     <HitPointsContainer>
@@ -178,49 +178,44 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
             disabled
           />
         </FormItem>
-        <FormItem name={['ac', 'armorBonus']} label='armor' textAlign='center' noBgLabel>
+        <FormItem label='armor' textAlign='center' noBgLabel>
           <InputNumber
             controls={false}
+            value={openedCharacter.equipBonuses?.acBonus?.armor || null}
+            disabled
             style={{ width: '100%', color: 'black' }}
-            onChange={(value) => changeAc(userId || user.uid, charId, 'armorBonus', value)}
           />
         </FormItem>
-        <FormItem name={['ac', 'shieldBonus']} label='shield' textAlign='center' noBgLabel>
+        <FormItem label='shield' textAlign='center' noBgLabel>
           <InputNumber
             controls={false}
+            disabled
+            value={openedCharacter.equipBonuses?.acBonus?.shield || null}
             style={{ width: '100%', color: 'black' }}
-            onChange={(value) => changeAc(userId || user.uid, charId, 'shieldBonus', value)}
           />
         </FormItem>
-        <FormItem
-          name={
-            openedCharacter.abilities?.dex?.tempModifier !== undefined
-              ? ['abilities', 'dex', 'tempModifier']
-              : ['abilities', 'dex', 'modifier']
-          }
-          label='dex'
-          textAlign='center'
-          noBgLabel
-        >
-          <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
-        </FormItem>
-        <FormItem name={['ac', 'naturalArmor']} label='natural ' textAlign='center' noBgLabel>
+        <FormItem label='dex' textAlign='center' noBgLabel>
           <InputNumber
             controls={false}
+            value={resultDex}
             style={{ width: '100%', color: 'black' }}
-            onChange={(value) => changeAc(userId || user.uid, charId, 'naturalArmor', value)}
+            disabled
           />
         </FormItem>
-        <FormItem
-          name={['ac', 'deflectionModifier']}
-          label='deflection '
-          textAlign='center'
-          noBgLabel
-        >
+        <FormItem label='natural' textAlign='center' noBgLabel>
           <InputNumber
             controls={false}
             style={{ width: '100%', color: 'black' }}
-            onChange={(value) => changeAc(userId || user.uid, charId, 'deflectionModifier', value)}
+            disabled
+            value={openedCharacter.equipBonuses?.acBonus?.natural || null}
+          />
+        </FormItem>
+        <FormItem label='deflection' textAlign='center' noBgLabel>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            disabled
+            value={openedCharacter.equipBonuses?.acBonus?.deflection || null}
           />
         </FormItem>
         <FormItem name={['ac', 'miscModifier']} label='misc' textAlign='center' noBgLabel>

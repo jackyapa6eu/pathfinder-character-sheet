@@ -11,7 +11,7 @@ import { toJS } from 'mobx';
 const FeatContainer = styled.div`
   display: grid;
   width: fit-content;
-  grid-template-columns: 16px 130px 44px 44px 44px 44px;
+  grid-template-columns: 16px 130px 44px 44px 44px 44px 44px;
   justify-items: center;
   align-items: center;
   box-shadow: 0 0 3px #dcdcdc;
@@ -47,10 +47,11 @@ const Skill = observer(({ name, title, ability, charId, userId, showLabels, trai
         (tempAbilityMod ?? abilityMod) +
         (ranks || 0) +
         (miscMod || 0) +
-        (openedCharacter.skills?.[name]?.classSkill && ranks > 0 ? 3 : 0);
+        (openedCharacter.skills?.[name]?.classSkill && ranks > 0 ? 3 : 0) -
+        (openedCharacter.equipBonuses?.checkPenalty || 0);
       setTotal(trainedOnly && ranks === undefined ? null : featTotal);
     }
-  }, [openedCharacter]);
+  }, [openedCharacter, openedCharacter.equipBonuses]);
   return (
     <FeatContainer>
       <FormItem label={showLabels && 'class skill'} textAlign='center' noBgLabel>
@@ -83,6 +84,17 @@ const Skill = observer(({ name, title, ability, charId, userId, showLabels, trai
         noBgLabel
       >
         <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
+      </FormItem>
+
+      <FormItem label={showLabels && 'check penalty'} textAlign='center' noBgLabel>
+        <InputNumber
+          controls={false}
+          value={
+            ['str', 'dex'].includes(ability) ? -openedCharacter.equipBonuses?.checkPenalty : null
+          }
+          style={{ width: '100%' }}
+          disabled
+        />
       </FormItem>
 
       <FormItem

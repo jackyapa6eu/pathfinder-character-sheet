@@ -30,6 +30,10 @@ code {
   padding-right: 2px!important;
 }
 
+.ant-form-item-control * {
+  cursor: default;
+}
+
 .ant-tooltip {
   z-index: 5555!important;
 }

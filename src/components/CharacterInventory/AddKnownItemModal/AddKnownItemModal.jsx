@@ -14,6 +14,11 @@ const StyledModal = styled(Modal)`
   max-width: 92vw;
 `;
 
+const StyledForm = styled(Form)`
+  max-height: 85vh;
+  overflow-y: auto;
+`;
+
 const AddKnownItemModal = observer(
   ({
     charId,
@@ -44,7 +49,7 @@ const AddKnownItemModal = observer(
         destroyOnClose
         centered
       >
-        <Form form={form}>
+        <StyledForm form={form}>
           {knownItems && (
             <StyledCollapse
               defaultActiveKey={itemTypes.map((type) => type.value)}
@@ -67,7 +72,7 @@ const AddKnownItemModal = observer(
               }))}
             />
           )}
-        </Form>
+        </StyledForm>
       </StyledModal>
     );
   }

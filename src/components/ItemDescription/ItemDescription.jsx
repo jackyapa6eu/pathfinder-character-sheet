@@ -60,7 +60,7 @@ const ItemDescription = observer(({ itemName, charId, userId, isKnown }) => {
     name,
     itemName: x,
     ...itemProperties
-  } = openedCharacter.inventory[itemName];
+  } = isKnown ? knownItems[itemName] : openedCharacter.inventory[itemName];
 
   const handleMagicItemUse = useCallback(
     async (chargesData) => {
@@ -68,10 +68,6 @@ const ItemDescription = observer(({ itemName, charId, userId, isKnown }) => {
     },
     [itemName]
   );
-
-  useEffect(() => {
-    console.log('desc mounted', toJS(openedCharacter.inventory[itemName]));
-  }, [openedCharacter.inventory]);
 
   return (
     <Container>
@@ -102,7 +98,9 @@ const ItemDescription = observer(({ itemName, charId, userId, isKnown }) => {
                 <PropertyLine key={data.acBonusType}>
                   {`${capitalizedFirstLetter(data.acBonusType)} ac ${data.acBonus > 0 ? '+' : '-'}${
                     data.acBonus
-                  }. Check penalty: ${data.checkPenalty}`}
+                  }. Check penalty: ${data.checkPenalty}. ${
+                    data.maxDex < 12 ? `Max dex: ${data.maxDex}.` : ''
+                  } `}
                 </PropertyLine>
               ))}
             </PropertyContainer>

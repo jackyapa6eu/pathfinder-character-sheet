@@ -280,7 +280,7 @@ export const initialUserData = {
     platinum: 0,
   },
 
-  equippedItem: {
+  equippedItems: {
     head: null, // circlets,crowns,hats,headbands,helmets, phylacteries.
     face: null, // googles,lenses,masks,spectacles,third eyes.
     shoulders: null, // capes, cloaks, mantles, shawls
@@ -293,6 +293,18 @@ export const initialUserData = {
     hands: null, // gauntlets, gloves
     waist: null, // belts, girdles, sashes
     feet: null, // boots, sandals, shoes, slippers
+  },
+
+  // TODO: ЗДЕСЬ
+  equipBonuses: {
+    checkPenalty: 0,
+    maxDex: 99,
+    acBonus: {
+      armor: 0,
+      shield: 0,
+      natural: 0,
+      deflection: 0,
+    },
   },
 };
 
@@ -1002,6 +1014,65 @@ class CharactersStore {
       message.error('Error!');
     }
   }, 700);
+
+  equipItem = debounce(async (uid, charRef, field, value) => {
+    const db = getDatabase();
+    const dataRef = `users/${uid}/characters/${charRef}/equippedItems/${field}`;
+    const updates = {};
+
+    try {
+      updates[dataRef] = value || null;
+      await update(ref(db), updates);
+      message.success(`Item equipped!`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  }, 500);
+
+  calcEquippedBonuses = () => {
+    console.log('CALC EQUIPPED BONUSES');
+    console.log(toJS(this.openedCharacter.equippedItems));
+    if (!this.openedCharacter.equippedItems) {
+      runInAction(() => {
+        this.openedCharacter.equipBonuses = JSON.parse(
+          JSON.stringify(initialUserData.equipBonuses)
+        );
+      });
+      return;
+    }
+    const equippedItems = Object.values(this.openedCharacter.equippedItems);
+    // TODO: ЗДЕСЬ
+    const result = equippedItems.reduce((acc, current) => {
+      acc.checkPenalty ??= 0;
+      acc.maxDex ??= 99;
+
+      const item = this.openedCharacter.inventory[current];
+      if (item) {
+        Object.entries(item).forEach(([keyName, data]) => {
+          if (keyName === 'acBonus') {
+            acc.acBonus ??= {};
+            Object.values(data).forEach(({ acBonusType, acBonus, maxDex, checkPenalty }) => {
+              acc.acBonus[acBonusType] ??= 0;
+
+              if (acBonusType === 'deflection') {
+                if (acc.acBonus[acBonusType] < acBonus) acc.acBonus[acBonusType] = acBonus;
+              } else {
+                acc.acBonus[acBonusType] = acBonus;
+              }
+              if (acc.maxDex > maxDex) acc.maxDex = maxDex;
+              acc.checkPenalty += checkPenalty || 0;
+            });
+          }
+        }, {});
+      }
+      return acc;
+    }, {});
+    runInAction(() => {
+      console.log(result);
+      this.openedCharacter.equipBonuses = result;
+    });
+  };
 }
 
 const charactersStore = new CharactersStore();
