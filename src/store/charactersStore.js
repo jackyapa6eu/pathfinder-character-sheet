@@ -305,6 +305,11 @@ export const initialUserData = {
       natural: 0,
       deflection: 0,
     },
+    savingThrows: {
+      fortitude: 0,
+      reflex: 0,
+      will: 0,
+    },
   },
 };
 
@@ -475,22 +480,12 @@ class CharactersStore {
 
   changeSavingThrows = debounce(async (uid, charRef, throwName, field, newValue, abilityName) => {
     const db = getDatabase();
-    const tempAbilityMod = this.openedCharacter.abilities?.[abilityName]?.tempModifier;
-    const abilityMod = this.openedCharacter.abilities?.[abilityName]?.modifier;
-    const savingThrow = this.openedCharacter.savingThrows?.[throwName];
-    // получим объект всех спасбросков кроме изменяемого и тотал.
-    const { total: prevTotal = 0, [field]: current, ...otherThrows } = savingThrow || {};
-    const total =
-      (tempAbilityMod ?? abilityMod) +
-      (newValue || 0) +
-      Object.values(otherThrows).reduce((acc, curr) => acc + curr, 0);
-
     try {
       const updates = {};
 
       updates[`users/${uid}/characters/${charRef}/savingThrows/${throwName}/${field}`] = newValue;
-      updates[`users/${uid}/characters/${charRef}/savingThrows/${throwName}/total`] =
-        Math.floor(total);
+      // updates[`users/${uid}/characters/${charRef}/savingThrows/${throwName}/total`] =
+      //   Math.floor(total);
 
       await update(ref(db), updates);
       message.success(`Saving throw ${throwName} changed!`);
@@ -1031,8 +1026,6 @@ class CharactersStore {
   }, 500);
 
   calcEquippedBonuses = () => {
-    console.log('CALC EQUIPPED BONUSES');
-    console.log(toJS(this.openedCharacter.equippedItems));
     if (!this.openedCharacter.equippedItems) {
       runInAction(() => {
         this.openedCharacter.equipBonuses = JSON.parse(
@@ -1064,13 +1057,48 @@ class CharactersStore {
               acc.checkPenalty += checkPenalty || 0;
             });
           }
+          if (keyName === 'savingThrows') {
+            acc.savingThrows ??= {};
+            Object.values(data).forEach(({ name, count }) => {
+              acc.savingThrows[name] ??= 0;
+              acc.savingThrows[name] += count;
+            });
+          }
         }, {});
       }
       return acc;
     }, {});
     runInAction(() => {
-      console.log(result);
       this.openedCharacter.equipBonuses = result;
+    });
+  };
+
+  calcTotalSavingThrows = () => {
+    if (!this.openedCharacter.equippedItems) {
+      runInAction(() => {
+        this.openedCharacter.equipBonuses = JSON.parse(
+          JSON.stringify(initialUserData.equipBonuses)
+        );
+      });
+      return;
+    }
+    const dict = { fortitude: 'con', reflex: 'dex', will: 'wis' };
+    const total = Object.entries(dict).reduce((acc, [st, ability]) => {
+      const tempAbilityMod = this.openedCharacter.abilities?.[ability]?.tempModifier;
+      const abilityMod = this.openedCharacter.abilities?.[ability]?.modifier;
+      acc[st] ??= 0;
+      acc[st] += Object.values(this.openedCharacter?.savingThrows[st]).reduce((sum, item) => {
+        return sum + item;
+      }, 0);
+      acc[st] += this.openedCharacter?.equipBonuses?.savingThrows?.[st] || 0;
+      acc[st] += tempAbilityMod ?? abilityMod;
+
+      return acc;
+    }, {});
+    runInAction(() => {
+      Object.entries(total).forEach(([st, value]) => {
+        this.openedCharacter.savingThrows[st].total = value;
+      });
     });
   };
 }

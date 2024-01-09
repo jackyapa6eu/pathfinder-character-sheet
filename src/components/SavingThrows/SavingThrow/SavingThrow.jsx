@@ -1,4 +1,4 @@
-import { memo, useEffect } from 'react';
+import { memo } from 'react';
 import CharSheetRowLabel from '../../CharlSheetRowLabel/CharSheetRowLabel';
 import FormItem from '../../FormItem';
 import { InputNumber } from 'antd';
@@ -21,13 +21,13 @@ const SavingThrow = observer(({ name, abilityName, charId, userId, showLabels = 
   return (
     <SavingThrowContainer>
       <CharSheetRowLabel label={name} />
-      <FormItem
-        name={['savingThrows', name, 'total']}
-        label={showLabels && 'total'}
-        textAlign='center'
-        noBgLabel
-      >
-        <InputNumber controls={false} style={{ width: '100%' }} disabled />
+      <FormItem label={showLabels && 'total'} textAlign='center' noBgLabel>
+        <InputNumber
+          value={openedCharacter?.savingThrows?.[name]?.total || null}
+          controls={false}
+          style={{ width: '100%' }}
+          disabled
+        />
       </FormItem>
 
       <FormItem
@@ -65,18 +65,12 @@ const SavingThrow = observer(({ name, abilityName, charId, userId, showLabels = 
         <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
       </FormItem>
 
-      <FormItem
-        name={['savingThrows', name, 'magicMod']}
-        label={showLabels && 'magic modifier'}
-        textAlign='center'
-        noBgLabel
-      >
+      <FormItem label={showLabels && 'magic modifier'} textAlign='center' noBgLabel>
         <InputNumber
           controls={false}
           style={{ width: '100%' }}
-          onChange={(value) =>
-            changeSavingThrows(userId || user.uid, charId, name, 'magicMod', value, abilityName)
-          }
+          value={openedCharacter?.equipBonuses?.savingThrows?.[name] || null}
+          disabled
         />
       </FormItem>
 

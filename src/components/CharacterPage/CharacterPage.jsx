@@ -147,6 +147,7 @@ const CharacterPage = observer(() => {
     makeFullRest,
     changeBaseInfo,
     calcEquippedBonuses,
+    calcTotalSavingThrows,
   } = charactersStore;
   const { subscribeKnownItems, knownItems } = knownItemsStore;
 
@@ -158,6 +159,7 @@ const CharacterPage = observer(() => {
       form.setFieldsValue({ ...initialUserData });
       form.setFieldsValue({ ...openedCharacter });
       calcEquippedBonuses();
+      calcTotalSavingThrows();
     }
   }, [openedCharacter]);
 
