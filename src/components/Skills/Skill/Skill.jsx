@@ -52,6 +52,7 @@ const Skill = observer(({ name, title, ability, charId, userId, showLabels, trai
       setTotal(trainedOnly && ranks === undefined ? null : featTotal);
     }
   }, [openedCharacter, openedCharacter.equipBonuses]);
+
   return (
     <FeatContainer>
       <FormItem label={showLabels && 'class skill'} textAlign='center' noBgLabel>
@@ -73,17 +74,17 @@ const Skill = observer(({ name, title, ability, charId, userId, showLabels, trai
         <InputNumber controls={false} style={{ width: '100%' }} disabled value={total} />
       </FormItem>
 
-      <FormItem
-        name={
-          openedCharacter.abilities?.[ability]?.tempModifier !== undefined
-            ? ['abilities', ability, 'tempModifier']
-            : ['abilities', ability, 'modifier']
-        }
-        label={showLabels && 'ability modifier'}
-        textAlign='center'
-        noBgLabel
-      >
-        <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
+      <FormItem label={showLabels && 'ability modifier'} textAlign='center' noBgLabel>
+        <InputNumber
+          value={
+            openedCharacter.abilities?.[ability]?.tempModifier !== null
+              ? openedCharacter.abilities?.[ability]?.tempModifier
+              : openedCharacter.abilities?.[ability]?.modifier
+          }
+          controls={false}
+          style={{ width: '100%', color: 'black' }}
+          disabled
+        />
       </FormItem>
 
       <FormItem label={showLabels && 'check penalty'} textAlign='center' noBgLabel>

@@ -63,7 +63,7 @@ const CharacterPageContainer = styled.div`
   display: grid;
   width: 100%;
   align-content: start;
-  grid-template-columns: 215px 1fr 1fr;
+  grid-template-columns: 260px 1fr 1fr;
   grid-template-rows: repeat(auto-fit, max-content);
   grid-template-areas:
     'abilities HitPointsInitiativeArmor feats'
@@ -78,7 +78,7 @@ const CharacterPageContainer = styled.div`
   overflow-x: hidden;
 
   @media screen and (max-width: 950px) {
-    grid-template-columns: 215px 1fr;
+    grid-template-columns: 260px 1fr;
     grid-template-areas:
       'abilities HitPointsInitiativeArmor'
       'abilities savingThrows'
@@ -148,6 +148,7 @@ const CharacterPage = observer(() => {
     changeBaseInfo,
     calcEquippedBonuses,
     calcTotalSavingThrows,
+    calcAbilitiesModifiers,
   } = charactersStore;
   const { subscribeKnownItems, knownItems } = knownItemsStore;
 
@@ -160,6 +161,7 @@ const CharacterPage = observer(() => {
       form.setFieldsValue({ ...openedCharacter });
       calcEquippedBonuses();
       calcTotalSavingThrows();
+      calcAbilitiesModifiers();
     }
   }, [openedCharacter]);
 

@@ -310,6 +310,14 @@ export const initialUserData = {
       reflex: 0,
       will: 0,
     },
+    abilityBonus: {
+      str: 0,
+      dex: 0,
+      con: 0,
+      int: 0,
+      wis: 0,
+      cha: 0,
+    },
   },
 };
 
@@ -396,8 +404,8 @@ class CharactersStore {
           abilityValue;
         updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/modifier`] =
           Math.floor((abilityValue - 10) / 2);
-        updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/tempModifier`] =
-          adjustment ? tempModifier : null;
+        // updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/tempModifier`] =
+        //   adjustment ? tempModifier : null;
         await update(ref(db), updates);
         message.success(`Ability ${abilityName} changed!`);
       } catch (e) {
@@ -412,8 +420,8 @@ class CharactersStore {
         const tempModifier = Math.floor((score + (adjustment || 0) - 10) / 2);
         updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/adjustment`] =
           adjustment ?? null;
-        updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/tempModifier`] =
-          adjustment ? tempModifier : null;
+        // updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/tempModifier`] =
+        //   adjustment ? tempModifier : null;
 
         await update(ref(db), updates);
         message.success(`Ability ${abilityName.toUpperCase()} changed!`);
@@ -1064,6 +1072,13 @@ class CharactersStore {
               acc.savingThrows[name] += count;
             });
           }
+          if (keyName === 'abilityBonus') {
+            acc.abilityBonus ??= {};
+            Object.values(data).forEach(({ name, count }) => {
+              acc.abilityBonus[name] ??= 0;
+              acc.abilityBonus[name] += count;
+            });
+          }
         }, {});
       }
       return acc;
@@ -1098,6 +1113,38 @@ class CharactersStore {
     runInAction(() => {
       Object.entries(total).forEach(([st, value]) => {
         this.openedCharacter.savingThrows[st].total = value;
+      });
+    });
+  };
+
+  calcAbilitiesModifiers = () => {
+    if (!this.openedCharacter.abilities) {
+      return;
+    }
+    const res = Object.entries(this.openedCharacter.abilities).reduce(
+      (acc, [abilityName, abilityValue]) => {
+        acc[abilityName] ??= { abilityModifier: 0, abilityTempModifier: null };
+
+        acc[abilityName].abilityModifier = Math.floor(((abilityValue.score || 0) - 10) / 2);
+        acc[abilityName].abilityTempModifier = abilityValue.adjustment
+          ? Math.floor(
+              ((abilityValue.score || 0) +
+                (abilityValue.adjustment || 0) +
+                (this.openedCharacter.equipBonuses?.abilityBonus?.[abilityName] || 0) -
+                10) /
+                2
+            )
+          : null;
+        return acc;
+      },
+      {}
+    );
+    runInAction(() => {
+      Object.entries(res).forEach(([abilityName, abilityValue]) => {
+        this.openedCharacter.abilities[abilityName].modifier = abilityValue.abilityModifier || 0;
+        this.openedCharacter.abilities[abilityName].tempModifier =
+          abilityValue.abilityTempModifier || null;
+        console.log(abilityValue.abilityTempModifier);
       });
     });
   };

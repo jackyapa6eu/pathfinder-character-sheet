@@ -6,16 +6,17 @@ import charactersStore from '../../../store/charactersStore';
 import { observer } from 'mobx-react';
 import authStore from '../../../store/authStore';
 import CharSheetRowLabel from '../../CharlSheetRowLabel/CharSheetRowLabel';
+import { toJS } from 'mobx';
 
 const AbilityContainer = styled.div`
   display: grid;
-  grid-template-columns: 38px 44px 44px 44px 44px;
+  grid-template-columns: 38px 44px 44px 44px 44px 44px;
   justify-items: center;
   align-items: center;
 `;
 
 const Ability = observer(({ name = '', showLabel = false, abilityDesc, charId, userId }) => {
-  const { changeAbilityDebounce } = charactersStore;
+  const { changeAbilityDebounce, openedCharacter } = charactersStore;
   const { user } = authStore;
 
   const handleScoreChange = async (value, name, type) => {
@@ -40,13 +41,31 @@ const Ability = observer(({ name = '', showLabel = false, abilityDesc, charId, u
         />
       </FormItem>
       <FormItem
-        name={['abilities', name, 'modifier']}
+        // name={['abilities', name, 'modifier']}
         label={showLabel && 'ability modifier'}
         textAlign='center'
         labelDesc='Модификатор'
         noBgLabel
       >
-        <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
+        <InputNumber
+          value={openedCharacter.abilities?.[name]?.modifier}
+          controls={false}
+          style={{ width: '100%', color: 'black' }}
+          disabled
+        />
+      </FormItem>
+      <FormItem
+        label={showLabel && 'equip adjustment'}
+        textAlign='center'
+        labelDesc='Бонус от экипировки'
+        noBgLabel
+      >
+        <InputNumber
+          value={openedCharacter.equipBonuses?.abilityBonus?.[name] || null}
+          controls={false}
+          style={{ width: '100%', color: 'black' }}
+          disabled
+        />
       </FormItem>
       <FormItem
         name={['abilities', name, 'adjustment']}
@@ -62,13 +81,18 @@ const Ability = observer(({ name = '', showLabel = false, abilityDesc, charId, u
         />
       </FormItem>
       <FormItem
-        name={['abilities', name, 'tempModifier']}
+        // name={['abilities', name, 'tempModifier']}
         label={showLabel && 'temp modifier'}
         textAlign='center'
         noBgLabel
         labelDesc={'Временный модификатор.'}
       >
-        <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
+        <InputNumber
+          value={openedCharacter.abilities?.[name]?.tempModifier}
+          controls={false}
+          style={{ width: '100%', color: 'black' }}
+          disabled
+        />
       </FormItem>
     </AbilityContainer>
   );

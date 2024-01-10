@@ -57,6 +57,7 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
 
   const tempDexMod = openedCharacter.abilities?.dex?.tempModifier;
   const dexMod = openedCharacter.abilities?.dex?.modifier;
+
   const resultDex = Math.min(tempDexMod ?? dexMod, openedCharacter.equipBonuses?.maxDex || 99);
   useEffect(() => {
     const initiative = openedCharacter.abilities?.dex
@@ -143,17 +144,17 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
             disabled
           />
         </FormItem>
-        <FormItem
-          name={
-            openedCharacter.abilities?.dex?.tempModifier !== undefined
-              ? ['abilities', 'dex', 'tempModifier']
-              : ['abilities', 'dex', 'modifier']
-          }
-          label='dex modifier'
-          textAlign='center'
-          noBgLabel
-        >
-          <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
+        <FormItem label='dex modifier' textAlign='center' noBgLabel>
+          <InputNumber
+            value={
+              openedCharacter.abilities?.dex?.tempModifier !== null
+                ? openedCharacter.abilities?.dex?.tempModifier
+                : openedCharacter.abilities?.dex?.modifier
+            }
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            disabled
+          />
         </FormItem>
         <FormItem
           name={['initiative', 'miscModifier']}

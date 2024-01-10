@@ -46,11 +46,11 @@ const SavingThrow = observer(({ name, abilityName, charId, userId, showLabels = 
       </FormItem>
 
       <FormItem
-        name={
-          openedCharacter.abilities?.[abilityName]?.tempModifier !== undefined
-            ? ['abilities', abilityName, 'tempModifier']
-            : ['abilities', abilityName, 'modifier']
-        }
+        // name={
+        //   openedCharacter.abilities?.[abilityName]?.tempModifier !== undefined
+        //     ? ['abilities', abilityName, 'tempModifier']
+        //     : ['abilities', abilityName, 'modifier']
+        // }
         label={showLabels && 'ability modifier'}
         textAlign='center'
         noBgLabel
@@ -62,7 +62,16 @@ const SavingThrow = observer(({ name, abilityName, charId, userId, showLabels = 
           </div>
         }
       >
-        <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
+        <InputNumber
+          value={
+            openedCharacter.abilities?.[abilityName]?.tempModifier !== null
+              ? openedCharacter.abilities?.[abilityName]?.tempModifier
+              : openedCharacter.abilities?.[abilityName]?.modifier
+          }
+          controls={false}
+          style={{ width: '100%', color: 'black' }}
+          disabled
+        />
       </FormItem>
 
       <FormItem label={showLabels && 'magic modifier'} textAlign='center' noBgLabel>
