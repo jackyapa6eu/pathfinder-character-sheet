@@ -1048,7 +1048,7 @@ class CharactersStore {
       acc.checkPenalty ??= 0;
       acc.maxDex ??= 99;
 
-      const item = this.openedCharacter.inventory[current];
+      const item = this.openedCharacter.inventory?.[current];
       if (item) {
         Object.entries(item).forEach(([keyName, data]) => {
           if (keyName === 'acBonus') {
