@@ -142,14 +142,14 @@ const GroupedInventoryItems = observer(
 
     const handleChangeItemData = async (itemData, type, value) => {
       if (isKnown) {
-        await changeKnown(itemData, type, value.target?.value || value);
+        await changeKnown(itemData, type, value?.target?.value || value);
       } else {
         await changeItemData(
           userId || user.uid,
           charId,
           itemData.itemName,
           type,
-          value.target?.value || value,
+          value?.target?.value || value,
           isKnown
         );
       }

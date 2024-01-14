@@ -335,18 +335,27 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
           />
         </FormItem>
         <FormItem
-          name={
-            weaponData.maxDamageBonus && weaponData.maxDamageBonus < damageMod
-              ? ['weapons', weaponData.name, 'maxDamageBonus']
-              : openedCharacter.abilities?.[weaponData.damageBonus]?.tempModifier !== undefined
-                ? ['abilities', weaponData.damageBonus, 'tempModifier']
-                : ['abilities', weaponData.damageBonus, 'modifier']
-          }
+          // value={
+          //   openedCharacter.abilities?.[ability]?.tempModifier !== null
+          //     ? openedCharacter.abilities?.[ability]?.tempModifier
+          //     : openedCharacter.abilities?.[ability]?.modifier
+          // }
           label={weaponData.damageBonus ? `${weaponData.damageBonus} modifier` : ''}
           textAlign='center'
           noBgLabel
         >
-          <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
+          <InputNumber
+            value={
+              weaponData.maxDamageBonus && weaponData.maxDamageBonus < damageMod
+                ? weaponData.maxDamageBonus
+                : openedCharacter.abilities?.[weaponData.damageBonus]?.tempModifier !== null
+                  ? openedCharacter.abilities?.[weaponData.damageBonus]?.tempModifier
+                  : openedCharacter.abilities?.[weaponData.damageBonus]?.modifier
+            }
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            disabled
+          />
         </FormItem>
         <FormItem
           name={['weapons', weaponData.name, 'weaponDamageBonus']}

@@ -165,6 +165,7 @@ const itemProperties = {
 };
 
 const equippedItem = {
+  none: null,
   head: null, // circlets,crowns,hats,headbands,helmets, phylacteries.
   face: null, // googles,lenses,masks,spectacles,third eyes.
   shoulders: null, // capes, cloaks, mantles, shawls
@@ -177,7 +178,6 @@ const equippedItem = {
   waist: null, // belts, girdles, sashes
   feet: null, // boots, sandals, shoes, slippers
   shield: null,
-  empty: null,
 };
 
 const availableSkills = {

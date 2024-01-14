@@ -50,15 +50,15 @@ const ItemDescription = observer(({ itemName, charId, userId, isKnown }) => {
   const { user } = authStore;
 
   const {
-    cost,
-    count,
-    currency,
-    equipSlot,
-    type,
-    weight,
-    ref,
-    name,
-    itemName: x,
+    cost = null,
+    count = null,
+    currency = null,
+    equipSlot = null,
+    type = null,
+    weight = null,
+    ref = null,
+    name = null,
+    itemName: x = null,
     ...itemProperties
   } = isKnown ? knownItems[itemName] : openedCharacter.inventory[itemName];
 

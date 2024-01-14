@@ -287,6 +287,7 @@ export const initialUserData = {
     throat: null, // amulets, badges, brooches, collars, medals, medallions, necklaces, pendants, periapts, scarabs,scarfs, torcs
     body: null, // armor, robes
     torso: null, //shirts,tunics,vests,vestments
+    shield: null,
     arms: null, // armbands,bracelets,bracers
     ringOne: null,
     ringTwo: null,
