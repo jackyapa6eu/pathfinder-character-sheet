@@ -12,7 +12,6 @@ const FeatsContainer = styled.div`
   margin: 0;
   height: max-content;
   gap: 5px;
-  outline: 1px solid yellow;
 `;
 
 const Skills = ({ charId, userId }) => {

@@ -19,7 +19,6 @@ const FeatContainer = styled.div`
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
-  outline: 1px solid red;
   &:hover {
     background: white;
   }
