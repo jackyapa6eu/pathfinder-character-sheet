@@ -23,6 +23,13 @@ const FeatContainer = styled.div`
   &:hover {
     background: white;
   }
+
+  @media screen and (max-width: 400px) {
+    & {
+      grid-template-columns: 16px 110px 44px 44px 44px 44px 44px;
+      font-size: 13px;
+    }
+  }
 `;
 
 const FeatLabel = styled.span`

@@ -32,6 +32,10 @@ const StyledTabs = styled(Tabs)`
     margin: 0;
   }
   
+  & .ant-tabs-nav-list {
+    flex-wrap: wrap;
+  }
+  
   & .ant-tabs-tab-btn {
     color: black!important;
     

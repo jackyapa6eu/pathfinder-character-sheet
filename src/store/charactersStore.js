@@ -400,13 +400,11 @@ class CharactersStore {
       try {
         const updates = {};
         const adjustment = this.openedCharacter.abilities?.[abilityName]?.adjustment || 0;
-        const tempModifier = Math.floor((abilityValue + (adjustment || 0) - 10) / 2);
         updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/${abilityType}`] =
           abilityValue;
         updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/modifier`] =
           Math.floor((abilityValue - 10) / 2);
-        // updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/tempModifier`] =
-        //   adjustment ? tempModifier : null;
+
         await update(ref(db), updates);
         message.success(`Ability ${abilityName} changed!`);
       } catch (e) {
@@ -414,15 +412,10 @@ class CharactersStore {
       }
     }
     if (abilityType === 'adjustment') {
-      const score = this.openedCharacter.abilities?.[abilityName].score || 0;
-      const adjustment = abilityValue;
       try {
         const updates = {};
-        const tempModifier = Math.floor((score + (adjustment || 0) - 10) / 2);
         updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/adjustment`] =
-          adjustment ?? null;
-        // updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/tempModifier`] =
-        //   adjustment ? tempModifier : null;
+          abilityValue ?? null;
 
         await update(ref(db), updates);
         message.success(`Ability ${abilityName.toUpperCase()} changed!`);
@@ -1124,18 +1117,20 @@ class CharactersStore {
     }
     const res = Object.entries(this.openedCharacter.abilities).reduce(
       (acc, [abilityName, abilityValue]) => {
+        const abilityFromEquip = this.openedCharacter.equipBonuses?.abilityBonus?.[abilityName];
         acc[abilityName] ??= { abilityModifier: 0, abilityTempModifier: null };
 
         acc[abilityName].abilityModifier = Math.floor(((abilityValue.score || 0) - 10) / 2);
-        acc[abilityName].abilityTempModifier = abilityValue.adjustment
-          ? Math.floor(
-              ((abilityValue.score || 0) +
-                (abilityValue.adjustment || 0) +
-                (this.openedCharacter.equipBonuses?.abilityBonus?.[abilityName] || 0) -
-                10) /
-                2
-            )
-          : null;
+        acc[abilityName].abilityTempModifier =
+          abilityValue.adjustment || abilityFromEquip
+            ? Math.floor(
+                ((abilityValue.score || 0) +
+                  (abilityValue.adjustment || 0) +
+                  (this.openedCharacter.equipBonuses?.abilityBonus?.[abilityName] || 0) -
+                  10) /
+                  2
+              )
+            : null;
         return acc;
       },
       {}
@@ -1145,7 +1140,6 @@ class CharactersStore {
         this.openedCharacter.abilities[abilityName].modifier = abilityValue.abilityModifier || 0;
         this.openedCharacter.abilities[abilityName].tempModifier =
           abilityValue.abilityTempModifier || null;
-        console.log(abilityValue.abilityTempModifier);
       });
     });
   };

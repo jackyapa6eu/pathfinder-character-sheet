@@ -6,7 +6,6 @@ import charactersStore from '../../../store/charactersStore';
 import { observer } from 'mobx-react';
 import authStore from '../../../store/authStore';
 import CharSheetRowLabel from '../../CharlSheetRowLabel/CharSheetRowLabel';
-import { toJS } from 'mobx';
 
 const AbilityContainer = styled.div`
   display: grid;
@@ -41,7 +40,6 @@ const Ability = observer(({ name = '', showLabel = false, abilityDesc, charId, u
         />
       </FormItem>
       <FormItem
-        // name={['abilities', name, 'modifier']}
         label={showLabel && 'ability modifier'}
         textAlign='center'
         labelDesc='Модификатор'
@@ -81,7 +79,6 @@ const Ability = observer(({ name = '', showLabel = false, abilityDesc, charId, u
         />
       </FormItem>
       <FormItem
-        // name={['abilities', name, 'tempModifier']}
         label={showLabel && 'temp modifier'}
         textAlign='center'
         noBgLabel

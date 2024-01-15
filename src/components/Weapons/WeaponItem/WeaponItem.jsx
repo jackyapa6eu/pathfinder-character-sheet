@@ -29,7 +29,7 @@ const Weapon = styled.div`
   grid-template-areas:
     'name attackBonus'
     'typeAndRange damageBonus'
-    '. critical'
+    'addOnHit critical'
     'onHit onHit';
   gap: 10px;
   padding: 15px 0;
@@ -40,7 +40,9 @@ const Weapon = styled.div`
       display: flex;
     }
     .add-on-hit-property {
-      display: flex;
+      // display: flex;
+      visibility: visible;
+      opacity: 1;
     }
   }
 
@@ -50,16 +52,18 @@ const Weapon = styled.div`
       'name name'
       'attackBonus attackBonus'
       'damageBonus damageBonus'
-      'typeAndRange critical';
+      'typeAndRange critical'
+      'addOnHit .';
   }
 
-  @media screen and (max-width: 595px) {
+  @media screen and (max-width: 445px) {
     grid-template-areas:
       'name name'
       'attackBonus attackBonus'
       'damageBonus damageBonus'
       'typeAndRange .'
-      'critical .';
+      'critical .'
+      'addOnHit .';
   }
 `;
 
@@ -160,9 +164,10 @@ const DeleteWeaponButton = styled(Button)`
 `;
 
 const AddOnHitButton = styled(Button)`
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
+  grid-area: addOnHit;
   width: 32px;
   height: 32px;
   background: white;
@@ -171,6 +176,9 @@ const AddOnHitButton = styled(Button)`
   border-radius: 0px;
   font-size: 20px;
   line-height: 16px;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.5s ease;
 `;
 
 const WeaponItem = observer(({ weaponData, userId, charId }) => {
@@ -335,11 +343,6 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
           />
         </FormItem>
         <FormItem
-          // value={
-          //   openedCharacter.abilities?.[ability]?.tempModifier !== null
-          //     ? openedCharacter.abilities?.[ability]?.tempModifier
-          //     : openedCharacter.abilities?.[ability]?.modifier
-          // }
           label={weaponData.damageBonus ? `${weaponData.damageBonus} modifier` : ''}
           textAlign='center'
           noBgLabel
