@@ -19,14 +19,14 @@ const FeatContainer = styled.div`
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
-
+  outline: 1px solid red;
   &:hover {
     background: white;
   }
 
   @media screen and (max-width: 400px) {
     & {
-      grid-template-columns: 16px 110px 44px 44px 44px 44px 44px;
+      grid-template-columns: 16px 105px 44px 44px 44px 44px 44px;
       font-size: 13px;
     }
   }
