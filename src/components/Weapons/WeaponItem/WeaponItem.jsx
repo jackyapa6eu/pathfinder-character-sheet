@@ -8,6 +8,7 @@ import charactersStore from '../../../store/charactersStore';
 import authStore from '../../../store/authStore';
 import TextArea from 'antd/es/input/TextArea';
 import { ButtonBox, StyledFormItem } from '../../../uiComponents/uiComponents';
+import { toJS } from 'mobx';
 
 const generateAttackString = (attacksPerRound, isMonk = false, attackBonus = 0) => {
   if (attacksPerRound <= 0) {
@@ -221,7 +222,6 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
   const handleDeleteOnHit = async (event, onHitName) => {
     event.stopPropagation();
     await deleteWeaponPropertyOnHit(userId || user.uid, charId, weaponData.name, onHitName);
-    console.log(onHitName);
   };
 
   useEffect(() => {
@@ -251,7 +251,7 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
 
     setTotalAttackBonus(totalAttBonus);
     setResultDamage(`${weaponData.weaponDamage}  ${damageBonus > 0 ? '+' : '-'}${damageBonus}`);
-  }, [openedCharacter]);
+  }, [openedCharacter, openedCharacter.equipBonuses]);
 
   return (
     <Weapon>
