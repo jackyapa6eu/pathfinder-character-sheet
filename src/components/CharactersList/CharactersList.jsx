@@ -81,8 +81,10 @@ const CharactersList = observer(() => {
   };
 
   useEffect(() => {
-    getData();
-  }, []);
+    if (user) {
+      getData();
+    }
+  }, [user]);
 
   return (
     <CharacterListContainer>

@@ -295,17 +295,17 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
         <FormItem textAlign='center' noBgLabel label='total' labelDesc='Включая бонус от оружия'>
           <Input disabled value={totalAttackBonus} />
         </FormItem>
-        <FormItem
-          name={
-            openedCharacter.abilities?.[weaponData.attackBonus]?.tempModifier !== undefined
-              ? ['abilities', weaponData.attackBonus, 'tempModifier']
-              : ['abilities', weaponData.attackBonus, 'modifier']
-          }
-          label={`${weaponData.attackBonus} modifier`}
-          textAlign='center'
-          noBgLabel
-        >
-          <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
+        <FormItem label={`${weaponData.attackBonus} modifier`} textAlign='center' noBgLabel>
+          <InputNumber
+            value={
+              openedCharacter.abilities?.[weaponData.attackBonus]?.tempModifier !== null
+                ? openedCharacter.abilities?.[weaponData.attackBonus]?.tempModifier
+                : openedCharacter.abilities?.[weaponData.attackBonus]?.modifier
+            }
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            disabled
+          />
         </FormItem>
         <FormItem
           name={['weapons', weaponData.name, 'attackMisc']}
