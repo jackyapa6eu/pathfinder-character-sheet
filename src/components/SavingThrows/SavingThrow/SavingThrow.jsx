@@ -15,12 +15,16 @@ const SavingThrowContainer = styled.div`
 `;
 
 const SavingThrow = observer(({ name, abilityName, charId, userId, showLabels = false }) => {
-  const { openedCharacter, changeSavingThrows } = charactersStore;
+  const { openedCharacter, changeSavingThrows, handleCopyToClickBoard } = charactersStore;
   const { user } = authStore;
+
+  const copyToClickBoard = () => {
+    handleCopyToClickBoard(`1d20+${openedCharacter?.savingThrows?.[name]?.total}`);
+  };
 
   return (
     <SavingThrowContainer>
-      <CharSheetRowLabel label={name} />
+      <CharSheetRowLabel label={name} handleOnClick={copyToClickBoard} />
       <FormItem label={showLabels && 'total'} textAlign='center' noBgLabel>
         <InputNumber
           value={openedCharacter?.savingThrows?.[name]?.total || null}
@@ -46,11 +50,6 @@ const SavingThrow = observer(({ name, abilityName, charId, userId, showLabels = 
       </FormItem>
 
       <FormItem
-        // name={
-        //   openedCharacter.abilities?.[abilityName]?.tempModifier !== undefined
-        //     ? ['abilities', abilityName, 'tempModifier']
-        //     : ['abilities', abilityName, 'modifier']
-        // }
         label={showLabels && 'ability modifier'}
         textAlign='center'
         noBgLabel

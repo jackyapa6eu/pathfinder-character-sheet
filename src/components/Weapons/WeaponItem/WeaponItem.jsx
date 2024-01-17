@@ -8,7 +8,6 @@ import charactersStore from '../../../store/charactersStore';
 import authStore from '../../../store/authStore';
 import TextArea from 'antd/es/input/TextArea';
 import { ButtonBox, StyledFormItem } from '../../../uiComponents/uiComponents';
-import { toJS } from 'mobx';
 
 const generateAttackString = (attacksPerRound, isMonk = false, attackBonus = 0) => {
   if (attacksPerRound <= 0) {

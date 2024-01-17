@@ -3,7 +3,7 @@ import { getDatabase, ref, set, get, onValue, update } from 'firebase/database';
 import { message } from 'antd';
 import { debounce } from 'lodash';
 import { availableSpellLevels } from '../utils/consts';
-import { filterUndefinedToNull, makeName } from '../utils/helpers';
+import { copyToClipboard, filterUndefinedToNull, makeName } from '../utils/helpers';
 
 const savingThrowsAbilities = {
   fortitude: 'con',
@@ -399,11 +399,10 @@ class CharactersStore {
     if (abilityType === 'score') {
       try {
         const updates = {};
-        const adjustment = this.openedCharacter.abilities?.[abilityName]?.adjustment || 0;
         updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/${abilityType}`] =
           abilityValue;
-        updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/modifier`] =
-          Math.floor((abilityValue - 10) / 2);
+        // updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/modifier`] =
+        //   Math.floor((abilityValue - 10) / 2);
 
         await update(ref(db), updates);
         message.success(`Ability ${abilityName} changed!`);
@@ -423,7 +422,6 @@ class CharactersStore {
         console.log(e);
       }
     }
-    this.recalcTotalSavingThrows(uid, charRef);
     this.changeAttack(uid, charRef);
   };
 
@@ -486,8 +484,6 @@ class CharactersStore {
       const updates = {};
 
       updates[`users/${uid}/characters/${charRef}/savingThrows/${throwName}/${field}`] = newValue;
-      // updates[`users/${uid}/characters/${charRef}/savingThrows/${throwName}/total`] =
-      //   Math.floor(total);
 
       await update(ref(db), updates);
       message.success(`Saving throw ${throwName} changed!`);
@@ -496,25 +492,32 @@ class CharactersStore {
     }
   });
 
-  changeAttack = debounce(async (uid, charRef, newValue, isUpdate = false) => {
-    const db = getDatabase();
-
-    const updates = {};
+  calcAttack = () => {
     const tempStrMod = this.openedCharacter.abilities?.str?.tempModifier;
     const strMod = this.openedCharacter.abilities?.str?.modifier;
     const tempDexMod = this.openedCharacter.abilities?.dex?.tempModifier;
     const dexMod = this.openedCharacter.abilities?.dex?.modifier;
-    const cmb = (newValue || this.openedCharacter.attack?.bab || 0) + ((tempStrMod ?? strMod) || 0);
+    const cmb = (this.openedCharacter.attack?.bab || 0) + ((tempStrMod ?? strMod) || 0);
     const cmd =
-      (newValue || this.openedCharacter.attack?.bab || 0) +
+      (this.openedCharacter.attack?.bab || 0) +
       ((tempStrMod ?? strMod) || 0) +
       ((tempDexMod ?? dexMod) || 0) +
       10;
+    runInAction(() => {
+      if (this.openedCharacter.attack) {
+        this.openedCharacter.attack.cmb = cmb;
+        this.openedCharacter.attack.cmd = cmd;
+      }
+    });
+  };
+
+  changeAttack = debounce(async (uid, charRef, newValue, isUpdate = false) => {
+    const db = getDatabase();
+
+    const updates = {};
 
     updates[`users/${uid}/characters/${charRef}/attack/bab`] =
       newValue || this.openedCharacter.attack?.bab || 0;
-    updates[`users/${uid}/characters/${charRef}/attack/cmb`] = cmb;
-    updates[`users/${uid}/characters/${charRef}/attack/cmd`] = cmd;
 
     try {
       await update(ref(db), updates);
@@ -537,27 +540,27 @@ class CharactersStore {
   }, 700);
 
   recalcTotalSavingThrows = debounce(async (uid, charRef) => {
-    const db = getDatabase();
-    const updates = {};
-
-    if (this.openedCharacter.savingThrows) {
-      Object.entries(this.openedCharacter.savingThrows).forEach(([name, data]) => {
-        const { total = 0, ...otherThrows } = data || {};
-        const tempAbilityMod =
-          this.openedCharacter.abilities?.[savingThrowsAbilities[name]]?.tempModifier;
-        const abilityMod = this.openedCharacter.abilities?.[savingThrowsAbilities[name]]?.modifier;
-        const newTotal =
-          (tempAbilityMod ?? abilityMod) +
-          Object.values(otherThrows).reduce((acc, curr) => acc + curr, 0);
-        updates[`users/${uid}/characters/${charRef}/savingThrows/${name}/total`] =
-          Math.floor(newTotal);
-      });
-      try {
-        await update(ref(db), updates);
-      } catch (e) {
-        console.log(e);
-      }
-    }
+    // const db = getDatabase();
+    // const updates = {};
+    //
+    // if (this.openedCharacter.savingThrows) {
+    //   Object.entries(this.openedCharacter.savingThrows).forEach(([name, data]) => {
+    //     const { total = 0, ...otherThrows } = data || {};
+    //     const tempAbilityMod =
+    //       this.openedCharacter.abilities?.[savingThrowsAbilities[name]]?.tempModifier;
+    //     const abilityMod = this.openedCharacter.abilities?.[savingThrowsAbilities[name]]?.modifier;
+    //     const newTotal =
+    //       (tempAbilityMod ?? abilityMod) +
+    //       Object.values(otherThrows).reduce((acc, curr) => acc + curr, 0);
+    //     updates[`users/${uid}/characters/${charRef}/savingThrows/${name}/total`] =
+    //       Math.floor(newTotal);
+    //   });
+    //   try {
+    //     await update(ref(db), updates);
+    //   } catch (e) {
+    //     console.log(e);
+    //   }
+    // }
   });
 
   changeSkills = debounce(async (uid, charRef, skillName, field, newValue) => {
@@ -1095,8 +1098,10 @@ class CharactersStore {
     const total = Object.entries(dict).reduce((acc, [st, ability]) => {
       const tempAbilityMod = this.openedCharacter.abilities?.[ability]?.tempModifier;
       const abilityMod = this.openedCharacter.abilities?.[ability]?.modifier;
+
+      const { total, ...otherThrows } = this.openedCharacter?.savingThrows[st] || {};
       acc[st] ??= 0;
-      acc[st] += Object.values(this.openedCharacter?.savingThrows[st]).reduce((sum, item) => {
+      acc[st] += Object.values(otherThrows).reduce((sum, item) => {
         return sum + item;
       }, 0);
       acc[st] += this.openedCharacter?.equipBonuses?.savingThrows?.[st] || 0;
@@ -1142,6 +1147,10 @@ class CharactersStore {
           abilityValue.abilityTempModifier || null;
       });
     });
+  };
+
+  handleCopyToClickBoard = (text) => {
+    copyToClipboard(text, () => message.success('Скопировано в буфер обмена', 1));
   };
 }
 

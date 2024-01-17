@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import styled from 'styled-components';
 import FormItem from '../../FormItem';
 import { InputNumber, Tooltip } from 'antd';
@@ -15,16 +15,25 @@ const AbilityContainer = styled.div`
 `;
 
 const Ability = observer(({ name = '', showLabel = false, abilityDesc, charId, userId }) => {
-  const { changeAbilityDebounce, openedCharacter } = charactersStore;
+  const { changeAbilityDebounce, openedCharacter, handleCopyToClickBoard } = charactersStore;
   const { user } = authStore;
 
   const handleScoreChange = async (value, name, type) => {
     await changeAbilityDebounce(userId || user.uid, charId, name, type, value);
   };
 
+  const handleLabelClick = useCallback(() => {
+    handleCopyToClickBoard(
+      `1d20+${
+        openedCharacter.abilities?.[name]?.tempModifier ??
+        openedCharacter.abilities?.[name]?.modifier
+      }`
+    );
+  }, [openedCharacter]);
+
   return (
     <AbilityContainer>
-      <CharSheetRowLabel label={name} desc={abilityDesc} />
+      <CharSheetRowLabel label={name} desc={abilityDesc} handleOnClick={handleLabelClick} />
 
       <FormItem
         name={['abilities', name, 'score']}

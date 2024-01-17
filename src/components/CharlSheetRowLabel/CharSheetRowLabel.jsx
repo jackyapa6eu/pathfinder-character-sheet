@@ -9,12 +9,13 @@ const StyledContainer = styled.span`
   width: 100%;
   text-align: center;
   font-size: 13px;
+  cursor: pointer;
 `;
 
-const CharSheetRowLabel = ({ label, desc }) => {
+const CharSheetRowLabel = ({ label, desc, handleOnClick }) => {
   return (
     <Tooltip title={desc}>
-      <StyledContainer>{label.toUpperCase()}</StyledContainer>
+      <StyledContainer onClick={handleOnClick}>{label.toUpperCase()}</StyledContainer>
     </Tooltip>
   );
 };

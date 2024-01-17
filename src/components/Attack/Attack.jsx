@@ -46,7 +46,7 @@ const Cmd = styled.div`
 `;
 
 const Attack = observer(({ charId, userId }) => {
-  const { changeAttack, changeAttackPerRound } = charactersStore;
+  const { changeAttack, changeAttackPerRound, openedCharacter } = charactersStore;
   const { user } = authStore;
 
   return (
@@ -73,14 +73,24 @@ const Attack = observer(({ charId, userId }) => {
       </AttacksPerRound>
       <Cmb>
         <CharSheetRowLabel label='cmb' />
-        <FormItem textAlign='center' noBgLabel name={['attack', 'cmb']}>
-          <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
+        <FormItem textAlign='center' noBgLabel>
+          <InputNumber
+            value={openedCharacter.attack?.cmb}
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            disabled
+          />
         </FormItem>
       </Cmb>
       <Cmd>
         <CharSheetRowLabel label='cmd' />
-        <FormItem textAlign='center' noBgLabel name={['attack', 'cmd']}>
-          <InputNumber controls={false} style={{ width: '100%', color: 'black' }} disabled />
+        <FormItem textAlign='center' noBgLabel>
+          <InputNumber
+            value={openedCharacter.attack?.cmd}
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            disabled
+          />
         </FormItem>
       </Cmd>
     </AttackContainer>

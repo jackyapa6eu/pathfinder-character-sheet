@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { capitalizedFirstLetter } from '../../../utils/helpers';
 import styled from 'styled-components';
 import FormItem from '../../FormItem';
@@ -37,7 +37,7 @@ const FeatLabel = styled.span`
 `;
 
 const Skill = observer(({ name, title, ability, charId, userId, showLabels, trainedOnly }) => {
-  const { openedCharacter, changeSkills } = charactersStore;
+  const { openedCharacter, changeSkills, handleCopyToClickBoard } = charactersStore;
   const { user } = authStore;
   const [total, setTotal] = useState(null);
 
@@ -59,6 +59,14 @@ const Skill = observer(({ name, title, ability, charId, userId, showLabels, trai
     }
   }, [openedCharacter, openedCharacter.equipBonuses]);
 
+  const copyToClickBoard = useCallback(
+    (event) => {
+      event.stopPropagation();
+      handleCopyToClickBoard(`1d20+${total}`);
+    },
+    [total]
+  );
+
   return (
     <FeatContainer>
       <FormItem label={showLabels && 'class skill'} textAlign='center' noBgLabel>
@@ -71,7 +79,7 @@ const Skill = observer(({ name, title, ability, charId, userId, showLabels, trai
       </FormItem>
 
       <Tooltip title={ability.toUpperCase()}>
-        <FeatLabel>
+        <FeatLabel onClick={copyToClickBoard}>
           {capitalizedFirstLetter(title ?? name)}
           {trainedOnly && '*'}
         </FeatLabel>

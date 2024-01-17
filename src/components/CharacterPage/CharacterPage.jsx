@@ -153,8 +153,9 @@ const CharacterPage = observer(() => {
     calcEquippedBonuses,
     calcTotalSavingThrows,
     calcAbilitiesModifiers,
+    calcAttack,
   } = charactersStore;
-  const { subscribeKnownItems, knownItems } = knownItemsStore;
+  const { subscribeKnownItems } = knownItemsStore;
 
   const { charId, userId } = useParams();
   const [form] = useForm();
@@ -164,8 +165,9 @@ const CharacterPage = observer(() => {
       form.setFieldsValue({ ...initialUserData });
       form.setFieldsValue({ ...openedCharacter });
       calcEquippedBonuses();
-      calcTotalSavingThrows();
       calcAbilitiesModifiers();
+      calcTotalSavingThrows();
+      calcAttack();
     }
   }, [openedCharacter]);
 
@@ -173,6 +175,7 @@ const CharacterPage = observer(() => {
     if (user) {
       const unsubscribe = subscribeCharacter(userId || user?.uid, charId);
       const unsubscribeKnownItems = subscribeKnownItems();
+      console.log('SCROLL TO');
       window.scrollTo({
         top: 0,
         behavior: 'smooth',
