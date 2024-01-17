@@ -62,7 +62,7 @@ const Skill = observer(({ name, title, ability, charId, userId, showLabels, trai
   const copyToClickBoard = useCallback(
     (event) => {
       event.stopPropagation();
-      handleCopyToClickBoard(`1d20+${total}`);
+      handleCopyToClickBoard(`1d20${total > 0 ? '+' : ''}${total}`);
     },
     [total]
   );

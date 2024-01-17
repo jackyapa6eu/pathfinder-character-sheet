@@ -23,12 +23,10 @@ const Ability = observer(({ name = '', showLabel = false, abilityDesc, charId, u
   };
 
   const handleLabelClick = useCallback(() => {
-    handleCopyToClickBoard(
-      `1d20+${
-        openedCharacter.abilities?.[name]?.tempModifier ??
-        openedCharacter.abilities?.[name]?.modifier
-      }`
-    );
+    const total =
+      openedCharacter.abilities?.[name]?.tempModifier ??
+      openedCharacter.abilities?.[name]?.modifier;
+    handleCopyToClickBoard(`1d20${total > 0 ? '+' : ''}${total}`);
   }, [openedCharacter]);
 
   return (

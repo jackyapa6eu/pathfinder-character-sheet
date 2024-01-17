@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import CharSheetRowLabel from '../../CharlSheetRowLabel/CharSheetRowLabel';
 import FormItem from '../../FormItem';
 import { InputNumber } from 'antd';
@@ -18,9 +18,12 @@ const SavingThrow = observer(({ name, abilityName, charId, userId, showLabels = 
   const { openedCharacter, changeSavingThrows, handleCopyToClickBoard } = charactersStore;
   const { user } = authStore;
 
-  const copyToClickBoard = () => {
-    handleCopyToClickBoard(`1d20+${openedCharacter?.savingThrows?.[name]?.total}`);
-  };
+  const copyToClickBoard = useCallback(() => {
+    const total = openedCharacter?.savingThrows?.[name]?.total;
+    handleCopyToClickBoard(
+      `1d20${total > 0 ? '+' : ''}${openedCharacter?.savingThrows?.[name]?.total}`
+    );
+  }, [openedCharacter]);
 
   return (
     <SavingThrowContainer>
