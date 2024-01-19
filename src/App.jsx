@@ -14,6 +14,7 @@ import CreateCharacter from './components/CreateCharacter';
 import MainPage from './components/MainPage';
 import CharacterPage from './components/CharacterPage';
 import knownItemsStore from './store/knownItemsStore';
+import loadingImage from './assets/images/loading-image.gif';
 
 const StyledApp = styled.div`
   display: grid;
@@ -27,6 +28,7 @@ const StyledApp = styled.div`
 `;
 
 const MainContainer = styled.main`
+  position: relative;
   display: grid;
   grid-area: mainContainer;
   justify-items: center;
@@ -39,6 +41,36 @@ const MainContainer = styled.main`
     }
   }
 `;
+
+const Loader = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding-top: 7%;
+  background: rgba(0, 0, 0, 0.9);
+  align-items: start;
+  justify-content: center;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 777;
+  display: flex;
+  visibility: ${({ loading }) => (loading ? 'visible' : 'hidden')};
+  opacity: ${({ loading }) => (loading ? 1 : 0)};
+  transition: all ease 0.5s;
+`;
+
+const ImageContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  width: min-content;
+  height: min-content;
+`;
+
+const LoadingGif = styled.img``;
 
 const App = observer(() => {
   const auth = getAuth();
@@ -68,6 +100,13 @@ const App = observer(() => {
 
   return (
     <StyledApp>
+      <Loader
+        loading={+(mountedAuthLoadingState === 'pending' || mountedAuthLoadingState === 'loading')}
+      >
+        <ImageContainer>
+          <LoadingGif src={loadingImage} alt='olegators loading' />
+        </ImageContainer>
+      </Loader>
       <Header />
       <MainContainer>
         <Routes>

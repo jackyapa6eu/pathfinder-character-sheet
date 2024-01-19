@@ -175,7 +175,6 @@ const CharacterPage = observer(() => {
     if (user) {
       const unsubscribe = subscribeCharacter(userId || user?.uid, charId);
       const unsubscribeKnownItems = subscribeKnownItems();
-      console.log('SCROLL TO');
       window.scrollTo({
         top: 0,
         behavior: 'smooth',
