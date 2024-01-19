@@ -9,6 +9,12 @@ const Container = styled.div`
   display: grid;
   grid-template-columns: 1fr 2fr 1fr 2fr 32px;
   column-gap: 5px;
+
+  @media screen and (max-width: 660px) {
+    & {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
 `;
 
 const ChargesInputs = ({ inputKey, deleteField }) => {

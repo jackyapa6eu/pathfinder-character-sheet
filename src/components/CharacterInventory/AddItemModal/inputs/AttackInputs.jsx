@@ -10,6 +10,11 @@ const Container = styled.div`
   grid-template-columns: 1fr 1fr 1fr 32px;
   grid-auto-flow: row;
   column-gap: 5px;
+  @media screen and (max-width: 660px) {
+    & {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
 `;
 
 const AttackInputs = ({ inputKey, deleteField }) => {

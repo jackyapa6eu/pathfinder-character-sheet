@@ -12,6 +12,13 @@ import { useForm } from 'antd/es/form/Form';
 const StyledModal = styled(Modal)`
   width: 1920px !important;
   max-width: 92vw;
+
+  @media screen and (max-width: 660px) {
+    max-width: 96vw;
+    & .ant-modal-content {
+      padding: 10px;
+    }
+  }
 `;
 
 const StyledForm = styled(Form)`

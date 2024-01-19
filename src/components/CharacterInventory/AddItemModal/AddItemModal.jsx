@@ -48,12 +48,20 @@ const StyledForm = styled(Form)`
       'maxDamageBonus weaponDamageBonus'
       'charges charges'
       'additionalFields additionalFields'
+      'selectAddField addFieldButton'
       '. submit';
   }
 `;
 
 const StyledModal = styled(Modal)`
   width: 900px !important;
+
+  @media screen and (max-width: 660px) {
+    max-width: 96vw;
+    & .ant-modal-content {
+      padding: 10px;
+    }
+  }
 `;
 
 const componentDictionary = {
