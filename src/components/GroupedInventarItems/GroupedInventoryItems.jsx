@@ -90,8 +90,7 @@ const GroupedInventoryItems = observer(
     searchItemText,
     charId,
     userId,
-    setEditingItem,
-    setAddItemModalIsOpen,
+
     isKnown,
   }) => {
     const {

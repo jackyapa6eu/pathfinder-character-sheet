@@ -1,6 +1,6 @@
 import './App.css';
 import './vendor/normalize.css';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Header from './components/Header/Header';
 import styled from 'styled-components';
@@ -15,6 +15,7 @@ import MainPage from './components/MainPage';
 import CharacterPage from './components/CharacterPage';
 import knownItemsStore from './store/knownItemsStore';
 import loadingImage from './assets/images/loading-image.gif';
+import { getLSData, setLSData } from './utils/helpers';
 
 const StyledApp = styled.div`
   display: grid;
@@ -25,6 +26,10 @@ const StyledApp = styled.div`
     'mainContainer mainContainer mainContainer mainContainer mainContainer mainContainer';
   background-color: #f1f1f1;
   min-height: 100vh;
+
+  filter: ${({ isdarktheme }) => (isdarktheme ? 'invert(1)' : 'invert(0)')};
+
+  transition: all ease 0.5s;
 `;
 
 const MainContainer = styled.main`
@@ -73,6 +78,7 @@ const ImageContainer = styled.div`
 const LoadingGif = styled.img``;
 
 const App = observer(() => {
+  const [isDarkTheme, setIsDarkTheme] = useState(getLSData('darkTheme') || false);
   const auth = getAuth();
   const {
     getUserData,
@@ -98,8 +104,13 @@ const App = observer(() => {
     isPreviouslyLogged &&
     (mountedAuthLoadingState === 'pending' || mountedAuthLoadingState === 'loading');
 
+  const handleSwitchTheme = useCallback(() => {
+    setIsDarkTheme(!isDarkTheme);
+    setLSData('darkTheme', !isDarkTheme);
+  }, [isDarkTheme]);
+
   return (
-    <StyledApp>
+    <StyledApp isdarktheme={+isDarkTheme}>
       <Loader
         loading={+(mountedAuthLoadingState === 'pending' || mountedAuthLoadingState === 'loading')}
       >
@@ -107,7 +118,7 @@ const App = observer(() => {
           <LoadingGif src={loadingImage} alt='olegators loading' />
         </ImageContainer>
       </Loader>
-      <Header />
+      <Header isDarkTheme={isDarkTheme} handleSwitchTheme={handleSwitchTheme} />
       <MainContainer>
         <Routes>
           <Route element={<MainPage />} path='/' />

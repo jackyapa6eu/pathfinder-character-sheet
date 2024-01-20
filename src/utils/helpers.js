@@ -13,13 +13,17 @@ const makeName = (nameStr) => {
   return nameStr.replace(/\s+/g, '-').toLowerCase();
 };
 
+const filterData = (arr, fieldsForSearch, searchStr) => {
+  return arr.filter((element) =>
+    fieldsForSearch.map((field) => element[field]).some((str) => str && str.includes(searchStr))
+  );
+};
+
 const fieldsAndStrFilter = (arr, fieldName, fieldData, fieldsForSearch, searchStr) => {
   const filteredArr = arr.filter((el) => el[fieldName] === fieldData);
   if (!searchStr) return filteredArr; // сортировка по типу
   else {
-    return filteredArr.filter((element) =>
-      fieldsForSearch.map((field) => element[field]).some((str) => str && str.includes(searchStr))
-    );
+    return filterData(filteredArr, fieldsForSearch, searchStr);
   }
 };
 
@@ -55,6 +59,7 @@ export {
   filterUndefinedToNull,
   makeName,
   fieldsAndStrFilter,
+  filterData,
   getLSData,
   setLSData,
   copyToClipboard,
