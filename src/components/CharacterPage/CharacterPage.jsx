@@ -81,7 +81,7 @@ const CharacterPageContainer = styled.div`
   gap: 10px;
   overflow-x: hidden;
 
-  @media screen and (max-width: 950px) {
+  @media screen and (max-width: 1040px) {
     grid-template-columns: 260px 1fr;
     grid-template-areas:
       'abilities HitPointsInitiativeArmor'
@@ -89,7 +89,7 @@ const CharacterPageContainer = styled.div`
       'attack savingThrows'
       'attack .'
       'weapons weapons'
-      '.  feats';
+      'feats feats';
   }
 
   @media screen and (max-width: 605px) {
