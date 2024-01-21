@@ -1109,10 +1109,8 @@ class CharactersStore {
 
       return acc;
     }, {});
-    console.log(toJS(total));
     runInAction(() => {
       Object.entries(total).forEach(([st, value]) => {
-        console.log(toJS(this.openedCharacter.savingThrows));
         this.openedCharacter.savingThrows[st] ??= {};
         this.openedCharacter.savingThrows[st].total = value;
       });
