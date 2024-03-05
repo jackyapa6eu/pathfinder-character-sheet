@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { Button, Dropdown, Switch } from 'antd';
 import { Route, Routes, useNavigate } from 'react-router-dom';
@@ -64,7 +64,7 @@ const Header = observer(({ isDarkTheme, handleSwitchTheme }) => {
     <StyledHeader>
       <DiceIcon size='60px' handleClick={() => handleNavigateButton('')} />
 
-      <HeaderNavMenu></HeaderNavMenu>
+      <HeaderNavMenu>{user?.dm && <Button>Create campaign</Button>}</HeaderNavMenu>
       <Switch
         size='small'
         checkedChildren={<DayIcon size={14} />}

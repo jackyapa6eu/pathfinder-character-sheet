@@ -34,7 +34,7 @@ const EquippedGearContainer = styled.div`
   }
 `;
 
-const CharacterEquippedGear = observer(({ charId, userId }) => {
+const CharacterEquippedGear = observer(({ charId, userId, canEdit }) => {
   const { openedCharacter, equipItem } = charactersStore;
   const { user } = authStore;
   const { empty, ...itemsTypes } = initialUserData.equippedItems;
@@ -48,6 +48,7 @@ const CharacterEquippedGear = observer(({ charId, userId }) => {
           label={equipKey}
         >
           <Select
+            disabled={canEdit}
             allowClear
             onChange={(value) => equipItem(userId || user.uid, charId, equipKey, value)}
             options={Object.entries(openedCharacter.inventory || {})

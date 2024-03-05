@@ -13,12 +13,31 @@ const ThrowsContainer = styled.div`
   gap: 5px;
 `;
 
-const SavingThrows = ({ charId, userId }) => {
+const SavingThrows = ({ charId, userId, canEdit }) => {
   return (
     <ThrowsContainer>
-      <SavingThrow name='fortitude' abilityName='con' charId={charId} userId={userId} showLabels />
-      <SavingThrow name='reflex' abilityName='dex' charId={charId} userId={userId} />
-      <SavingThrow name='will' abilityName='wis' charId={charId} userId={userId} />
+      <SavingThrow
+        name='fortitude'
+        abilityName='con'
+        charId={charId}
+        userId={userId}
+        showLabels
+        canEdit={canEdit}
+      />
+      <SavingThrow
+        name='reflex'
+        abilityName='dex'
+        charId={charId}
+        userId={userId}
+        canEdit={canEdit}
+      />
+      <SavingThrow
+        name='will'
+        abilityName='wis'
+        charId={charId}
+        userId={userId}
+        canEdit={canEdit}
+      />
     </ThrowsContainer>
   );
 };

@@ -47,7 +47,7 @@ const TouchFlat = styled.div`
   align-items: center;
 `;
 
-const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
+const HitPointsInitiativeArmor = observer(({ charId, userId, canEdit }) => {
   const { changeHitPoints, openedCharacter, changeMiscInitiative, changeAc } = charactersStore;
   const { user } = authStore;
   const [totalInitiative, setTotalInitiative] = useState(null);
@@ -101,6 +101,7 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
             controls={false}
             style={{ width: '100%' }}
             onChange={(hpValue) => changeHitPoints(userId || user.uid, charId, 'total', hpValue)}
+            disabled={canEdit}
           />
         </FormItem>
         <FormItem
@@ -114,6 +115,7 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
             controls={false}
             style={{ width: '100%' }}
             onChange={(hpValue) => changeHitPoints(userId || user.uid, charId, 'wounds', hpValue)}
+            disabled={canEdit}
           />
         </FormItem>
 
@@ -130,6 +132,7 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
             onChange={(hpValue) =>
               changeHitPoints(userId || user.uid, charId, 'nonLethal', hpValue)
             }
+            disabled={canEdit}
           />
         </FormItem>
       </TotalHitPoints>
@@ -166,6 +169,7 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
             controls={false}
             style={{ width: '100%' }}
             onChange={(value) => changeMiscInitiative(userId || user.uid, charId, value)}
+            disabled={canEdit}
           />
         </FormItem>
       </Initiative>
@@ -224,6 +228,7 @@ const HitPointsInitiativeArmor = observer(({ charId, userId }) => {
             controls={false}
             style={{ width: '100%', color: 'black' }}
             onChange={(value) => changeAc(userId || user.uid, charId, 'miscModifier', value)}
+            disabled={canEdit}
           />
         </FormItem>
       </Ac>

@@ -45,7 +45,7 @@ const Cmd = styled.div`
   align-items: center;
 `;
 
-const Attack = observer(({ charId, userId }) => {
+const Attack = observer(({ charId, userId, canEdit }) => {
   const { changeAttack, changeAttackPerRound, openedCharacter } = charactersStore;
   const { user } = authStore;
 
@@ -58,6 +58,7 @@ const Attack = observer(({ charId, userId }) => {
             controls={false}
             style={{ width: '100%', color: 'black' }}
             onChange={(value) => changeAttack(userId || user.uid, charId, value)}
+            disabled={canEdit}
           />
         </FormItem>
       </BaseAttackBonus>
@@ -68,6 +69,7 @@ const Attack = observer(({ charId, userId }) => {
             controls={false}
             style={{ width: '100%', color: 'black' }}
             onChange={(value) => changeAttackPerRound(userId || user.uid, charId, value)}
+            disabled={canEdit}
           />
         </FormItem>
       </AttacksPerRound>

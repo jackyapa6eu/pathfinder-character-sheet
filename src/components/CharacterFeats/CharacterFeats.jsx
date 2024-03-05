@@ -69,7 +69,7 @@ const DeleteFeatButton = styled(Button)`
   font-size: 6px;
 `;
 
-const CharacterFeats = observer(({ charId, userId }) => {
+const CharacterFeats = observer(({ charId, userId, canEdit }) => {
   const [addFeatModalIsOpen, setAddFeatModalIsOpen] = useState(false);
   const { addFeat, deleteFeat, openedCharacter } = charactersStore;
   const { user } = authStore;
@@ -125,7 +125,12 @@ const CharacterFeats = observer(({ charId, userId }) => {
         </Form>
       </Modal>
       {contextHolder}
-      <Button size='small' style={{ width: '80px' }} onClick={() => setAddFeatModalIsOpen(true)}>
+      <Button
+        size='small'
+        style={{ width: '80px' }}
+        disabled={canEdit}
+        onClick={() => setAddFeatModalIsOpen(true)}
+      >
         Add +
       </Button>
       <FeatsList>
@@ -135,6 +140,7 @@ const CharacterFeats = observer(({ charId, userId }) => {
               <DeleteFeatButton
                 className='delete-feat-button'
                 onClick={(event) => handleDeleteFeat(event, featKey)}
+                disabled={canEdit}
               >
                 X
               </DeleteFeatButton>

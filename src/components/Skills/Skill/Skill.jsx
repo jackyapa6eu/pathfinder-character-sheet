@@ -36,109 +36,114 @@ const FeatLabel = styled.span`
   width: 100%;
 `;
 
-const Skill = observer(({ name, title, ability, charId, userId, showLabels, trainedOnly }) => {
-  const { openedCharacter, changeSkills, handleCopyToClickBoard } = charactersStore;
-  const { user } = authStore;
-  const [total, setTotal] = useState(null);
+const Skill = observer(
+  ({ name, title, ability, charId, userId, showLabels, trainedOnly, canEdit }) => {
+    const { openedCharacter, changeSkills, handleCopyToClickBoard } = charactersStore;
+    const { user } = authStore;
+    const [total, setTotal] = useState(null);
 
-  useEffect(() => {
-    if (!openedCharacter.abilities?.[ability]) {
-      setTotal(null);
-    } else {
-      const tempAbilityMod = openedCharacter.abilities?.[ability]?.tempModifier;
-      const abilityMod = openedCharacter.abilities?.[ability]?.modifier;
-      const ranks = openedCharacter.skills?.[name]?.ranks;
-      const miscMod = openedCharacter.skills?.[name]?.miscMod;
-      const featTotal =
-        (tempAbilityMod ?? abilityMod) +
-        (ranks || 0) +
-        (miscMod || 0) +
-        (openedCharacter.skills?.[name]?.classSkill && ranks > 0 ? 3 : 0) -
-        (['str', 'dex'].includes(ability) ? openedCharacter.equipBonuses?.checkPenalty || 0 : 0);
-      setTotal(trainedOnly && ranks === undefined ? null : featTotal);
-    }
-  }, [openedCharacter, openedCharacter.equipBonuses]);
+    useEffect(() => {
+      if (!openedCharacter.abilities?.[ability]) {
+        setTotal(null);
+      } else {
+        const tempAbilityMod = openedCharacter.abilities?.[ability]?.tempModifier;
+        const abilityMod = openedCharacter.abilities?.[ability]?.modifier;
+        const ranks = openedCharacter.skills?.[name]?.ranks;
+        const miscMod = openedCharacter.skills?.[name]?.miscMod;
+        const featTotal =
+          (tempAbilityMod ?? abilityMod) +
+          (ranks || 0) +
+          (miscMod || 0) +
+          (openedCharacter.skills?.[name]?.classSkill && ranks > 0 ? 3 : 0) -
+          (['str', 'dex'].includes(ability) ? openedCharacter.equipBonuses?.checkPenalty || 0 : 0);
+        setTotal(trainedOnly && ranks === undefined ? null : featTotal);
+      }
+    }, [openedCharacter, openedCharacter.equipBonuses]);
 
-  const copyToClickBoard = useCallback(
-    (event) => {
-      event.stopPropagation();
-      handleCopyToClickBoard(`1d20${total > 0 ? '+' : ''}${total}`);
-    },
-    [total]
-  );
+    const copyToClickBoard = useCallback(
+      (event) => {
+        event.stopPropagation();
+        handleCopyToClickBoard(`1d20${total > 0 ? '+' : ''}${total}`);
+      },
+      [total]
+    );
 
-  return (
-    <FeatContainer>
-      <FormItem label={showLabels && 'class skill'} textAlign='center' noBgLabel>
-        <Checkbox
-          onChange={(value) =>
-            changeSkills(userId || user.uid, charId, name, 'classSkill', value.target.checked)
-          }
-          checked={openedCharacter.skills?.[name]?.classSkill}
-        />
-      </FormItem>
+    return (
+      <FeatContainer>
+        <FormItem label={showLabels && 'class skill'} textAlign='center' noBgLabel>
+          <Checkbox
+            onChange={(value) =>
+              changeSkills(userId || user.uid, charId, name, 'classSkill', value.target.checked)
+            }
+            checked={openedCharacter.skills?.[name]?.classSkill}
+            disabled={canEdit}
+          />
+        </FormItem>
 
-      <Tooltip title={ability.toUpperCase()}>
-        <FeatLabel onClick={copyToClickBoard}>
-          {capitalizedFirstLetter(title ?? name)}
-          {trainedOnly && '*'}
-        </FeatLabel>
-      </Tooltip>
-      <FormItem label={showLabels && 'total'} textAlign='center' noBgLabel>
-        <InputNumber controls={false} style={{ width: '100%' }} disabled value={total} />
-      </FormItem>
+        <Tooltip title={ability.toUpperCase()}>
+          <FeatLabel onClick={copyToClickBoard}>
+            {capitalizedFirstLetter(title ?? name)}
+            {trainedOnly && '*'}
+          </FeatLabel>
+        </Tooltip>
+        <FormItem label={showLabels && 'total'} textAlign='center' noBgLabel>
+          <InputNumber controls={false} style={{ width: '100%' }} disabled value={total} />
+        </FormItem>
 
-      <FormItem label={showLabels && 'ability modifier'} textAlign='center' noBgLabel>
-        <InputNumber
-          value={
-            openedCharacter.abilities?.[ability]?.tempModifier !== null
-              ? openedCharacter.abilities?.[ability]?.tempModifier
-              : openedCharacter.abilities?.[ability]?.modifier
-          }
-          controls={false}
-          style={{ width: '100%', color: 'black' }}
-          disabled
-        />
-      </FormItem>
+        <FormItem label={showLabels && 'ability modifier'} textAlign='center' noBgLabel>
+          <InputNumber
+            value={
+              openedCharacter.abilities?.[ability]?.tempModifier !== null
+                ? openedCharacter.abilities?.[ability]?.tempModifier
+                : openedCharacter.abilities?.[ability]?.modifier
+            }
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            disabled
+          />
+        </FormItem>
 
-      <FormItem label={showLabels && 'check penalty'} textAlign='center' noBgLabel>
-        <InputNumber
-          controls={false}
-          value={
-            ['str', 'dex'].includes(ability) ? -openedCharacter.equipBonuses?.checkPenalty : null
-          }
-          style={{ width: '100%' }}
-          disabled
-        />
-      </FormItem>
+        <FormItem label={showLabels && 'check penalty'} textAlign='center' noBgLabel>
+          <InputNumber
+            controls={false}
+            value={
+              ['str', 'dex'].includes(ability) ? -openedCharacter.equipBonuses?.checkPenalty : null
+            }
+            style={{ width: '100%' }}
+            disabled
+          />
+        </FormItem>
 
-      <FormItem
-        name={['skills', name, 'ranks']}
-        label={showLabels && 'ranks'}
-        textAlign='center'
-        noBgLabel
-      >
-        <InputNumber
-          controls={false}
-          style={{ width: '100%' }}
-          onChange={(value) => changeSkills(userId || user.uid, charId, name, 'ranks', value)}
-        />
-      </FormItem>
+        <FormItem
+          name={['skills', name, 'ranks']}
+          label={showLabels && 'ranks'}
+          textAlign='center'
+          noBgLabel
+        >
+          <InputNumber
+            controls={false}
+            style={{ width: '100%' }}
+            onChange={(value) => changeSkills(userId || user.uid, charId, name, 'ranks', value)}
+            disabled={canEdit}
+          />
+        </FormItem>
 
-      <FormItem
-        name={['skills', name, 'miscMod']}
-        label={showLabels && 'misc modifier'}
-        textAlign='center'
-        noBgLabel
-      >
-        <InputNumber
-          controls={false}
-          style={{ width: '100%' }}
-          onChange={(value) => changeSkills(userId || user.uid, charId, name, 'miscMod', value)}
-        />
-      </FormItem>
-    </FeatContainer>
-  );
-});
+        <FormItem
+          name={['skills', name, 'miscMod']}
+          label={showLabels && 'misc modifier'}
+          textAlign='center'
+          noBgLabel
+        >
+          <InputNumber
+            controls={false}
+            style={{ width: '100%' }}
+            onChange={(value) => changeSkills(userId || user.uid, charId, name, 'miscMod', value)}
+            disabled={canEdit}
+          />
+        </FormItem>
+      </FeatContainer>
+    );
+  }
+);
 
 export default memo(Skill);

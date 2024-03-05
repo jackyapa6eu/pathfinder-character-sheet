@@ -16,7 +16,7 @@ const FeatsContainer = styled.div`
   gap: 15px;
 `;
 
-const Skills = ({ charId, userId }) => {
+const Skills = ({ charId, userId, canEdit }) => {
   const [searchItemText, setSearchItemText] = useState('');
 
   const searchInputRef = useRef(null);
@@ -54,6 +54,7 @@ const Skills = ({ charId, userId }) => {
               ability={ability}
               title={label || value}
               showLabels={index === 0}
+              canEdit={canEdit}
             />
           )
         )}

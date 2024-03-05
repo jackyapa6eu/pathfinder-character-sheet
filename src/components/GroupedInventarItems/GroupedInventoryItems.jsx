@@ -85,14 +85,7 @@ const Item = styled.div`
 `;
 
 const GroupedInventoryItems = observer(
-  ({
-    groupName,
-    searchItemText,
-    charId,
-    userId,
-
-    isKnown,
-  }) => {
+  ({ groupName, searchItemText, charId, userId, canEdit, isKnown }) => {
     const {
       openedCharacter,
       deleteInventoryItem,
@@ -130,13 +123,14 @@ const GroupedInventoryItems = observer(
                 isKnown={isKnown}
                 userId={userId}
                 charId={charId}
+                canEdit={canEdit}
               />
             </div>
           ),
           duration: 0,
         });
       },
-      [openedCharacter.inventory]
+      [openedCharacter.inventory, canEdit]
     );
 
     const handleChangeItemData = async (itemData, type, value) => {
@@ -198,6 +192,7 @@ const GroupedInventoryItems = observer(
                     onClick={(event) => event.stopPropagation()}
                     style={{ width: '100%' }}
                     onChange={(value) => handleChangeItemData(el, 'name', value)}
+                    disabled={canEdit}
                   />
                 </FormItem>
               </span>
@@ -225,13 +220,18 @@ const GroupedInventoryItems = observer(
                     controls={false}
                     style={{ width: '100%' }}
                     onChange={(value) => handleChangeItemData(el, 'count', value)}
+                    disabled={canEdit}
                   />
                 </FormItem>
               </span>
 
               <span>
                 <Tooltip title='delete item'>
-                  <Button onClick={(event) => handleDeleteItem(el, event)} className='sell-button'>
+                  <Button
+                    disabled={canEdit}
+                    onClick={(event) => handleDeleteItem(el, event)}
+                    className='sell-button'
+                  >
                     <span>🗑️</span>
                   </Button>
                 </Tooltip>
@@ -247,13 +247,21 @@ const GroupedInventoryItems = observer(
                     controls={false}
                     style={{ width: '100%' }}
                     onChange={(value) => handleChangeItemData(el, 'weight', value)}
+                    disabled={canEdit}
                   />
                 </FormItem>
               </span>
               <span>
                 {!!el.cost && !isKnown && (
-                  <Tooltip placement='topRight' title={`sell item for ${el.cost} ${el.currency}`}>
-                    <Button onClick={(event) => handleSellItem(el, event)} className='sell-button'>
+                  <Tooltip
+                    placement='topRight'
+                    title={el.cost ? `sell item for ${el.cost ?? ''} ${el.currency ?? ''}` : ''}
+                  >
+                    <Button
+                      disabled={canEdit}
+                      onClick={(event) => handleSellItem(el, event)}
+                      className='sell-button'
+                    >
                       <span>💰</span>
                     </Button>
                   </Tooltip>
@@ -261,7 +269,7 @@ const GroupedInventoryItems = observer(
 
                 <FormItem
                   name={isKnown ? [el.itemName, 'cost'] : ['inventory', el.itemName, 'cost']}
-                  labelDesc={`total: ${el.cost * (el.count || 1)} ${el.currency}`}
+                  labelDesc={el.cost ? `total: ${el.cost * (el.count || 1)} ${el.currency}` : ''}
                   textAlign='center'
                   noBgLabel
                   label='cost'
@@ -271,6 +279,7 @@ const GroupedInventoryItems = observer(
                     controls={false}
                     style={{ width: '100%' }}
                     onChange={(value) => handleChangeItemData(el, 'cost', value)}
+                    disabled={canEdit}
                   />
                 </FormItem>
               </span>

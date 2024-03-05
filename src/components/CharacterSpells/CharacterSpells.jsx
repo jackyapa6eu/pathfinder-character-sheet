@@ -151,7 +151,7 @@ const PrepareSpellButton = styled(Button)`
   font-size: 10px;
 `;
 
-const CharacterSpells = observer(({ charId, userId }) => {
+const CharacterSpells = observer(({ charId, userId, canEdit }) => {
   const [addSpellModalIsOpen, setAddSpellModalIsOpen] = useState(false);
   const [showAllSpellsPerDay, setShowAllSpellsPerDay] = useState(false);
   const [prepareSpellModalIsOpen, setPrepareSpellModalIsOpen] = useState(false);
@@ -248,7 +248,6 @@ const CharacterSpells = observer(({ charId, userId }) => {
   };
 
   const handleAddFreeSpellSlot = async (spellValue) => {
-    console.log(spellValue);
     await prepareSpell(userId || user.uid, charId, spellValue, true, { isDomain: false });
   };
 
@@ -364,7 +363,12 @@ const CharacterSpells = observer(({ charId, userId }) => {
         </StyledForm>
       </Modal>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Button size='small' style={{ width: '80px' }} onClick={() => setAddSpellModalIsOpen(true)}>
+        <Button
+          size='small'
+          style={{ width: '80px' }}
+          onClick={() => setAddSpellModalIsOpen(true)}
+          disabled={canEdit}
+        >
           Add +
         </Button>
         <div style={{ display: 'flex', gap: '5px', width: 'max-content', alignItems: 'center' }}>
@@ -373,6 +377,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
             size='small'
             checked={showAllSpellsPerDay}
             onChange={setShowAllSpellsPerDay}
+            disabled={canEdit}
           />
         </div>
       </div>
@@ -429,6 +434,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                           <PrepareSpellButton
                                             onClick={(event) => handleAddSpell(event, spellData)}
                                             className='add-spell-button'
+                                            disabled={canEdit}
                                           >
                                             +
                                           </PrepareSpellButton>
@@ -439,6 +445,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                           onClick={(event) =>
                                             handleDeleteSpell(event, spellName, spellData)
                                           }
+                                          disabled={canEdit}
                                         >
                                           X
                                         </DeleteSpellButton>
@@ -548,6 +555,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                                 handleChangeMaxSpellsPerDay(value, className, level)
                                               }
                                               size='small'
+                                              disabled={canEdit}
                                             />
                                           </Tooltip>
 
@@ -564,6 +572,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                                 )
                                               }
                                               size='small'
+                                              disabled={canEdit}
                                             />
                                           </Tooltip>
 
@@ -575,6 +584,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                             onChange={(value) =>
                                               handleFreeSpells(value, className, level)
                                             }
+                                            disabled={canEdit}
                                           />
                                         </div>
                                       )}
@@ -592,6 +602,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                               onClick={(event) =>
                                                 handleDeletedPreparedSpell(event, spellData)
                                               }
+                                              disabled={canEdit}
                                             >
                                               X
                                             </DeleteSpellButton>
@@ -600,9 +611,10 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                               <IsUsedCheckbox
                                                 key={slotKey}
                                                 checked={spellData.slots[slotKey].isUsed}
-                                                handleClick={(event) =>
-                                                  handleUseSpell(event, spellData, slotKey)
-                                                }
+                                                handleClick={(event) => {
+                                                  if (!canEdit)
+                                                    handleUseSpell(event, spellData, slotKey);
+                                                }}
                                               />
                                             ))}
                                           </SpellsListItem>
@@ -629,6 +641,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                               onClick={(event) =>
                                                 handleDeletedPreparedSpell(event, spellData, true)
                                               }
+                                              disabled={canEdit}
                                             >
                                               X
                                             </DeleteSpellButton>
@@ -637,9 +650,10 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                               <IsUsedCheckbox
                                                 key={slotKey}
                                                 checked={spellData.slots[slotKey].isUsed}
-                                                handleClick={(event) =>
-                                                  handleUseSpell(event, spellData, slotKey)
-                                                }
+                                                handleClick={(event) => {
+                                                  if (!canEdit)
+                                                    handleUseSpell(event, spellData, slotKey);
+                                                }}
                                               />
                                             ))}
                                           </SpellsListItem>
@@ -655,6 +669,7 @@ const CharacterSpells = observer(({ charId, userId }) => {
                                               name: 'freeSlot',
                                             })
                                           }
+                                          canEdit={canEdit}
                                         />
                                       )}
                                     </SpellsList>

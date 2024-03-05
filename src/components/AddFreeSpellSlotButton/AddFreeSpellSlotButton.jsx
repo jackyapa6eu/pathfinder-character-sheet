@@ -17,9 +17,9 @@ const StyledButton = styled(Button)`
   padding: 0;
 `;
 
-const AddFreeSpellSlotButton = observer(({ handleClick }) => {
+const AddFreeSpellSlotButton = observer(({ handleClick, canEdit }) => {
   return (
-    <StyledButton onClick={handleClick}>
+    <StyledButton onClick={handleClick} disabled={canEdit}>
       <span>+</span>
     </StyledButton>
   );

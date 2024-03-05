@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import authStore from '../../store/authStore';
 import charactersStore, { initialUserData } from '../../store/charactersStore';
@@ -160,6 +160,19 @@ const CharacterPage = observer(() => {
   const { charId, userId } = useParams();
   const [form] = useForm();
 
+  const canEdit = useMemo(
+    () => !(user?.dm || openedCharacter?.owner === user?.uid),
+    [user, openedCharacter]
+  );
+
+  const handleMakeFullRest = async () => {
+    await makeFullRest(userId || user?.uid, charId);
+  };
+
+  const handleChangeBaseInfo = async (dataName, newValue) => {
+    await changeBaseInfo(userId || user?.uid, charId, dataName, newValue.target?.value || newValue);
+  };
+
   useEffect(() => {
     if (openedCharacter) {
       form.setFieldsValue({ ...initialUserData });
@@ -199,14 +212,6 @@ const CharacterPage = observer(() => {
     }
   }, [openedCharacter, user]);
 
-  const handleMakeFullRest = async () => {
-    await makeFullRest(userId || user?.uid, charId);
-  };
-
-  const handleChangeBaseInfo = async (dataName, newValue) => {
-    await changeBaseInfo(userId || user?.uid, charId, dataName, newValue.target?.value || newValue);
-  };
-
   return (
     <>
       <AddClassModal
@@ -226,6 +231,7 @@ const CharacterPage = observer(() => {
             <Input
               onChange={(value) => handleChangeBaseInfo('race', value)}
               style={{ width: '100%' }}
+              disabled={canEdit}
             />
           </FormItem>
           <FormItem gridArea='alignment' label='alignment' name='alignment'>
@@ -233,6 +239,7 @@ const CharacterPage = observer(() => {
               onChange={(value) => handleChangeBaseInfo('alignment', value)}
               options={alignmentSelectOptions}
               style={{ width: '100%' }}
+              disabled={canEdit}
             />
           </FormItem>
           <CharClassesContainer>
@@ -250,6 +257,7 @@ const CharacterPage = observer(() => {
             <Button
               onClick={() => setAddClassModalIsOpen(true)}
               style={{ width: '25px', height: '25px', padding: 0 }}
+              disabled={canEdit}
             >
               +
             </Button>
@@ -264,12 +272,17 @@ const CharacterPage = observer(() => {
               key: 1,
               children: (
                 <CharacterPageContainer>
-                  <Abilities gridArea='abilities' charId={charId} userId={userId} />
-                  <HitPointsInitiativeArmor charId={charId} userId={userId} />
-                  <SavingThrows charId={charId} userId={userId} />
-                  <Attack charId={charId} userId={userId} />
-                  <Skills charId={charId} userId={userId} />
-                  <Weapons charId={charId} userId={userId} />
+                  <Abilities
+                    gridArea='abilities'
+                    charId={charId}
+                    userId={userId}
+                    canEdit={canEdit}
+                  />
+                  <HitPointsInitiativeArmor charId={charId} userId={userId} canEdit={canEdit} />
+                  <SavingThrows charId={charId} userId={userId} canEdit={canEdit} />
+                  <Attack charId={charId} userId={userId} canEdit={canEdit} />
+                  <Skills charId={charId} userId={userId} canEdit={canEdit} />
+                  <Weapons charId={charId} userId={userId} canEdit={canEdit} />
 
                   <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
                     <FormItem>
@@ -284,22 +297,22 @@ const CharacterPage = observer(() => {
             {
               label: `Feats`,
               key: 'Feats',
-              children: <CharacterFeats charId={charId} userId={userId} />,
+              children: <CharacterFeats charId={charId} userId={userId} canEdit={canEdit} />,
             },
             {
               label: `Spells`,
               key: 'Spells',
-              children: <CharacterSpells charId={charId} userId={userId} />,
+              children: <CharacterSpells charId={charId} userId={userId} canEdit={canEdit} />,
             },
             {
               label: `Inventory`,
               key: 'Inventory',
-              children: <CharacterInventory charId={charId} userId={userId} />,
+              children: <CharacterInventory charId={charId} userId={userId} canEdit={canEdit} />,
             },
             {
               label: `Equipped gear`,
               key: 'equippedItems',
-              children: <CharacterEquippedGear charId={charId} userId={userId} />,
+              children: <CharacterEquippedGear charId={charId} userId={userId} canEdit={canEdit} />,
             },
           ]}
         />

@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from 'mobx';
+import { makeAutoObservable, runInAction, toJS } from 'mobx';
 import { getDatabase, ref, get } from 'firebase/database';
 import { message } from 'antd';
 
@@ -19,20 +19,23 @@ class UsersStore {
       const response = await get(dataRef);
       if (response.exists()) {
         const users = response.val();
+        // console.log('USERS:', users);
         runInAction(() => {
           this.users = users;
-          if (isDm) {
-            this.usersCharacters = Object.entries(users).reduce((chars, [userId, userData]) => {
-              Object.entries(userData.characters).forEach(([charName, charData]) => {
-                chars[charName] = {
-                  ...charData,
-                  charName: charName,
-                  owner: userId,
-                };
-              });
-              return chars;
-            }, {});
-          }
+          // if (isDm) {
+          this.usersCharacters = Object.entries(users).reduce((chars, [userId, userData]) => {
+            Object.entries(userData.characters).forEach(([charName, charData]) => {
+              chars[charName] = {
+                ...charData,
+                charName: charName,
+                owner: userId,
+              };
+            });
+            return chars;
+          }, {});
+
+          console.log('usersCharacters:', toJS(this.usersCharacters));
+          // }
         });
       }
     } catch (e) {

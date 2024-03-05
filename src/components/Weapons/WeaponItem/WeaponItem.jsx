@@ -181,7 +181,7 @@ const AddOnHitButton = styled(Button)`
   transition: all 0.5s ease;
 `;
 
-const WeaponItem = observer(({ weaponData, userId, charId }) => {
+const WeaponItem = observer(({ weaponData, userId, charId, canEdit }) => {
   const [totalAttackBonus, setTotalAttackBonus] = useState('');
   const [resultDamage, setResultDamage] = useState('');
   const [addOnHitProperty, setAddOnHitProperty] = useState(false);
@@ -283,7 +283,11 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
         </Form>
       </Modal>
       {contextHolder}
-      <DeleteWeaponButton className='delete-weapon-button' onClick={handleDeleteWeapon}>
+      <DeleteWeaponButton
+        className='delete-weapon-button'
+        disabled={canEdit}
+        onClick={handleDeleteWeapon}
+      >
         X
       </DeleteWeaponButton>
       <FormItem name={['weapons', weaponData.name, 'name']} label='weapon' gridArea='name'>
@@ -318,6 +322,7 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
             onChange={(value) =>
               changeWeaponData(userId || user.uid, charId, weaponData.name, 'attackMisc', value)
             }
+            disabled={canEdit}
           />
         </FormItem>
       </AttackBonusContainer>
@@ -339,6 +344,7 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
                 value.target.value
               )
             }
+            disabled={canEdit}
           />
         </FormItem>
         <FormItem
@@ -377,6 +383,7 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
                 value
               )
             }
+            disabled={canEdit}
           />
         </FormItem>
         <FormItem
@@ -391,6 +398,7 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
             onChange={(value) =>
               changeWeaponData(userId || user.uid, charId, weaponData.name, 'damageMisc', value)
             }
+            disabled={canEdit}
           />
         </FormItem>
       </DamageBonusContainer>
@@ -410,6 +418,7 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
             onChange={(event) =>
               changeWeaponData(userId || user.uid, charId, weaponData.name, 'type', event)
             }
+            disabled={canEdit}
           />
         </FormItem>
         <FormItem
@@ -425,11 +434,16 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
             onChange={(value) =>
               changeWeaponData(userId || user.uid, charId, weaponData.name, 'range', value)
             }
+            disabled={canEdit}
           />
         </FormItem>
       </TypeAndRange>
       <Tooltip title='Добавить свойство при попадании'>
-        <AddOnHitButton onClick={() => setAddOnHitProperty(true)} className='add-on-hit-property'>
+        <AddOnHitButton
+          disabled={canEdit}
+          onClick={() => setAddOnHitProperty(true)}
+          className='add-on-hit-property'
+        >
           +
         </AddOnHitButton>
       </Tooltip>
@@ -450,6 +464,7 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
                 value.target.value
               )
             }
+            disabled={canEdit}
           />
         </FormItem>
         <FormItem
@@ -471,6 +486,7 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
                 value
               )
             }
+            disabled={canEdit}
           />
         </FormItem>
       </Critical>
@@ -481,6 +497,7 @@ const WeaponItem = observer(({ weaponData, userId, charId }) => {
               <DeleteOnHitButton
                 className='delete-onHit-button'
                 onClick={(event) => handleDeleteOnHit(event, prop.name)}
+                disabled={canEdit}
               >
                 X
               </DeleteOnHitButton>

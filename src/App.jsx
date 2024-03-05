@@ -155,10 +155,10 @@ const App = observer(() => {
               <ProtectedRoute
                 component={<CharacterPage />}
                 to='/'
-                condition={isStayLogged || user?.dm}
+                condition={isStayLogged || user?.dm || user}
               />
             }
-            path='dm/:userId/chars/:charId'
+            path='/:userId/chars/:charId'
           />
           <Route element={<div>404 страница не найдена</div>} path='/*' />
         </Routes>

@@ -44,7 +44,7 @@ const UseItemIcon = styled.span`
   }
 `;
 
-const ItemDescription = observer(({ itemName, charId, userId, isKnown }) => {
+const ItemDescription = observer(({ itemName, charId, userId, isKnown, canEdit }) => {
   const { openedCharacter, magicItemUse } = charactersStore;
   const { knownItems } = knownItemsStore;
   const { user } = authStore;
@@ -135,7 +135,13 @@ const ItemDescription = observer(({ itemName, charId, userId, isKnown }) => {
                     </Tooltip>{' '}
                     {item.count} / {item.maxCharges}
                   </span>
-                  <UseItemIcon onClick={() => handleMagicItemUse(item)}>🪄</UseItemIcon>
+                  <UseItemIcon
+                    onClick={() => {
+                      if (!canEdit) handleMagicItemUse(item);
+                    }}
+                  >
+                    🪄
+                  </UseItemIcon>
                 </PropertyLine>
               ))}
             </PropertyContainer>

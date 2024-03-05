@@ -25,7 +25,7 @@ const CardsContainer = styled.div`
 `;
 
 const CharacterCard = styled.div`
-  display: ${({ owner }) => (owner ? 'none' : 'flex')};
+  display: flex;
   flex-direction: column;
   gap: 5px;
   box-shadow: 0 0 1px rgba(128, 128, 128, 0.5);
@@ -77,7 +77,8 @@ const CharactersList = observer(() => {
 
   const getData = async () => {
     await getCharactersList(user.uid);
-    if (user.dm) await getUsers(user.dm);
+    // if (user.dm)
+    await getUsers(user.dm);
   };
 
   useEffect(() => {
@@ -86,62 +87,70 @@ const CharactersList = observer(() => {
     }
   }, [user]);
 
+  useEffect(() => {
+    console.log('characters:', toJS(characters));
+    console.log('usersCharacters:', toJS(usersCharacters));
+  }, [characters, usersCharacters]);
+
   return (
     <CharacterListContainer>
       <h3 style={{ margin: 0, marginBottom: '15px' }}>Characters</h3>
       <ListsContainer>
-        {characters && Object.keys(characters) && (
-          <CardsContainer>
-            {Object.entries(characters).map(([charRef, charData]) => (
-              <CharacterCard
-                owner={charData.owner === user.uid ?? false}
-                key={charRef}
-                onClick={() => navigate(`/chars/${charRef}`)}
-              >
-                <h4>
-                  {charData.name} [
-                  {Object.values(charData.classes).reduce((acc, curr) => {
-                    return acc + curr.levels;
-                  }, 0)}
-                  ]
-                </h4>
-                <p>
-                  {Object.entries(charData.classes).map(([className, classData], index, array) => (
-                    <span key={className}>
-                      {className} {classData.levels} {index < array.length - 1 ? '/' : ''}
-                    </span>
-                  ))}
-                </p>
-              </CharacterCard>
-            ))}
-          </CardsContainer>
-        )}
-        {user.dm && (
-          <CardsContainer>
-            {Object.values(usersCharacters).map(({ owner, name, charName, classes }) => (
-              <CharacterCard
-                onClick={() => navigate(`dm/${owner}/chars/${charName}`)}
-                owner={owner === user.uid ?? false}
-                key={`${owner}__${name}`}
-              >
-                <h4>
-                  {name} [
-                  {Object.values(classes).reduce((acc, curr) => {
-                    return acc + curr.levels;
-                  }, 0)}
-                  ]
-                </h4>
-                <p>
-                  {Object.entries(classes).map(([className, classData], index, array) => (
-                    <span key={className}>
-                      {className} {classData.levels} {index < array.length - 1 ? '/' : ''}
-                    </span>
-                  ))}
-                </p>
-              </CharacterCard>
-            ))}
-          </CardsContainer>
-        )}
+        {/*{characters && Object.keys(characters) && (*/}
+        {/*  <CardsContainer>*/}
+        {/*    {Object.entries(characters).map(([charRef, charData]) => (*/}
+        {/*      <CharacterCard*/}
+        {/*        owner={charData.owner === user.uid ?? false}*/}
+        {/*        key={charRef}*/}
+        {/*        onClick={() => navigate(`${charData.owner}/chars/${charRef}`)}*/}
+        {/*      >*/}
+        {/*        <h4>*/}
+        {/*          {charData.name} [*/}
+        {/*          {Object.values(charData.classes).reduce((acc, curr) => {*/}
+        {/*            return acc + curr.levels;*/}
+        {/*          }, 0)}*/}
+        {/*          ]*/}
+        {/*        </h4>*/}
+        {/*        <p>*/}
+        {/*          {Object.entries(charData.classes).map(([className, classData], index, array) => (*/}
+        {/*            <span key={className}>*/}
+        {/*              {className} {classData.levels} {index < array.length - 1 ? '/' : ''}*/}
+        {/*            </span>*/}
+        {/*          ))}*/}
+        {/*        </p>*/}
+        {/*      </CharacterCard>*/}
+        {/*    ))}*/}
+        {/*  </CardsContainer>*/}
+        {/*)}*/}
+        {
+          // user.dm
+          usersCharacters && (
+            <CardsContainer>
+              {Object.values(usersCharacters).map(({ owner, name, charName, classes }) => (
+                <CharacterCard
+                  onClick={() => navigate(`${owner}/chars/${charName}`)}
+                  owner={owner === user.uid ?? false}
+                  key={`${owner}__${name}`}
+                >
+                  <h4>
+                    {name} [
+                    {Object.values(classes).reduce((acc, curr) => {
+                      return acc + curr.levels;
+                    }, 0)}
+                    ]
+                  </h4>
+                  <p>
+                    {Object.entries(classes).map(([className, classData], index, array) => (
+                      <span key={className}>
+                        {className} {classData.levels} {index < array.length - 1 ? '/' : ''}
+                      </span>
+                    ))}
+                  </p>
+                </CharacterCard>
+              ))}
+            </CardsContainer>
+          )
+        }
       </ListsContainer>
     </CharacterListContainer>
   );

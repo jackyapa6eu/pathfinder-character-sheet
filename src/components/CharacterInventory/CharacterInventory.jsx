@@ -96,7 +96,7 @@ const CoinIconContainer = styled.div`
   left: -5px;
 `;
 
-const CharacterInventory = observer(({ charId, userId }) => {
+const CharacterInventory = observer(({ charId, userId, canEdit }) => {
   const [addItemModalIsOpen, setAddItemModalIsOpen] = useState(false);
   const [addKnownItemModalIsOpen, setAddKnownItemModalIsOpen] = useState(false);
   const [searchItemText, setSearchItemText] = useState('');
@@ -134,10 +134,18 @@ const CharacterInventory = observer(({ charId, userId }) => {
         setAddItemModalIsOpen={setAddItemModalIsOpen}
       />
       <InventoryPanelContainer>
-        <Button style={{ width: '80px' }} onClick={() => setAddItemModalIsOpen(true)}>
+        <Button
+          style={{ width: '80px' }}
+          disabled={canEdit}
+          onClick={() => setAddItemModalIsOpen(true)}
+        >
           Add +
         </Button>
-        <Button style={{ width: '120px' }} onClick={() => setAddKnownItemModalIsOpen(true)}>
+        <Button
+          style={{ width: '120px' }}
+          disabled={canEdit}
+          onClick={() => setAddKnownItemModalIsOpen(true)}
+        >
           Add known +
         </Button>
         <Search
@@ -154,6 +162,7 @@ const CharacterInventory = observer(({ charId, userId }) => {
                 controls={false}
                 style={{ width: '100%' }}
                 onChange={(value) => handleChangeMoney('platinum', value)}
+                disabled={canEdit}
               />
             </FormItem>
             <Tooltip title='Platinum coins'>
@@ -169,6 +178,7 @@ const CharacterInventory = observer(({ charId, userId }) => {
                 controls={false}
                 style={{ width: '100%' }}
                 onChange={(value) => handleChangeMoney('gold', value)}
+                disabled={canEdit}
               />
             </FormItem>
             <Tooltip title='Gold coins'>
@@ -184,6 +194,7 @@ const CharacterInventory = observer(({ charId, userId }) => {
                 controls={false}
                 style={{ width: '100%' }}
                 onChange={(value) => handleChangeMoney('silver', value)}
+                disabled={canEdit}
               />
             </FormItem>
             <Tooltip title='Silver coins'>
@@ -199,6 +210,7 @@ const CharacterInventory = observer(({ charId, userId }) => {
                 controls={false}
                 style={{ width: '100%' }}
                 onChange={(value) => handleChangeMoney('copper', value)}
+                disabled={canEdit}
               />
             </FormItem>
             <Tooltip title='Copper coins'>
@@ -226,6 +238,7 @@ const CharacterInventory = observer(({ charId, userId }) => {
                 searchItemText={searchItemText}
                 setEditingItem={setEditingItem}
                 setAddItemModalIsOpen={setAddItemModalIsOpen}
+                canEdit={canEdit}
               />
             ),
           }))}

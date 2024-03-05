@@ -50,7 +50,7 @@ const StyledForm = styled(Form)`
     '. . . submit';
 `;
 
-const Weapons = observer(({ charId, userId }) => {
+const Weapons = observer(({ charId, userId, canEdit }) => {
   const [addWeaponModalIsOpen, setAddWeaponModalIsOpen] = useState(false);
   const { openedCharacter, createWeapon } = charactersStore;
   const { user } = authStore;
@@ -131,11 +131,19 @@ const Weapons = observer(({ charId, userId }) => {
       <WeaponsList>
         {openedCharacter.weapons &&
           Object.entries(openedCharacter.weapons).map(([weaponName, weaponData]) => (
-            <WeaponItem charId={charId} userId={userId} key={weaponName} weaponData={weaponData} />
+            <WeaponItem
+              charId={charId}
+              userId={userId}
+              key={weaponName}
+              weaponData={weaponData}
+              canEdit={canEdit}
+            />
           ))}
       </WeaponsList>
       <Tooltip title='Добавить оружие'>
-        <AddWeaponButton onClick={() => setAddWeaponModalIsOpen(true)}>+</AddWeaponButton>
+        <AddWeaponButton disabled={canEdit} onClick={() => setAddWeaponModalIsOpen(true)}>
+          +
+        </AddWeaponButton>
       </Tooltip>
     </WeaponsContainer>
   );
