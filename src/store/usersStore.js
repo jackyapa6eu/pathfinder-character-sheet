@@ -24,7 +24,7 @@ class UsersStore {
           this.users = users;
           // if (isDm) {
           this.usersCharacters = Object.entries(users).reduce((chars, [userId, userData]) => {
-            Object.entries(userData.characters).forEach(([charName, charData]) => {
+            Object.entries(userData.characters || {}).forEach(([charName, charData]) => {
               chars[charName] = {
                 ...charData,
                 charName: charName,

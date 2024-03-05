@@ -64,7 +64,7 @@ const Header = observer(({ isDarkTheme, handleSwitchTheme }) => {
     <StyledHeader>
       <DiceIcon size='60px' handleClick={() => handleNavigateButton('')} />
 
-      <HeaderNavMenu>{user?.dm && <Button>Create campaign</Button>}</HeaderNavMenu>
+      <HeaderNavMenu>{/* user?.dm && <Button>Create campaign</Button> */}</HeaderNavMenu>
       <Switch
         size='small'
         checkedChildren={<DayIcon size={14} />}

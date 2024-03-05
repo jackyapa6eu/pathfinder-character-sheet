@@ -383,6 +383,7 @@ class CharactersStore {
       await set(dataRef, {
         ...initialUserData,
         ...charData,
+        owner: uid,
         classes: { [charData.classes]: { levels: 1, hasSpells } },
         spellsPerDay: { [charData.classes]: availableSpellLevels },
       });
