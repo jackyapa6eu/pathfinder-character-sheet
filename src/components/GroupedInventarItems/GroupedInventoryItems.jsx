@@ -22,6 +22,7 @@ const Item = styled.div`
   margin: 0;
   display: grid;
   grid-template-columns: ${(p) => p.template ?? ''};
+  opacity: ${(p) => (p.onhorse ? 0.3 : 1)};
   background: white;
   padding: 3px;
   cursor: pointer;
@@ -163,6 +164,7 @@ const GroupedInventoryItems = observer(
               key={el.ref}
               template={itemTemplate}
               onClick={() => handleShowItemDescription(el)}
+              onhorse={el.onHorse}
             >
               <span className='item-name-container'>
                 {isKnown && (

@@ -1,16 +1,18 @@
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import charactersStore, { initialUserData } from '../../store/charactersStore';
 import authStore from '../../store/authStore';
-import { Button, Collapse, Form, InputNumber, Tooltip } from 'antd';
+import { Button, Collapse, Form, Input, InputNumber, Tooltip } from 'antd';
 import AddItemModal from './AddItemModal';
-import { itemTypes } from '../../utils/consts';
+import { carryingCapacityTable, itemTypes } from '../../utils/consts';
 import GroupedInventoryItems from '../GroupedInventarItems/GroupedInventoryItems';
 import Search from 'antd/es/input/Search';
 import CoinIcon from '../../icons/CoinIcon';
 import FormItem from '../FormItem';
 import AddKnownItemModal from './AddKnownItemModal';
+import { toJS } from 'mobx';
+import { calcLoad } from '../../utils/helpers';
 
 export const itemTemplate = '1fr 26px 50px 50px 66px';
 
@@ -76,7 +78,7 @@ const InventoryPanelContainer = styled.div`
 
 const MoneyForm = styled.div`
   display: grid;
-  grid-template-columns: 64px 64px 64px 64px;
+  grid-template-columns: 64px 64px 64px 64px 64px 96px;
   gap: 5px;
   align-items: center;
 `;
@@ -111,6 +113,28 @@ const CharacterInventory = observer(({ charId, userId, canEdit }) => {
   const handleChangeMoney = async (type, amount) => {
     await editMoney(userId || user.uid, charId, type, amount);
   };
+
+  const weight = useMemo(
+    () =>
+      Object.values(openedCharacter.inventory).reduce((acc, curr) => {
+        acc += !curr?.onHorse ? curr?.weight || 0 : 0;
+        return acc;
+      }, 0),
+    [openedCharacter]
+  );
+
+  const loaded = useMemo(
+    () =>
+      calcLoad(
+        carryingCapacityTable[
+          (openedCharacter?.abilities?.str?.score || 1) +
+            (openedCharacter?.equipBonuses?.abilityBonus?.str || 0) +
+            (openedCharacter?.abilities?.str?.adjustment || 0)
+        ],
+        weight
+      ),
+    [weight, openedCharacter]
+  );
 
   return (
     <CharacterInventoryContainer>
@@ -216,6 +240,28 @@ const CharacterInventory = observer(({ charId, userId, canEdit }) => {
             <Tooltip title='Copper coins'>
               <CoinIconContainer>
                 <CoinIcon size='20px' color='#B87333' /> {/* медь  */}
+              </CoinIconContainer>
+            </Tooltip>
+          </CoinContainer>
+
+          <CoinContainer>
+            <FormItem label='weight' textAlign='center' noBgLabel>
+              <InputNumber value={weight} controls={false} style={{ width: '100%' }} disabled />
+            </FormItem>
+            <Tooltip title=''>
+              <CoinIconContainer>
+                {/*<CoinIcon size='20px' color='#B87333' /> /!* медь  *!/*/}
+              </CoinIconContainer>
+            </Tooltip>
+          </CoinContainer>
+
+          <CoinContainer>
+            <FormItem label='load' textAlign='center' noBgLabel>
+              <Input value={loaded} controls={false} style={{ width: '100%' }} disabled />
+            </FormItem>
+            <Tooltip title=''>
+              <CoinIconContainer>
+                {/*<CoinIcon size='20px' color='#B87333' /> /!* медь  *!/*/}
               </CoinIconContainer>
             </Tooltip>
           </CoinContainer>

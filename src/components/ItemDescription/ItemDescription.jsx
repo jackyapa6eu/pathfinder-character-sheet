@@ -5,7 +5,7 @@ import charactersStore from '../../store/charactersStore';
 import knownItemsStore from '../../store/knownItemsStore';
 import styled from 'styled-components';
 import { capitalizedFirstLetter } from '../../utils/helpers';
-import { Tooltip } from 'antd';
+import { Checkbox, Tooltip } from 'antd';
 import authStore from '../../store/authStore';
 
 const Container = styled.div`
@@ -45,7 +45,7 @@ const UseItemIcon = styled.span`
 `;
 
 const ItemDescription = observer(({ itemName, charId, userId, isKnown, canEdit }) => {
-  const { openedCharacter, magicItemUse } = charactersStore;
+  const { openedCharacter, magicItemUse, handleOnHorse } = charactersStore;
   const { knownItems } = knownItemsStore;
   const { user } = authStore;
 
@@ -58,6 +58,7 @@ const ItemDescription = observer(({ itemName, charId, userId, isKnown, canEdit }
     weight = null,
     ref = null,
     name = null,
+    onHorse = false,
     itemName: x = null,
     ...itemProperties
   } = isKnown ? knownItems[itemName] : openedCharacter.inventory[itemName];
@@ -69,8 +70,15 @@ const ItemDescription = observer(({ itemName, charId, userId, isKnown, canEdit }
     [itemName]
   );
 
+  const handleChangeOnHorse = async (event) => {
+    await handleOnHorse(userId || user.id, charId, itemName, event.target.checked);
+  };
+
   return (
     <Container>
+      <PropertyLine>
+        on horse: <Checkbox checked={onHorse} onChange={handleChangeOnHorse} />
+      </PropertyLine>
       <PropertyLine>
         {equipSlot === 'empty' ? '' : capitalizedFirstLetter(equipSlot || '')}
       </PropertyLine>

@@ -658,11 +658,13 @@ class CharactersStore {
   };
 
   prepareSpell = async (uid, charRef, spellData, justSlot = false, preparingSpell) => {
-    console.log(spellData);
     const db = getDatabase();
-    const spellRef = `${spellData.name.replace(/\s+/g, '-').toLowerCase()}${
-      spellData.metamagic ? '(metamagic)' : ''
-    }`;
+    const metaName = spellData.metamagic
+      ? spellData.metamagicName
+        ? `(${spellData.metamagicName})`
+        : '(metamagic)'
+      : '';
+    const spellRef = `${spellData.name.replace(/\s+/g, '-').toLowerCase()}${metaName}`;
 
     const spellLevelData = toJS(this.openedCharacter).spellsPerDay[spellData.class][
       spellData.level
@@ -687,7 +689,7 @@ class CharactersStore {
       spell = {
         ...spellData,
         freeSlot: justSlot,
-        name: `${spellData.name} ${spellData.metamagic ? '(metamagic)' : ''}`,
+        name: `${spellData.name} ${metaName}`,
         metamagic: spellData.metamagic ?? false,
         asDomain: spellData.asDomain ?? false,
         slots: {
@@ -982,6 +984,19 @@ class CharactersStore {
       await set(dataRef, chargesData.count - 1);
 
       message.success(`Item used!`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
+  handleOnHorse = async (uid, charRef, itemName, newData) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `${this.openedCharacter.inventory[itemName].ref}/onHorse`);
+    try {
+      await set(dataRef, newData);
+
+      message.success(`On horse changed!`);
     } catch (e) {
       console.log(e);
       message.error('Error!');

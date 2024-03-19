@@ -137,33 +137,6 @@ const itemTypes = [
   },
 ];
 
-const itemProperties = {
-  name: null,
-  weight: null,
-  cost: null,
-  description: null,
-  equipSlot: '',
-  count: null,
-
-  acBonus: { armor: null, shield: null, natural: null, deflection: null },
-  checkPenalty: null,
-  maxDex: null,
-
-  charges: { name: { restorable: null, nonRestorable: null } }, // название умения
-
-  attackBonus: null, // ability attack mod
-  weaponAttackBonus: null, // weapon attack bonus
-  damageBonus: null, // ability damage mod
-  maxDamageBonus: null, // max ability damage mod
-  weaponDamageBonus: null, // weapon damage bonus
-
-  abilityBonus: { str: null, dex: null, con: null, int: null, wis: null, cha: null },
-
-  savingThrows: { fortitude: null, reflex: null, will: null },
-
-  skills: { name: null },
-};
-
 const equippedItem = {
   none: null,
   head: null, // circlets,crowns,hats,headbands,helmets, phylacteries.
@@ -288,6 +261,38 @@ const availableSkills = {
   },
 };
 
+const carryingCapacityTable = {
+  1: [3, 4, 6, 7, 10],
+  2: [6, 7, 13, 14, 20],
+  3: [10, 11, 20, 21, 30],
+  4: [13, 14, 26, 27, 40],
+  5: [16, 17, 33, 34, 50],
+  6: [20, 21, 40, 41, 60],
+  7: [23, 24, 46, 47, 70],
+  8: [26, 27, 53, 54, 80],
+  9: [30, 31, 60, 61, 90],
+  10: [33, 34, 66, 67, 100],
+  11: [38, 39, 76, 77, 115],
+  12: [43, 44, 86, 87, 130],
+  13: [50, 51, 100, 101, 150],
+  14: [58, 59, 116, 117, 175],
+  15: [66, 67, 133, 134, 200],
+  16: [76, 77, 153, 154, 230],
+  17: [86, 87, 173, 174, 260],
+  18: [100, 101, 200, 201, 300],
+  19: [116, 117, 233, 234, 350],
+  20: [133, 134, 266, 267, 400],
+  21: [153, 154, 306, 307, 460],
+  22: [173, 174, 346, 347, 520],
+  23: [200, 201, 400, 401, 600],
+  24: [233, 234, 466, 467, 700],
+  25: [266, 267, 533, 534, 800],
+  26: [306, 307, 613, 614, 920],
+  27: [346, 347, 693, 694, 1040],
+  28: [400, 401, 800, 801, 1200],
+  29: [466, 467, 933, 934, 1400],
+};
+
 export {
   alignmentSelectOptions,
   availableClasses,
@@ -298,4 +303,5 @@ export {
   equippedItem,
   availableAbilitiesForSelect,
   availableSkills,
+  carryingCapacityTable,
 };

@@ -22,6 +22,7 @@ const StyledForm = styled(Form)`
   grid-template-areas:
     'name class'
     'checkBoxes level'
+    'metamagicName .'
     '. submit';
 `;
 
@@ -98,7 +99,7 @@ const PrepareSpellModal = observer(
               valuePropName='checked'
               onChange={(event) => setIsMetamagic(event.target.checked)}
             >
-              <Checkbox></Checkbox>
+              <Checkbox />
             </StyledFormItem>
             {/*<StyledFormItem*/}
             {/*  gridarea='asDomain'*/}
@@ -110,6 +111,9 @@ const PrepareSpellModal = observer(
             {/*  <Checkbox disabled={preparingSpell.isDomain}></Checkbox>*/}
             {/*</StyledFormItem>*/}
           </div>
+          <StyledFormItem gridarea='metamagicName' name='metamagicName' label='metamagic name'>
+            <Input allowClear />
+          </StyledFormItem>
 
           <ButtonBox>
             <StyledFormItem>
