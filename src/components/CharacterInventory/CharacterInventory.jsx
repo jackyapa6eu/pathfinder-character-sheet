@@ -81,6 +81,10 @@ const MoneyForm = styled.div`
   grid-template-columns: 64px 64px 64px 64px 64px 96px;
   gap: 5px;
   align-items: center;
+
+  @media screen and (max-width: 470px) {
+    grid-template-columns: 64px 64px 64px 64px;
+  }
 `;
 
 const CoinContainer = styled.div`
