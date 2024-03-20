@@ -664,6 +664,7 @@ class CharactersStore {
         ? `(${spellData.metamagicName})`
         : '(metamagic)'
       : '';
+    console.log('metaName:', metaName);
     const spellRef = `${spellData.name.replace(/\s+/g, '-').toLowerCase()}${metaName}`;
 
     const spellLevelData = toJS(this.openedCharacter).spellsPerDay[spellData.class][
@@ -692,6 +693,7 @@ class CharactersStore {
         name: `${spellData.name} ${metaName}`,
         metamagic: spellData.metamagic ?? false,
         asDomain: spellData.asDomain ?? false,
+        metamagicName: spellData.metamagicName ?? '',
         slots: {
           [Date.now()]: {
             isUsed: false,
