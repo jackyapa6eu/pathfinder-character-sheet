@@ -112,156 +112,187 @@ export const initialUserData = {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     appraise: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     bluff: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     climb: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     craft: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     diplomacy: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     disableDevice: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     escapeArtist: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     handleAnimal: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     knowledgeArcana: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     knowledgeDungeoneering: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     knowledgeEngineering: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     knowledgeGeography: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     knowledgeHistory: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     knowledgeLocal: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     knowledgeNature: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     knowledgeNobility: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     knowledgePlanes: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     knowledgeReligion: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     linguistics: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     perception: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     perform: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     profession: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     ride: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     senseMotive: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     sleightOfHand: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     spellCraft: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     stealth: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     survival: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     swim: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
     useMagicDevice: {
       classSkill: false,
       ranks: null,
       miscMod: null,
+      bonusClassSkill: false,
     },
   },
 
@@ -540,35 +571,21 @@ class CharactersStore {
     }
   }, 700);
 
-  recalcTotalSavingThrows = debounce(async (uid, charRef) => {
-    // const db = getDatabase();
-    // const updates = {};
-    //
-    // if (this.openedCharacter.savingThrows) {
-    //   Object.entries(this.openedCharacter.savingThrows).forEach(([name, data]) => {
-    //     const { total = 0, ...otherThrows } = data || {};
-    //     const tempAbilityMod =
-    //       this.openedCharacter.abilities?.[savingThrowsAbilities[name]]?.tempModifier;
-    //     const abilityMod = this.openedCharacter.abilities?.[savingThrowsAbilities[name]]?.modifier;
-    //     const newTotal =
-    //       (tempAbilityMod ?? abilityMod) +
-    //       Object.values(otherThrows).reduce((acc, curr) => acc + curr, 0);
-    //     updates[`users/${uid}/characters/${charRef}/savingThrows/${name}/total`] =
-    //       Math.floor(newTotal);
-    //   });
-    //   try {
-    //     await update(ref(db), updates);
-    //   } catch (e) {
-    //     console.log(e);
-    //   }
-    // }
-  });
-
   changeSkills = debounce(async (uid, charRef, skillName, field, newValue) => {
     const db = getDatabase();
-    const dataRef = ref(db, `users/${uid}/characters/${charRef}/skills/${skillName}/${field}`);
+    const updates = {};
+    if (field === 'ranks') {
+      if (
+        this.openedCharacter.skills?.[skillName].classSkill &&
+        !this.openedCharacter.skills?.[skillName].ranks
+      ) {
+        updates[`users/${uid}/characters/${charRef}/skills/${skillName}/bonusClassSkill`] = true;
+      }
+    }
+    updates[`users/${uid}/characters/${charRef}/skills/${skillName}/${field}`] = newValue;
+
     try {
-      await set(dataRef, newValue);
+      await update(ref(db), updates);
       message.success('Skill changed!');
     } catch (e) {
       console.log(e);

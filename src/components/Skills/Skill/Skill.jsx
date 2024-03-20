@@ -54,7 +54,7 @@ const Skill = observer(
           (tempAbilityMod ?? abilityMod) +
           (ranks || 0) +
           (miscMod || 0) +
-          (openedCharacter.skills?.[name]?.classSkill && ranks > 0 ? 3 : 0) -
+          (openedCharacter.skills?.[name]?.bonusClassSkill && ranks > 0 ? 3 : 0) -
           (['str', 'dex'].includes(ability) ? openedCharacter.equipBonuses?.checkPenalty || 0 : 0);
         setTotal(trainedOnly && ranks === undefined ? null : featTotal);
       }
