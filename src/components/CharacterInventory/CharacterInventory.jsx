@@ -121,7 +121,7 @@ const CharacterInventory = observer(({ charId, userId, canEdit }) => {
   const weight = useMemo(
     () =>
       Object.values(openedCharacter.inventory).reduce((acc, curr) => {
-        acc += !curr?.onHorse ? curr?.weight || 0 : 0;
+        acc += !curr?.onHorse ? (curr?.weight || 0) * (curr?.count || 1) : 0;
         return acc;
       }, 0),
     [openedCharacter]
