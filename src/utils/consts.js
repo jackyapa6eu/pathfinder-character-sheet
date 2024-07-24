@@ -67,6 +67,7 @@ const availableClasses = {
   Familiar: true,
   'Animal companion': true,
   'Fantastic beast': true,
+  Ritualist: true,
 };
 
 const availableSchools = {

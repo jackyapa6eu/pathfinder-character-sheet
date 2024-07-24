@@ -1180,7 +1180,7 @@ class CharactersStore {
       Object.entries(res).forEach(([abilityName, abilityValue]) => {
         this.openedCharacter.abilities[abilityName].modifier = abilityValue.abilityModifier || 0;
         this.openedCharacter.abilities[abilityName].tempModifier =
-          abilityValue.abilityTempModifier || null;
+          abilityValue.abilityTempModifier ?? null;
       });
     });
   };

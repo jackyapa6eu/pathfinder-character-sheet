@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import FormItem from '../../FormItem';
 import { InputNumber, Tooltip } from 'antd';
@@ -6,6 +6,7 @@ import charactersStore from '../../../store/charactersStore';
 import { observer } from 'mobx-react';
 import authStore from '../../../store/authStore';
 import CharSheetRowLabel from '../../CharlSheetRowLabel/CharSheetRowLabel';
+import { toJS } from 'mobx';
 
 const AbilityContainer = styled.div`
   display: grid;
