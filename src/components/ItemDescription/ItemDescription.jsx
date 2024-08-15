@@ -49,11 +49,19 @@ const ItemDescription = observer(({ itemName, charId, userId, isKnown, canEdit, 
   const { knownItems } = knownItemsStore;
   const { user } = authStore;
 
-  console.log('itemData: ', itemData);
   const dataOfItem = useMemo(() => {
     if (itemData) return itemData;
     return isKnown ? knownItems[itemName] : openedCharacter.inventory[itemName];
-  }, [itemName, charId, userId, isKnown, canEdit, itemData]);
+  }, [
+    itemName,
+    charId,
+    userId,
+    isKnown,
+    canEdit,
+    itemData,
+    knownItems,
+    openedCharacter.inventory[itemName],
+  ]);
   const {
     cost = null,
     count = null,
@@ -72,16 +80,19 @@ const ItemDescription = observer(({ itemName, charId, userId, isKnown, canEdit, 
 
   const handleMagicItemUse = useCallback(
     async (chargesData) => {
+      if (itemData) return;
       await magicItemUse(userId || user.id, charId, itemName, chargesData);
     },
     [itemName]
   );
 
   const handleChangeOnHorse = async (event) => {
+    if (itemData) return;
     await handleOnHorse(userId || user.id, charId, itemName, event.target.checked);
   };
 
   const handleUseful = async (event) => {
+    if (itemData) return;
     await handleUsefulItem(userId || user.id, charId, itemName, event.target.checked);
   };
 

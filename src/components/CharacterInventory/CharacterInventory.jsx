@@ -120,7 +120,7 @@ const CharacterInventory = observer(({ charId, userId, canEdit }) => {
 
   const weight = useMemo(
     () =>
-      Object.values(openedCharacter.inventory).reduce((acc, curr) => {
+      Object.values(openedCharacter?.inventory || {}).reduce((acc, curr) => {
         acc += !curr?.onHorse ? (curr?.weight || 0) * (curr?.count || 1) : 0;
         return acc;
       }, 0),
@@ -272,7 +272,7 @@ const CharacterInventory = observer(({ charId, userId, canEdit }) => {
         </MoneyForm>
       </InventoryPanelContainer>
 
-      {openedCharacter.inventory && (
+      {openedCharacter?.inventory && (
         <StyledCollapse
           defaultActiveKey={itemTypes.map((type) => type.value)}
           ghost

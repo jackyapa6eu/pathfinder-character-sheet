@@ -77,7 +77,8 @@ const CharactersList = observer(() => {
 
   const getData = async () => {
     await getCharactersList(user.uid);
-    await getUsers(user.dm);
+    console.log(toJS(user));
+    await getUsers(user.uid, user.dm);
   };
 
   useEffect(() => {
@@ -85,11 +86,6 @@ const CharactersList = observer(() => {
       getData();
     }
   }, [user]);
-
-  // useEffect(() => {
-  //   console.log('characters:', toJS(characters));
-  //   console.log('usersCharacters:', toJS(usersCharacters));
-  // }, [characters, usersCharacters]);
 
   return (
     <CharacterListContainer>

@@ -5,13 +5,15 @@ import { message } from 'antd';
 class UsersStore {
   users = [];
 
-  usersCharacters = [];
+  usersCharacters = {};
+
+  usersAllCharacters = {};
 
   constructor() {
     makeAutoObservable(this);
   }
 
-  getUsers = async (isDm) => {
+  getUsers = async (userId, isDm) => {
     const db = getDatabase();
     const dataRef = ref(db, `users`);
 
@@ -19,23 +21,24 @@ class UsersStore {
       const response = await get(dataRef);
       if (response.exists()) {
         const users = response.val();
-        // console.log('USERS:', users);
         runInAction(() => {
           this.users = users;
-          // if (isDm) {
-          this.usersCharacters = Object.entries(users).reduce((chars, [userId, userData]) => {
+          const allUsersCharacters = {};
+          this.usersCharacters = Object.entries(users).reduce((chars, [ownerId, userData]) => {
             Object.entries(userData.characters || {}).forEach(([charName, charData]) => {
-              chars[charName] = {
+              const data = {
                 ...charData,
                 charName: charName,
-                owner: userId,
+                owner: ownerId,
               };
+              if (!charData.private || charData.owner === userId || isDm) {
+                chars[charName] = data;
+              }
+              allUsersCharacters[charName] = data;
             });
             return chars;
           }, {});
-
-          console.log('usersCharacters:', toJS(this.usersCharacters));
-          // }
+          this.usersAllCharacters = allUsersCharacters;
         });
       }
     } catch (e) {

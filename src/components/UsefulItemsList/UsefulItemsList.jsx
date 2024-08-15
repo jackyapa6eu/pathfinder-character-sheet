@@ -1,7 +1,6 @@
 import { observer } from 'mobx-react';
 import usersStore from '../../store/usersStore';
-import { useCallback, useEffect, useMemo } from 'react';
-import { toJS } from 'mobx';
+import { useCallback, useMemo } from 'react';
 import ItemDescription from '../ItemDescription';
 import { notification } from 'antd';
 import styled from 'styled-components';
@@ -57,11 +56,11 @@ const ItemCard = styled.div`
 `;
 
 export const UsefulItemsList = observer(() => {
-  const { usersCharacters } = usersStore;
+  const { usersAllCharacters } = usersStore;
   const [api, contextHolder] = notification.useNotification();
 
   const usefulItems = useMemo(() => {
-    return Object.entries(usersCharacters).reduce((res, [charName, charData]) => {
+    return Object.entries(usersAllCharacters).reduce((res, [charName, charData]) => {
       if (charData.inventory) {
         Object.values(charData.inventory).forEach((item) => {
           if (item.isUseful) {
@@ -72,7 +71,7 @@ export const UsefulItemsList = observer(() => {
 
       return res;
     }, []);
-  }, [usersCharacters]);
+  }, [usersAllCharacters]);
 
   const handleShowItemDescription = useCallback(
     (itemData) => {
@@ -92,11 +91,6 @@ export const UsefulItemsList = observer(() => {
     },
     [usefulItems]
   );
-
-  useEffect(() => {
-    console.log('usersCharacters:', toJS(usersCharacters));
-    console.log('usefulItems:', toJS(usefulItems));
-  }, []);
 
   return (
     <Container>

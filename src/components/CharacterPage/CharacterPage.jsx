@@ -5,7 +5,7 @@ import authStore from '../../store/authStore';
 import charactersStore, { initialUserData } from '../../store/charactersStore';
 import { toJS } from 'mobx';
 import styled from 'styled-components';
-import { Button, Form, Input, InputNumber, Modal, Select, Tabs } from 'antd';
+import { Button, Checkbox, Form, Input, InputNumber, Modal, Select, Tabs } from 'antd';
 import { alignmentSelectOptions } from '../../utils/consts';
 import FormItem from '../FormItem';
 import Abilities from '../Abilities';
@@ -116,19 +116,19 @@ const CharacterPageContainer = styled.div`
 
 const BaseInfo = styled.div`
   display: grid;
-  grid-template-columns: 120px 140px 1fr;
-  grid-template-areas: 'race alignment classes';
+  grid-template-columns: 20px 120px 140px 2fr;
+  grid-template-areas: 'private race alignment classes';
   grid-area: baseInfo;
   width: 100%;
   gap: 5px;
   margin: 0;
   height: max-content;
 
-  @media screen and (max-width: 400px) {
-    grid-template-columns: 120px 140px;
+  @media screen and (max-width: 600px) {
+    grid-template-columns: 20px 120px 1fr;
     grid-template-areas:
-      'race alignment'
-      'classes classes';
+      'private race alignment'
+      '. classes classes';
   }
   padding-bottom: 5px;
 `;
@@ -171,6 +171,10 @@ const CharacterPage = observer(() => {
 
   const handleChangeBaseInfo = async (dataName, newValue) => {
     await changeBaseInfo(userId || user?.uid, charId, dataName, newValue.target?.value || newValue);
+  };
+
+  const handlePrivate = async (event) => {
+    await changeBaseInfo(userId || user?.uid, charId, 'private', event.target.checked);
   };
 
   useEffect(() => {
@@ -262,6 +266,13 @@ const CharacterPage = observer(() => {
               +
             </Button>
           </CharClassesContainer>
+          <FormItem gridarea='private' name='private' label='private' valuePropName='checked'>
+            <Checkbox
+              checked={openedCharacter.private}
+              onChange={handlePrivate}
+              disabled={canEdit}
+            />
+          </FormItem>
         </BaseInfo>
         <StyledTabs
           size='small'

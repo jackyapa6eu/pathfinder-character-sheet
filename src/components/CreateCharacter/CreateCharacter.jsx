@@ -18,6 +18,7 @@ const StyledForm = styled(Form)`
     'classes classes classes'
     'level level level'
     'race race race'
+    'private . .'
     '. . submit';
   width: 100%;
   max-width: 360px;
@@ -52,7 +53,12 @@ const CreateCharacter = observer(() => {
   const navigate = useNavigate();
 
   const handleFinish = async (values) => {
-    await createCharacter(user.uid, values, hasSpells, () => navigate('/'));
+    await createCharacter(
+      user.uid,
+      { ...values, private: values.private ?? false },
+      hasSpells,
+      () => navigate('/')
+    );
   };
 
   return (
@@ -92,6 +98,10 @@ const CreateCharacter = observer(() => {
 
       <StyledFormItem gridarea='race' name='race' label='race' rules={[{ required: true }]}>
         <Input allowClear />
+      </StyledFormItem>
+
+      <StyledFormItem gridarea='private' name='private' label='private' valuePropName='checked'>
+        <Checkbox />
       </StyledFormItem>
 
       <ButtonBox>
