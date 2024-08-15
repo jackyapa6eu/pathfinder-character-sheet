@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect } from 'react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { toJS } from 'mobx';
 import charactersStore from '../../store/charactersStore';
@@ -44,11 +44,16 @@ const UseItemIcon = styled.span`
   }
 `;
 
-const ItemDescription = observer(({ itemName, charId, userId, isKnown, canEdit }) => {
-  const { openedCharacter, magicItemUse, handleOnHorse } = charactersStore;
+const ItemDescription = observer(({ itemName, charId, userId, isKnown, canEdit, itemData }) => {
+  const { openedCharacter, magicItemUse, handleOnHorse, handleUsefulItem } = charactersStore;
   const { knownItems } = knownItemsStore;
   const { user } = authStore;
 
+  console.log('itemData: ', itemData);
+  const dataOfItem = useMemo(() => {
+    if (itemData) return itemData;
+    return isKnown ? knownItems[itemName] : openedCharacter.inventory[itemName];
+  }, [itemName, charId, userId, isKnown, canEdit, itemData]);
   const {
     cost = null,
     count = null,
@@ -59,9 +64,11 @@ const ItemDescription = observer(({ itemName, charId, userId, isKnown, canEdit }
     ref = null,
     name = null,
     onHorse = false,
+    isUseful = false,
     itemName: x = null,
+    owner = null,
     ...itemProperties
-  } = isKnown ? knownItems[itemName] : openedCharacter.inventory[itemName];
+  } = dataOfItem;
 
   const handleMagicItemUse = useCallback(
     async (chargesData) => {
@@ -74,10 +81,19 @@ const ItemDescription = observer(({ itemName, charId, userId, isKnown, canEdit }
     await handleOnHorse(userId || user.id, charId, itemName, event.target.checked);
   };
 
+  const handleUseful = async (event) => {
+    await handleUsefulItem(userId || user.id, charId, itemName, event.target.checked);
+  };
+
   return (
     <Container>
       <PropertyLine>
-        on horse: <Checkbox checked={onHorse} onChange={handleChangeOnHorse} />
+        <span>
+          on horse: <Checkbox checked={onHorse} onChange={handleChangeOnHorse} />
+        </span>
+        <span style={{ marginLeft: 'auto' }}>
+          useful: <Checkbox checked={isUseful} onChange={handleUseful} />
+        </span>
       </PropertyLine>
       <PropertyLine>
         {equipSlot === 'empty' ? '' : capitalizedFirstLetter(equipSlot || '')}

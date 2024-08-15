@@ -1022,6 +1022,19 @@ class CharactersStore {
     }
   };
 
+  handleUsefulItem = async (uid, charRef, itemName, newData) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `${this.openedCharacter.inventory[itemName].ref}/isUseful`);
+    try {
+      await set(dataRef, newData);
+
+      message.success(`is useful changed!`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
   editMoney = debounce(async (uid, charRef, moneyType, amount) => {
     const db = getDatabase();
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/money/${moneyType}`);

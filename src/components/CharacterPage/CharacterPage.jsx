@@ -165,11 +165,6 @@ const CharacterPage = observer(() => {
     [user, openedCharacter]
   );
 
-  // useEffect(() => {
-  //   console.log('openedCharacter:', openedCharacter?.owner);
-  //   console.log('user?.uid: ', user?.uid);
-  // }, [openedCharacter]);
-
   const handleMakeFullRest = async () => {
     await makeFullRest(userId || user?.uid, charId);
   };
