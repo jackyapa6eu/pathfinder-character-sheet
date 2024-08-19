@@ -1140,14 +1140,13 @@ class CharactersStore {
           JSON.stringify(initialUserData.equipBonuses)
         );
       });
-      return;
     }
     const dict = { fortitude: 'con', reflex: 'dex', will: 'wis' };
     const total = Object.entries(dict).reduce((acc, [st, ability]) => {
       const tempAbilityMod = this.openedCharacter.abilities?.[ability]?.tempModifier;
       const abilityMod = this.openedCharacter.abilities?.[ability]?.modifier;
 
-      const { total, ...otherThrows } = this.openedCharacter?.savingThrows[st] || {};
+      const { total, ...otherThrows } = this.openedCharacter?.savingThrows?.[st] || {};
       acc[st] ??= 0;
       acc[st] += Object.values(otherThrows).reduce((sum, item) => {
         return sum + item;
@@ -1159,6 +1158,7 @@ class CharactersStore {
     }, {});
     runInAction(() => {
       Object.entries(total).forEach(([st, value]) => {
+        this.openedCharacter.savingThrows ??= {};
         this.openedCharacter.savingThrows[st] ??= {};
         this.openedCharacter.savingThrows[st].total = value;
       });
