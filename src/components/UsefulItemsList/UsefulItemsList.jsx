@@ -16,7 +16,7 @@ const Container = styled.div`
 
 const ItemsContainer = styled.div`
   display: grid;
-  grid-template-rows: repeat(auto-fill, 50px);
+  //grid-template-rows: repeat(auto-fill, 50px);
   width: 100%;
   gap: 10px;
   padding: 6px;
@@ -98,7 +98,7 @@ export const UsefulItemsList = observer(() => {
       <ItemsContainer>
         {usefulItems.map((item) => (
           <ItemCard key={item.ref} onClick={() => handleShowItemDescription(item)}>
-            <h4>{item.itemName}</h4>
+            <h4>{item.name}</h4>
           </ItemCard>
         ))}
       </ItemsContainer>

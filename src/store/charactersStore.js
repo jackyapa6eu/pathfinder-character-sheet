@@ -5,12 +5,6 @@ import { debounce } from 'lodash';
 import { availableSpellLevels } from '../utils/consts';
 import { copyToClipboard, filterUndefinedToNull, makeName } from '../utils/helpers';
 
-const savingThrowsAbilities = {
-  fortitude: 'con',
-  reflex: 'dex',
-  will: 'wis',
-};
-
 export const initialUserData = {
   race: '',
   classes: {},
@@ -327,7 +321,6 @@ export const initialUserData = {
     feet: null, // boots, sandals, shoes, slippers
   },
 
-  // TODO: ЗДЕСЬ
   equipBonuses: {
     checkPenalty: 0,
     maxDex: 99,
@@ -426,17 +419,26 @@ class CharactersStore {
     }
   };
 
+  handleChangesLog = async (uid, charRef, { type, target, prevValue = null, currValue = null }) => {
+    console.warn({ type, target, prevValue, currValue });
+    // console.log(data);
+    //
+    // message.warning(`${data} ЗАПИСАЛИ В ЛОГ!`);
+  };
+
   changeAbility = async (uid, charRef, abilityName, abilityType, abilityValue) => {
     const db = getDatabase();
+
+    const prevValue = this.openedCharacter.abilities[abilityName][abilityType];
+
     if (abilityType === 'score') {
       try {
         const updates = {};
         updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/${abilityType}`] =
           abilityValue;
-        // updates[`users/${uid}/characters/${charRef}/abilities/${abilityName}/modifier`] =
-        //   Math.floor((abilityValue - 10) / 2);
 
         await update(ref(db), updates);
+
         message.success(`Ability ${abilityName} changed!`);
       } catch (e) {
         console.log(e);
@@ -454,7 +456,13 @@ class CharactersStore {
         console.log(e);
       }
     }
-    this.changeAttack(uid, charRef);
+    await this.handleChangesLog(uid, charRef, {
+      type: 'changed',
+      target: `${abilityName} ${abilityType}`,
+      prevValue,
+      currValue: abilityValue,
+    }); // TODO
+    // this.changeAttack(uid, charRef);
   };
 
   changeAbilityDebounce = debounce(async (uid, charRef, abilityName, abilityType, abilityValue) => {
@@ -467,6 +475,12 @@ class CharactersStore {
     console.log(newValue);
     try {
       await set(dataRef, newValue);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success('Changed!');
     } catch (e) {
       console.log(e);
@@ -479,6 +493,12 @@ class CharactersStore {
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/hitPoints/${hpType}`);
     try {
       await set(dataRef, hpValue);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success('Hit points changed!');
     } catch (e) {
       console.log(e);
@@ -491,6 +511,12 @@ class CharactersStore {
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/initiative/miscModifier`);
     try {
       await set(dataRef, newInitiative);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success('Initiative changed!');
     } catch (e) {
       console.log(e);
@@ -503,6 +529,12 @@ class CharactersStore {
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/ac/${field}`);
     try {
       await set(dataRef, newValue);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success('Ac changed!');
     } catch (e) {
       console.log(e);
@@ -518,6 +550,12 @@ class CharactersStore {
       updates[`users/${uid}/characters/${charRef}/savingThrows/${throwName}/${field}`] = newValue;
 
       await update(ref(db), updates);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success(`Saving throw ${throwName} changed!`);
     } catch (e) {
       console.log(e);
@@ -553,6 +591,12 @@ class CharactersStore {
 
     try {
       await update(ref(db), updates);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       if (!isUpdate) message.success(`Base attack bonus changed!`);
     } catch (e) {
       console.log(e);
@@ -564,6 +608,12 @@ class CharactersStore {
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/attack/perRound`);
     try {
       await set(dataRef, newValue);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success('Attacks per round changed!');
     } catch (e) {
       console.log(e);
@@ -586,6 +636,12 @@ class CharactersStore {
 
     try {
       await update(ref(db), updates);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success('Skill changed!');
     } catch (e) {
       console.log(e);
@@ -601,6 +657,12 @@ class CharactersStore {
 
     try {
       await set(dataRef, featData);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success('Feat added!');
     } catch (e) {
       console.log(e);
@@ -618,6 +680,12 @@ class CharactersStore {
     }
     try {
       await update(ref(db), updates);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success('Class added!');
     } catch (e) {
       console.log(e);
@@ -632,6 +700,12 @@ class CharactersStore {
 
     try {
       await set(dataRef, null);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success('Feat deleted!');
     } catch (e) {
       console.log(e);
@@ -650,6 +724,12 @@ class CharactersStore {
 
     try {
       await set(dataRef, spellData);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success('Spell added!');
     } catch (e) {
       console.log(e);
@@ -667,6 +747,12 @@ class CharactersStore {
 
     try {
       await set(dataRef, null);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success('Spell deleted!');
     } catch (e) {
       console.log(e);
@@ -681,12 +767,10 @@ class CharactersStore {
         ? `(${spellData.metamagicName})`
         : '(metamagic)'
       : '';
-    console.log('metaName:', metaName);
+
     const spellRef = `${spellData.name.replace(/\s+/g, '-').toLowerCase()}${metaName}`;
 
-    const spellLevelData = toJS(this.openedCharacter).spellsPerDay[spellData.class][
-      spellData.level
-    ];
+    const spellLevelData = this.openedCharacter.spellsPerDay[spellData.class][spellData.level];
 
     const toDomain =
       preparingSpell.isDomain &&
@@ -695,7 +779,6 @@ class CharactersStore {
         Object.values(spellLevelData.domainSpells || {}).reduce((acc, curr) => {
           return Object.keys(curr.slots).length;
         }, 0);
-    // spellLevelData.maxDomainCountPerDay > Object.keys(spellLevelData.domainSpells || {}).length;
 
     const domainRef = toDomain ? 'domainSpells' : 'spells';
     let path = `users/${uid}/characters/${charRef}/spellsPerDay/${spellData.class}/${spellData.level}/${domainRef}/${spellRef}`;
@@ -724,6 +807,12 @@ class CharactersStore {
 
     try {
       await set(dataRef, spell);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success('Spell prepared!');
     } catch (e) {
       console.log(e);
@@ -737,6 +826,12 @@ class CharactersStore {
 
     try {
       await set(dataRef, !spellData.slots[slotKey].isUsed);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success(
         `Spell ${spellData.name} ${spellData.slots[slotKey].isUsed ? 'un' : ''}used!`
       );
@@ -759,6 +854,12 @@ class CharactersStore {
 
     try {
       await set(dataRef, null);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success(`Spell deleted!`);
     } catch (e) {
       console.log(e);
@@ -775,6 +876,12 @@ class CharactersStore {
 
     try {
       await set(dataRef, isFreeSlots);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success(`Free slots changed`);
     } catch (e) {
       console.log(e);
@@ -793,7 +900,13 @@ class CharactersStore {
 
     try {
       await set(dataRef, newCount);
-      message.success(`Free slots changed`);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
+      message.success(`Max spells per day changed`);
     } catch (e) {
       console.log(e);
       message.error('Error!');
@@ -836,7 +949,7 @@ class CharactersStore {
           : this.openedCharacter.hitPoints.wounds + 1;
     }
     // откатывает магические предметы
-    Object.values(this.openedCharacter.inventory).forEach((item) => {
+    Object.values(this.openedCharacter?.inventory || {}).forEach((item) => {
       if (item.charges) {
         Object.entries(item.charges).forEach(([chargesName, chargesData]) => {
           console.log(chargesName, toJS(chargesData), item.ref);
@@ -859,6 +972,12 @@ class CharactersStore {
           );
         }
       });
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success('Zzzz... full rest...');
     } catch (e) {
       console.log(e);
@@ -872,6 +991,12 @@ class CharactersStore {
     if (!weaponData.maxDamageBonus) delete weaponData.maxDamageBonus;
     try {
       await set(dataRef, weaponData);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success(`Weapon created!`);
     } catch (e) {
       console.log(e);
@@ -888,6 +1013,12 @@ class CharactersStore {
 
     try {
       await set(dataRef, newValue);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success(`Weapon edited!`);
     } catch (e) {
       console.log(e);
@@ -904,6 +1035,12 @@ class CharactersStore {
 
     try {
       await set(dataRef, propertyData);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success(`On hit property added!`);
     } catch (e) {
       console.log(e);
@@ -920,6 +1057,12 @@ class CharactersStore {
 
     try {
       await set(dataRef, null);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success(`On hit property deleted!`);
     } catch (e) {
       console.log(e);
@@ -933,6 +1076,12 @@ class CharactersStore {
 
     try {
       await set(dataRef, null);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success(`Weapon deleted!`);
     } catch (e) {
       console.log(e);
@@ -952,6 +1101,12 @@ class CharactersStore {
     try {
       updates[itemRef] = clearedData;
       await update(ref(db), updates);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success(name ? 'Item Edited' : `Item added!`);
     } catch (e) {
       console.log(e);
@@ -979,6 +1134,12 @@ class CharactersStore {
         );
         message.success(`Item sold!`);
       } else message.success(`Item deleted!`);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
     } catch (e) {
       console.log(e);
       message.error('Error!');
@@ -992,16 +1153,18 @@ class CharactersStore {
       `${this.openedCharacter.inventory[itemName].ref}/charges/${makeName(chargesData.name)}/count`
     );
 
-    console.log('MAGIC ITEM USE!');
-    console.log(toJS(this.openedCharacter.inventory[itemName]), toJS(chargesData.name));
-    console.log(chargesData.count);
     if (chargesData.count <= 0) {
       message.warning(`No charges left.`);
       return;
     }
     try {
       await set(dataRef, chargesData.count - 1);
-
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success(`Item used!`);
     } catch (e) {
       console.log(e);
@@ -1014,7 +1177,12 @@ class CharactersStore {
     const dataRef = ref(db, `${this.openedCharacter.inventory[itemName].ref}/onHorse`);
     try {
       await set(dataRef, newData);
-
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success(`On horse changed!`);
     } catch (e) {
       console.log(e);
@@ -1041,6 +1209,12 @@ class CharactersStore {
 
     try {
       await set(dataRef, amount);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success(`Money (${moneyType}) changed!`);
     } catch (e) {
       console.log(e);
@@ -1056,6 +1230,12 @@ class CharactersStore {
     try {
       updates[dataRef] = newValue;
       await update(ref(db), updates);
+      await this.handleChangesLog(uid, charRef, {
+        type: '',
+        target: '',
+        prevValue: null,
+        currValue: null,
+      }); // TODO
       message.success(`Item changed!`);
     } catch (e) {
       console.log(e);
@@ -1088,7 +1268,6 @@ class CharactersStore {
       return;
     }
     const equippedItems = Object.values(this.openedCharacter.equippedItems);
-    // TODO: ЗДЕСЬ
     const result = equippedItems.reduce((acc, current) => {
       acc.checkPenalty ??= 0;
       acc.maxDex ??= 99;

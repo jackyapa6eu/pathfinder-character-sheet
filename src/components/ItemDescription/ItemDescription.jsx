@@ -60,7 +60,7 @@ const ItemDescription = observer(({ itemName, charId, userId, isKnown, canEdit, 
     canEdit,
     itemData,
     knownItems,
-    openedCharacter.inventory[itemName],
+    openedCharacter.inventory?.[itemName],
   ]);
   const {
     cost = null,
