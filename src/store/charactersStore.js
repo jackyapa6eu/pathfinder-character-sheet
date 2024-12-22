@@ -4,6 +4,7 @@ import { message } from 'antd';
 import { debounce } from 'lodash';
 import { availableSpellLevels } from '../utils/consts';
 import { copyToClipboard, filterUndefinedToNull, makeName } from '../utils/helpers';
+import authStore from './authStore';
 
 export const initialUserData = {
   race: '',
@@ -421,9 +422,23 @@ class CharactersStore {
 
   handleChangesLog = async (uid, charRef, { type, target, prevValue = null, currValue = null }) => {
     console.warn({ type, target, prevValue, currValue });
-    // console.log(data);
-    //
-    // message.warning(`${data} ЗАПИСАЛИ В ЛОГ!`);
+
+    const { user } = authStore;
+    const db = getDatabase();
+    const date = Date.now();
+    const updates = {};
+    updates[`users/${uid}/characters/${charRef}/changesHistory/${date}`] = {
+      type,
+      target,
+      prevValue,
+      currValue,
+      author: user,
+    };
+    try {
+      await update(ref(db), updates);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   changeAbility = async (uid, charRef, abilityName, abilityType, abilityValue) => {
@@ -461,7 +476,7 @@ class CharactersStore {
       target: `${abilityName} ${abilityType}`,
       prevValue,
       currValue: abilityValue,
-    }); // TODO
+    }); // TODO +
     // this.changeAttack(uid, charRef);
   };
 
@@ -472,15 +487,16 @@ class CharactersStore {
   changeBaseInfo = debounce(async (uid, charRef, dataName, newValue) => {
     const db = getDatabase();
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/${dataName}`);
-    console.log(newValue);
+
+    const prevValue = this.openedCharacter?.[dataName];
     try {
       await set(dataRef, newValue);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
-        prevValue: null,
-        currValue: null,
-      }); // TODO
+        type: 'changed',
+        target: dataName,
+        prevValue: prevValue,
+        currValue: newValue,
+      }); // TODO +
       message.success('Changed!');
     } catch (e) {
       console.log(e);
@@ -491,14 +507,17 @@ class CharactersStore {
   changeHitPoints = debounce(async (uid, charRef, hpType, hpValue) => {
     const db = getDatabase();
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/hitPoints/${hpType}`);
+
+    const prevValue = this.openedCharacter.hitPoints?.[hpType];
+
     try {
       await set(dataRef, hpValue);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
-        prevValue: null,
-        currValue: null,
-      }); // TODO
+        type: 'changed',
+        target: `${hpType} hit points`,
+        prevValue: prevValue,
+        currValue: hpValue,
+      }); // TODO +
       message.success('Hit points changed!');
     } catch (e) {
       console.log(e);
@@ -509,14 +528,17 @@ class CharactersStore {
   changeMiscInitiative = debounce(async (uid, charRef, newInitiative) => {
     const db = getDatabase();
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/initiative/miscModifier`);
+
+    const prevValue = this.openedCharacter.initiative.miscModifier;
+
     try {
       await set(dataRef, newInitiative);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
-        prevValue: null,
-        currValue: null,
-      }); // TODO
+        type: 'changed',
+        target: 'misc modifier initiative',
+        prevValue,
+        currValue: newInitiative,
+      }); // TODO +
       message.success('Initiative changed!');
     } catch (e) {
       console.log(e);
@@ -527,14 +549,20 @@ class CharactersStore {
   changeAc = debounce(async (uid, charRef, field, newValue) => {
     const db = getDatabase();
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/ac/${field}`);
+
+    const prevValue = this.openedCharacter.ac?.[field];
+
     try {
       await set(dataRef, newValue);
-      await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
-        prevValue: null,
-        currValue: null,
-      }); // TODO
+      if (field === 'miscModifier') {
+        await this.handleChangesLog(uid, charRef, {
+          type: 'changed',
+          target: `AC misc modifier`,
+          prevValue,
+          currValue: newValue,
+        }); // TODO +
+      }
+
       message.success('Ac changed!');
     } catch (e) {
       console.log(e);
@@ -542,8 +570,15 @@ class CharactersStore {
     }
   }, 700);
 
-  changeSavingThrows = debounce(async (uid, charRef, throwName, field, newValue, abilityName) => {
+  changeSavingThrows = debounce(async (uid, charRef, throwName, field, newValue) => {
     const db = getDatabase();
+    const prevValue = this.openedCharacter.savingThrows[throwName]?.[field];
+
+    const title = {
+      miscMod: 'misc modifier',
+      tempMod: 'temp modifier',
+    };
+
     try {
       const updates = {};
 
@@ -551,11 +586,11 @@ class CharactersStore {
 
       await update(ref(db), updates);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
-        prevValue: null,
-        currValue: null,
-      }); // TODO
+        type: 'changed',
+        target: `saving throw ${throwName} ${title[field] ?? field}`,
+        prevValue,
+        currValue: newValue,
+      }); // TODO +
       message.success(`Saving throw ${throwName} changed!`);
     } catch (e) {
       console.log(e);
@@ -583,20 +618,20 @@ class CharactersStore {
 
   changeAttack = debounce(async (uid, charRef, newValue, isUpdate = false) => {
     const db = getDatabase();
-
+    const prevValue = this.openedCharacter.attack.bab;
+    const currValue = newValue || this.openedCharacter.attack?.bab || 0;
     const updates = {};
 
-    updates[`users/${uid}/characters/${charRef}/attack/bab`] =
-      newValue || this.openedCharacter.attack?.bab || 0;
+    updates[`users/${uid}/characters/${charRef}/attack/bab`] = currValue;
 
     try {
       await update(ref(db), updates);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
-        prevValue: null,
-        currValue: null,
-      }); // TODO
+        type: 'changed',
+        target: 'base attack bonus',
+        prevValue,
+        currValue,
+      }); // TODO +
       if (!isUpdate) message.success(`Base attack bonus changed!`);
     } catch (e) {
       console.log(e);
@@ -605,15 +640,17 @@ class CharactersStore {
 
   changeAttackPerRound = debounce(async (uid, charRef, newValue) => {
     const db = getDatabase();
+    const prevValue = this.openedCharacter.attack.perRound;
+
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/attack/perRound`);
     try {
       await set(dataRef, newValue);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
-        prevValue: null,
-        currValue: null,
-      }); // TODO
+        type: 'changed',
+        target: 'attacks per round',
+        prevValue,
+        currValue: newValue,
+      }); // TODO +
       message.success('Attacks per round changed!');
     } catch (e) {
       console.log(e);
@@ -623,25 +660,25 @@ class CharactersStore {
 
   changeSkills = debounce(async (uid, charRef, skillName, field, newValue) => {
     const db = getDatabase();
+    const prevValue = this.openedCharacter.skills[skillName]?.[field];
+
+    const isClassSkillBonus =
+      this.openedCharacter.skills?.[skillName].classSkill &&
+      !this.openedCharacter.skills?.[skillName].ranks;
+
     const updates = {};
-    if (field === 'ranks') {
-      if (
-        this.openedCharacter.skills?.[skillName].classSkill &&
-        !this.openedCharacter.skills?.[skillName].ranks
-      ) {
-        updates[`users/${uid}/characters/${charRef}/skills/${skillName}/bonusClassSkill`] = true;
-      }
-    }
+    if (field === 'ranks' && isClassSkillBonus)
+      updates[`users/${uid}/characters/${charRef}/skills/${skillName}/bonusClassSkill`] = true;
     updates[`users/${uid}/characters/${charRef}/skills/${skillName}/${field}`] = newValue;
 
     try {
       await update(ref(db), updates);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
-        prevValue: null,
-        currValue: null,
-      }); // TODO
+        type: 'changed',
+        target: `skill ${skillName} ${field === 'miscMod' ? 'misc modifier' : field}`,
+        prevValue,
+        currValue: newValue,
+      }); // TODO +
       message.success('Skill changed!');
     } catch (e) {
       console.log(e);
@@ -658,11 +695,11 @@ class CharactersStore {
     try {
       await set(dataRef, featData);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: 'added',
+        target: featData.name,
         prevValue: null,
         currValue: null,
-      }); // TODO
+      }); // TODO +
       message.success('Feat added!');
     } catch (e) {
       console.log(e);
@@ -681,11 +718,11 @@ class CharactersStore {
     try {
       await update(ref(db), updates);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: 'added',
+        target: newClass,
         prevValue: null,
         currValue: null,
-      }); // TODO
+      }); // TODO +
       message.success('Class added!');
     } catch (e) {
       console.log(e);
@@ -695,17 +732,17 @@ class CharactersStore {
 
   deleteFeat = async (uid, charRef, featRef) => {
     const db = getDatabase();
-
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/feats/${featRef}`);
+    const prevValue = this.openedCharacter.feats[featRef];
 
     try {
       await set(dataRef, null);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: 'deleted',
+        target: prevValue.name,
         prevValue: null,
         currValue: null,
-      }); // TODO
+      }); // TODO +
       message.success('Feat deleted!');
     } catch (e) {
       console.log(e);
@@ -725,11 +762,11 @@ class CharactersStore {
     try {
       await set(dataRef, spellData);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: 'added',
+        target: `spell "${spellData.name}" ${spellData.level}`,
         prevValue: null,
         currValue: null,
-      }); // TODO
+      }); // TODO +
       message.success('Spell added!');
     } catch (e) {
       console.log(e);
@@ -739,6 +776,7 @@ class CharactersStore {
 
   deleteSpell = async (uid, charRef, spellRef, spellData) => {
     const db = getDatabase();
+    const prevValue = this.openedCharacter.spells[spellData.class]?.[spellData.level]?.[spellRef];
 
     const dataRef = ref(
       db,
@@ -748,11 +786,11 @@ class CharactersStore {
     try {
       await set(dataRef, null);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: 'deleted',
+        target: `spell "${prevValue.name}" ${spellData.level}`,
         prevValue: null,
         currValue: null,
-      }); // TODO
+      }); // TODO +
       message.success('Spell deleted!');
     } catch (e) {
       console.log(e);
@@ -808,11 +846,11 @@ class CharactersStore {
     try {
       await set(dataRef, spell);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: 'added',
+        target: `prepared spell "${spellData.name} ${metaName}" ${spellData.level}`,
         prevValue: null,
         currValue: null,
-      }); // TODO
+      }); // TODO +
       message.success('Spell prepared!');
     } catch (e) {
       console.log(e);
@@ -823,18 +861,17 @@ class CharactersStore {
   spellUse = async (uid, charRef, spellData, slotKey) => {
     const db = getDatabase();
     const dataRef = ref(db, `${spellData.ref}/slots/${slotKey}/isUsed`);
-
+    const isUsed = spellData.slots[slotKey].isUsed;
     try {
       await set(dataRef, !spellData.slots[slotKey].isUsed);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: `${isUsed ? 'un' : ''}used`,
+        target: `spell ${spellData.name}`,
         prevValue: null,
         currValue: null,
-      }); // TODO
-      message.success(
-        `Spell ${spellData.name} ${spellData.slots[slotKey].isUsed ? 'un' : ''}used!`
-      );
+      }); // TODO +
+
+      message.success(`Spell ${spellData.name} ${isUsed ? 'un' : ''}used!`);
     } catch (e) {
       console.log(e);
       message.error('Error!');
@@ -855,11 +892,11 @@ class CharactersStore {
     try {
       await set(dataRef, null);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: 'deleted',
+        target: `prepared spell ${spellData.level} ${spellData.name}`,
         prevValue: null,
         currValue: null,
-      }); // TODO
+      }); // TODO +
       message.success(`Spell deleted!`);
     } catch (e) {
       console.log(e);
@@ -869,6 +906,9 @@ class CharactersStore {
 
   changeFreeSlotsForLevel = async (uid, charRef, isFreeSlots, className, level) => {
     const db = getDatabase();
+
+    const prevValue = this.openedCharacter.spellsPerDay[className]?.[level]?.freeSpells;
+
     const dataRef = ref(
       db,
       `users/${uid}/characters/${charRef}/spellsPerDay/${className}/${level}/freeSpells`
@@ -877,11 +917,11 @@ class CharactersStore {
     try {
       await set(dataRef, isFreeSlots);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
-        prevValue: null,
-        currValue: null,
-      }); // TODO
+        type: 'changed',
+        target: `${className} spells ${level} is free spells`,
+        prevValue,
+        currValue: isFreeSlots,
+      }); // TODO  +
       message.success(`Free slots changed`);
     } catch (e) {
       console.log(e);
@@ -891,21 +931,21 @@ class CharactersStore {
 
   changeMaxSpellsPerDay = debounce(async (uid, charRef, newCount, className, level, isDomain) => {
     const db = getDatabase();
+    const maxSpellPerDayRef = isDomain ? 'maxDomainCountPerDay' : 'maxCountPerDay';
+    const prevValue = this.openedCharacter.spellsPerDay[className]?.[level]?.[maxSpellPerDayRef];
     const dataRef = ref(
       db,
-      `users/${uid}/characters/${charRef}/spellsPerDay/${className}/${level}/${
-        isDomain ? 'maxDomainCountPerDay' : 'maxCountPerDay'
-      }`
+      `users/${uid}/characters/${charRef}/spellsPerDay/${className}/${level}/${maxSpellPerDayRef}`
     );
 
     try {
       await set(dataRef, newCount);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
-        prevValue: null,
-        currValue: null,
-      }); // TODO
+        type: 'changed',
+        target: `max${isDomain ? ' domain' : ''} ${className} ${level} spells per day`,
+        prevValue,
+        currValue: newCount,
+      }); // TODO +
       message.success(`Max spells per day changed`);
     } catch (e) {
       console.log(e);
@@ -973,11 +1013,11 @@ class CharactersStore {
         }
       });
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: 'rest',
+        target: 'full rest',
         prevValue: null,
         currValue: null,
-      }); // TODO
+      }); // TODO +
       message.success('Zzzz... full rest...');
     } catch (e) {
       console.log(e);
@@ -992,11 +1032,11 @@ class CharactersStore {
     try {
       await set(dataRef, weaponData);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: 'added',
+        target: `quick access weapon ${weaponData.name}`,
         prevValue: null,
         currValue: null,
-      }); // TODO
+      }); // TODO +
       message.success(`Weapon created!`);
     } catch (e) {
       console.log(e);
@@ -1006,6 +1046,7 @@ class CharactersStore {
 
   changeWeaponData = debounce(async (uid, charRef, weaponName, fieldName, newValue) => {
     const db = getDatabase();
+    const prevValue = this.openedCharacter.weapons[weaponName]?.[fieldName];
     const dataRef = ref(
       db,
       `users/${uid}/characters/${charRef}/weapons/${weaponName}/${fieldName}`
@@ -1014,11 +1055,11 @@ class CharactersStore {
     try {
       await set(dataRef, newValue);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
-        prevValue: null,
-        currValue: null,
-      }); // TODO
+        type: 'changed',
+        target: `quick access weapon ${weaponName} ${fieldName}`,
+        prevValue,
+        currValue: newValue,
+      }); // TODO +
       message.success(`Weapon edited!`);
     } catch (e) {
       console.log(e);
@@ -1036,11 +1077,11 @@ class CharactersStore {
     try {
       await set(dataRef, propertyData);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: 'added',
+        target: `quick access weapon "${weaponName}" feat "${propertyData.name}"`,
         prevValue: null,
         currValue: null,
-      }); // TODO
+      }); // TODO +
       message.success(`On hit property added!`);
     } catch (e) {
       console.log(e);
@@ -1058,11 +1099,11 @@ class CharactersStore {
     try {
       await set(dataRef, null);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: 'deleted',
+        target: `quick access weapon "${weaponName}" feat "${propertyName}"`,
         prevValue: null,
         currValue: null,
-      }); // TODO
+      }); // TODO +
       message.success(`On hit property deleted!`);
     } catch (e) {
       console.log(e);
@@ -1077,11 +1118,11 @@ class CharactersStore {
     try {
       await set(dataRef, null);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: 'deleted',
+        target: `quick access weapon "${weaponName}"`,
         prevValue: null,
         currValue: null,
-      }); // TODO
+      }); // TODO +
       message.success(`Weapon deleted!`);
     } catch (e) {
       console.log(e);
@@ -1102,11 +1143,11 @@ class CharactersStore {
       updates[itemRef] = clearedData;
       await update(ref(db), updates);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: name ? 'edited' : 'added',
+        target: `inventory item "${name ?? itemName}"`,
         prevValue: null,
         currValue: null,
-      }); // TODO
+      }); // TODO +
       message.success(name ? 'Item Edited' : `Item added!`);
     } catch (e) {
       console.log(e);
@@ -1135,11 +1176,11 @@ class CharactersStore {
         message.success(`Item sold!`);
       } else message.success(`Item deleted!`);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: 'deleted',
+        target: `${itemData.name}`,
         prevValue: null,
         currValue: null,
-      }); // TODO
+      }); // TODO +
     } catch (e) {
       console.log(e);
       message.error('Error!');
@@ -1160,11 +1201,11 @@ class CharactersStore {
     try {
       await set(dataRef, chargesData.count - 1);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
+        type: 'used',
+        target: `magic item ${itemName} (${chargesData.name})`,
         prevValue: null,
         currValue: null,
-      }); // TODO
+      }); // TODO +
       message.success(`Item used!`);
     } catch (e) {
       console.log(e);
@@ -1178,11 +1219,11 @@ class CharactersStore {
     try {
       await set(dataRef, newData);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
-        prevValue: null,
-        currValue: null,
-      }); // TODO
+        type: 'changed',
+        target: `item ${itemName} on horse`,
+        prevValue: this.openedCharacter.inventory[itemName].ref.onHorse,
+        currValue: newData,
+      }); // TODO +
       message.success(`On horse changed!`);
     } catch (e) {
       console.log(e);
@@ -1206,15 +1247,15 @@ class CharactersStore {
   editMoney = debounce(async (uid, charRef, moneyType, amount) => {
     const db = getDatabase();
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/money/${moneyType}`);
-
+    const prevValue = this.openedCharacter.money[moneyType];
     try {
       await set(dataRef, amount);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
-        prevValue: null,
-        currValue: null,
-      }); // TODO
+        type: 'changed',
+        target: `${moneyType}`,
+        prevValue,
+        currValue: amount,
+      }); // TODO +
       message.success(`Money (${moneyType}) changed!`);
     } catch (e) {
       console.log(e);
@@ -1225,17 +1266,17 @@ class CharactersStore {
   changeItemData = debounce(async (uid, charRef, itemName, dataType, newValue) => {
     const db = getDatabase();
     const dataRef = `users/${uid}/characters/${charRef}/inventory/${itemName}/${dataType}`;
-
+    const prevValue = this.openedCharacter.inventory[itemName]?.[dataType];
     const updates = {};
     try {
       updates[dataRef] = newValue;
       await update(ref(db), updates);
       await this.handleChangesLog(uid, charRef, {
-        type: '',
-        target: '',
-        prevValue: null,
-        currValue: null,
-      }); // TODO
+        type: 'changed',
+        target: `item "${itemName}" property "${dataType}"`,
+        prevValue,
+        currValue: newValue,
+      }); // TODO +
       message.success(`Item changed!`);
     } catch (e) {
       console.log(e);
