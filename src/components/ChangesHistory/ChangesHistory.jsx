@@ -4,6 +4,16 @@ import { useMemo } from 'react';
 import { format } from 'date-fns';
 
 import charactersStore from '../../store/charactersStore';
+import {
+  ArrowRightOutlined,
+  DeleteOutlined,
+  FormOutlined,
+  PlayCircleOutlined,
+  PlusOutlined,
+  RightOutlined,
+  RollbackOutlined,
+  UndoOutlined,
+} from '@ant-design/icons';
 
 const ChangesHistoryContainer = styled.div`
   display: grid;
@@ -11,15 +21,13 @@ const ChangesHistoryContainer = styled.div`
   padding: 10px 0;
 `;
 
-const ChangesHistoryItem = styled.p`
+const ChangesHistoryItem = styled.div`
   display: grid;
   padding: 0 10px;
   align-items: center;
-  grid-template-columns: 50px 120px 2fr 1fr 0.5fr 1fr;
-  //height: 30px;
+  grid-template-columns: 50px 120px 4fr 1fr 0 115px;
   border-radius: 8px;
   box-shadow: 0 0 1px black;
-  //gap: 10px;
   margin: 0;
   width: 100%;
 
@@ -31,7 +39,7 @@ const ChangesHistoryItem = styled.p`
 const ChangeIcon = styled.div`
   width: 25px;
   height: 25px;
-
+  align-self: start;
   @media (max-width: 800px) {
   }
 `;
@@ -59,6 +67,7 @@ const ChangedTarget = styled.span`
   gap: 5px;
 
   @media (max-width: 800px) {
+    align-items: start;
   }
 `;
 
@@ -107,21 +116,49 @@ export const ChangesHistory = observer(() => {
     return [];
   }, [openedCharacter]);
 
+  const IconContent = (type) => {
+    switch (type) {
+      case 'changed':
+        return <FormOutlined />;
+      case 'added':
+        return <PlusOutlined />;
+      case 'deleted':
+        return <DeleteOutlined />;
+      case 'used':
+        return <PlayCircleOutlined />;
+      case 'unused':
+        return <UndoOutlined />;
+      case 'rest':
+        return <UndoOutlined />;
+    }
+  };
+
   return (
     <ChangesHistoryContainer>
       {historyArr.length > 0 &&
         historyArr.map((item) => {
           return (
             <ChangesHistoryItem key={item.date}>
-              <ChangeIcon>L</ChangeIcon>
+              <ChangeIcon>{IconContent(item.type)}</ChangeIcon>
               <ChangeAuthor>{item.author.displayName}</ChangeAuthor>
               <ChangedTarget>
-                <span>{item.type}</span>
+                <span
+                  style={{
+                    textTransform: 'uppercase',
+                    minWidth: '72px',
+                    textAlign: 'center',
+                    background: 'black',
+                    color: 'white',
+                    padding: '0 3px',
+                  }}
+                >
+                  {item.type}
+                </span>
                 <span>{item.target}</span>
               </ChangedTarget>
               <ChangedValues>
                 <span>{item.prevValue}</span>
-                <span>{item.prevValue || item.currValue ? '->' : ''}</span>
+                <span>{item.prevValue || item.currValue ? <ArrowRightOutlined /> : ''}</span>
                 <span>{item.currValue}</span>
               </ChangedValues>
               <div />

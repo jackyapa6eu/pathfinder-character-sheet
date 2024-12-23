@@ -1,11 +1,9 @@
-import { memo, useCallback, useState } from 'react';
-import { Button, Checkbox, Form, Input, Modal, Select } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
+import { memo, useCallback } from 'react';
+import { Button, Form, Modal, Select } from 'antd';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
-import { alignmentSelectOptions, availableClasses } from '../../utils/consts';
+import { availableClasses } from '../../utils/consts';
 import charactersStore from '../../store/charactersStore';
-import { toJS } from 'mobx';
 import authStore from '../../store/authStore';
 
 const StyledFormItem = styled(Form.Item)`

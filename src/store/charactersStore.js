@@ -442,7 +442,7 @@ class CharactersStore {
   changeAbility = async (uid, charRef, abilityName, abilityType, abilityValue) => {
     const db = getDatabase();
 
-    const prevValue = this.openedCharacter.abilities[abilityName][abilityType];
+    const prevValue = this.openedCharacter.abilities[abilityName]?.[abilityType];
 
     if (abilityType === 'score') {
       try {
@@ -527,7 +527,7 @@ class CharactersStore {
     const db = getDatabase();
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/initiative/miscModifier`);
 
-    const prevValue = this.openedCharacter.initiative.miscModifier;
+    const prevValue = this.openedCharacter.initiative?.miscModifier;
 
     try {
       await set(dataRef, newInitiative);
@@ -661,8 +661,8 @@ class CharactersStore {
     const prevValue = this.openedCharacter.skills[skillName]?.[field];
 
     const isClassSkillBonus =
-      this.openedCharacter.skills?.[skillName].classSkill &&
-      !this.openedCharacter.skills?.[skillName].ranks;
+      this.openedCharacter.skills?.[skillName]?.classSkill &&
+      !this.openedCharacter.skills?.[skillName]?.ranks;
 
     const updates = {};
     if (field === 'ranks' && isClassSkillBonus)
@@ -694,7 +694,7 @@ class CharactersStore {
       await set(dataRef, featData);
       await this.handleChangesLog(uid, charRef, {
         type: 'added',
-        target: featData.name,
+        target: `feat ${featData.name}`,
         prevValue: null,
         currValue: null,
       }); // TODO +
@@ -717,7 +717,7 @@ class CharactersStore {
       await update(ref(db), updates);
       await this.handleChangesLog(uid, charRef, {
         type: 'added',
-        target: newClass,
+        target: `lvl ${newClass}`,
         prevValue: null,
         currValue: null,
       }); // TODO +
@@ -737,7 +737,7 @@ class CharactersStore {
       await set(dataRef, null);
       await this.handleChangesLog(uid, charRef, {
         type: 'deleted',
-        target: prevValue.name,
+        target: `feat ${prevValue.name}`,
         prevValue: null,
         currValue: null,
       }); // TODO +
@@ -806,7 +806,7 @@ class CharactersStore {
 
     const spellRef = `${spellData.name.replace(/\s+/g, '-').toLowerCase()}${metaName}`;
 
-    const spellLevelData = this.openedCharacter.spellsPerDay[spellData.class][spellData.level];
+    const spellLevelData = this.openedCharacter.spellsPerDay[spellData.class]?.[spellData.level];
 
     const toDomain =
       preparingSpell.isDomain &&
@@ -1012,7 +1012,7 @@ class CharactersStore {
       });
       await this.handleChangesLog(uid, charRef, {
         type: 'rest',
-        target: 'full rest',
+        target: 'Zzzz... full rest...',
         prevValue: null,
         currValue: null,
       }); // TODO +
@@ -1141,7 +1141,7 @@ class CharactersStore {
       updates[itemRef] = clearedData;
       await update(ref(db), updates);
       await this.handleChangesLog(uid, charRef, {
-        type: name ? 'edited' : 'added',
+        type: name ? 'changed' : 'added',
         target: `inventory item "${name ?? itemName}"`,
         prevValue: null,
         currValue: null,
