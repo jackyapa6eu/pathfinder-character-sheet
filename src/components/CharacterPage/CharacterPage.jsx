@@ -23,6 +23,7 @@ import Weapons from '../Weapons';
 import CharacterInventory from '../CharacterInventory';
 import knownItemsStore from '../../store/knownItemsStore';
 import CharacterEquippedGear from '../CharacterEquippedGear';
+import ChangesHistory from '../ChangesHistory';
 
 const StyledTabs = styled(Tabs)`
   width: 100%;
@@ -324,6 +325,11 @@ const CharacterPage = observer(() => {
               label: `Equipped gear`,
               key: 'equippedItems',
               children: <CharacterEquippedGear charId={charId} userId={userId} canEdit={canEdit} />,
+            },
+            {
+              label: `Changes history`,
+              key: 'changes history',
+              children: <ChangesHistory />,
             },
           ]}
         />

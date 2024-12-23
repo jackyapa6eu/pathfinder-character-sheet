@@ -5,6 +5,7 @@
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
     "antd": "^5.11.2",
+    "date-fns": "^4.1.0",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-react": "^7.32.2",
     "firebase": "^10.6.0",

@@ -421,8 +421,6 @@ class CharactersStore {
   };
 
   handleChangesLog = async (uid, charRef, { type, target, prevValue = null, currValue = null }) => {
-    console.warn({ type, target, prevValue, currValue });
-
     const { user } = authStore;
     const db = getDatabase();
     const date = Date.now();
@@ -514,7 +512,7 @@ class CharactersStore {
       await set(dataRef, hpValue);
       await this.handleChangesLog(uid, charRef, {
         type: 'changed',
-        target: `${hpType} hit points`,
+        target: `${hpType === 'wounds' ? 'current' : hpType} hit points`,
         prevValue: prevValue,
         currValue: hpValue,
       }); // TODO +

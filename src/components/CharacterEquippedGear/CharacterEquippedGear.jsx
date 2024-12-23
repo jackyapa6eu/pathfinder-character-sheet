@@ -41,12 +41,7 @@ const CharacterEquippedGear = observer(({ charId, userId, canEdit }) => {
   return (
     <EquippedGearContainer>
       {Object.keys(itemsTypes).map((equipKey) => (
-        <StyledFormItem
-          key={equipKey}
-          // gridarea={equipKey}
-          name={['equippedItems', equipKey]}
-          label={equipKey}
-        >
+        <StyledFormItem key={equipKey} name={['equippedItems', equipKey]} label={equipKey}>
           <Select
             disabled={canEdit}
             allowClear
