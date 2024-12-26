@@ -1,5 +1,3 @@
-import { value } from 'lodash/seq';
-
 const alignmentSelectOptions = [
   {
     value: 'Lawful Good',

@@ -61,7 +61,7 @@ export const UsefulItemsList = observer(() => {
 
   const usefulItems = useMemo(() => {
     return Object.entries(usersAllCharacters).reduce((res, [charName, charData]) => {
-      if (charData.inventory) {
+      if (charData.inventory && !charData.isDead) {
         Object.values(charData.inventory).forEach((item) => {
           if (item.isUseful) {
             res.push({ ...item, owner: charName });

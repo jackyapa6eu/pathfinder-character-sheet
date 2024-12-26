@@ -1,11 +1,13 @@
 import { observer } from 'mobx-react';
 import { memo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import { toJS } from 'mobx';
+import { FaSkullCrossbones } from 'react-icons/fa6';
+
 import charactersStore from '../../store/charactersStore';
 import authStore from '../../store/authStore';
-import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
 import usersStore from '../../store/usersStore';
-import { toJS } from 'mobx';
 
 const CharacterListContainer = styled.div`
   display: flex;
@@ -18,7 +20,7 @@ const CharacterListContainer = styled.div`
 
 const CardsContainer = styled.div`
   display: grid;
-  grid-template-rows: repeat(auto-fill, 50px);
+  //grid-template-rows: repeat(auto-fill, 50px);
   width: 100%;
   gap: 10px;
   padding: 6px;
@@ -26,13 +28,13 @@ const CardsContainer = styled.div`
 
 const CharacterCard = styled.div`
   display: flex;
+  position: relative;
   flex-direction: column;
   gap: 5px;
   box-shadow: 0 0 1px rgba(128, 128, 128, 0.5);
   padding: 6px;
   border-radius: 6px;
   width: 340px;
-  height: 50px;
   cursor: pointer;
   transition: all ease 0.5s;
   & p {
@@ -93,7 +95,7 @@ const CharactersList = observer(() => {
       <ListsContainer>
         {usersCharacters && (
           <CardsContainer>
-            {Object.values(usersCharacters).map(({ owner, name, charName, classes }) => (
+            {Object.values(usersCharacters).map(({ owner, name, charName, classes, isDead }) => (
               <CharacterCard
                 onClick={() => navigate(`${owner}/chars/${charName}`)}
                 owner={owner === user.uid ?? false}
@@ -113,6 +115,11 @@ const CharactersList = observer(() => {
                     </span>
                   ))}
                 </p>
+                {isDead && (
+                  <FaSkullCrossbones
+                    style={{ position: 'absolute', right: '5px', bottom: '5px' }}
+                  />
+                )}
               </CharacterCard>
             ))}
           </CardsContainer>

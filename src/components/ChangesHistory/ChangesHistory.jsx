@@ -87,20 +87,6 @@ const formatDate = (timestamp) => {
 export const ChangesHistory = observer(() => {
   const { openedCharacter } = charactersStore;
 
-  const x = {
-    author: {
-      displayName: 'Eugene',
-      dm: true,
-      email: 'yapa6eu@gmail.com',
-      uid: '9aKm8vlGflQQ5EIwd0vhdcKGX7T2',
-    },
-    currValue: 9,
-    prevValue: 9,
-    target: 'current hit points',
-    type: 'changed',
-    date: 1734929709570,
-  };
-
   const historyArr = useMemo(() => {
     if (openedCharacter.changesHistory) {
       return Object.entries(openedCharacter.changesHistory)
@@ -157,9 +143,13 @@ export const ChangesHistory = observer(() => {
                 <span>{item.target}</span>
               </ChangedTarget>
               <ChangedValues>
-                <span>{item.prevValue}</span>
+                <span>
+                  {Array.isArray(item.prevValue) ? item.prevValue.join(', ') : item.prevValue}
+                </span>
                 <span>{item.prevValue || item.currValue ? <ArrowRightOutlined /> : ''}</span>
-                <span>{item.currValue}</span>
+                <span>
+                  {Array.isArray(item.currValue) ? item.currValue.join(', ') : item.currValue}
+                </span>
               </ChangedValues>
               <div />
               <ChangeDate>{formatDate(item.date)}</ChangeDate>

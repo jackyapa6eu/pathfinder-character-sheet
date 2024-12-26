@@ -117,21 +117,29 @@ const CharacterPageContainer = styled.div`
 
 const BaseInfo = styled.div`
   display: grid;
-  grid-template-columns: 20px 120px 140px 2fr;
-  grid-template-areas: 'private race alignment classes';
+  grid-template-columns: 20px 120px 140px 1fr 1fr;
+  grid-template-areas: 'private race alignment classes languages';
   grid-area: baseInfo;
   width: 100%;
   gap: 5px;
   margin: 0;
   height: max-content;
+  padding-bottom: 5px;
 
-  @media screen and (max-width: 600px) {
-    grid-template-columns: 20px 120px 1fr;
+  @media screen and (max-width: 700px) {
+    grid-template-columns: 20px 1fr 1fr;
     grid-template-areas:
       'private race alignment'
-      '. classes classes';
+      '. classes languages';
   }
-  padding-bottom: 5px;
+
+  @media screen and (max-width: 500px) {
+    grid-template-columns: 20px 1fr 1fr;
+    grid-template-areas:
+      'private race alignment'
+      'classes classes classes'
+      'languages languages languages';
+  }
 `;
 
 const CharClassesContainer = styled.div`
@@ -271,6 +279,14 @@ const CharacterPage = observer(() => {
             <Checkbox
               checked={openedCharacter.private}
               onChange={handlePrivate}
+              disabled={canEdit}
+            />
+          </FormItem>
+          <FormItem gridArea='languages' label='languages' name='languages'>
+            <Select
+              mode='tags'
+              onChange={(value) => handleChangeBaseInfo('languages', value)}
+              style={{ width: '100%' }}
               disabled={canEdit}
             />
           </FormItem>
