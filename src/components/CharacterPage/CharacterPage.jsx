@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import authStore from '../../store/authStore';
 import charactersStore, { initialUserData } from '../../store/charactersStore';
@@ -24,6 +24,9 @@ import CharacterInventory from '../CharacterInventory';
 import knownItemsStore from '../../store/knownItemsStore';
 import CharacterEquippedGear from '../CharacterEquippedGear';
 import ChangesHistory from '../ChangesHistory';
+import CharacterBackground from '../CharacterBackground';
+import EditAvatarModal from '../EditAvatarModal';
+import CroppedImage from '../CroppedImage';
 
 const StyledTabs = styled(Tabs)`
   width: 100%;
@@ -56,11 +59,39 @@ const FormInstance = styled(Form)`
   & .char-name-container {
     grid-area: title;
     display: flex;
+    align-items: flex-end;
+    padding: 5px;
     gap: 5px;
+  }
+
+  & .char-avatar-container {
+    position: relative;
   }
 
   & h3 {
     margin: 0;
+    font-size: 26px;
+    line-height: 26px;
+  }
+`;
+
+const EditAvatarButton = styled(Button)`
+  position: absolute;
+  top: 0;
+  left: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: all ease 0.3s;
+
+  .char-name-container:hover &,
+  &:hover {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media screen and (max-width: 660px) {
+    opacity: 1;
+    pointer-events: auto;
   }
 `;
 
@@ -82,7 +113,7 @@ const CharacterPageContainer = styled.div`
   gap: 10px;
   overflow-x: hidden;
 
-  @media screen and (max-width: 1040px) {
+  @media screen and (max-width: 1080px) {
     grid-template-columns: 260px 1fr;
     grid-template-areas:
       'abilities HitPointsInitiativeArmor'
@@ -93,7 +124,7 @@ const CharacterPageContainer = styled.div`
       'feats feats';
   }
 
-  @media screen and (max-width: 605px) {
+  @media screen and (max-width: 690px) {
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-areas:
       'abilities abilities attack'
@@ -149,8 +180,11 @@ const CharClassesContainer = styled.div`
   grid-area: classes;
 `;
 
+const DEFAULT_IMAGE_LINK = 'https://i.postimg.cc/bNHNQwtg/0926d090-dd70-4242-926e-5cea3c486c48.png';
+
 const CharacterPage = observer(() => {
   const [addClassModalIsOpen, setAddClassModalIsOpen] = useState(false);
+  const [editAvatarModalIsOpen, setEditAvatarModalIsOpen] = useState(false);
 
   const { user } = authStore;
   const {
@@ -169,7 +203,7 @@ const CharacterPage = observer(() => {
   const { charId, userId } = useParams();
   const [form] = useForm();
 
-  const canEdit = useMemo(
+  const cantEdit = useMemo(
     () => !(user?.dm || openedCharacter?.owner === user?.uid),
     [user, openedCharacter]
   );
@@ -233,10 +267,31 @@ const CharacterPage = observer(() => {
         charId={charId}
         userId={userId}
       />
+      <EditAvatarModal
+        charId={charId}
+        userId={userId}
+        modalIsOpen={editAvatarModalIsOpen}
+        setModalIsOpen={setEditAvatarModalIsOpen}
+      />
       <FormInstance form={form} layout='vertical'>
         <div className='char-name-container'>
+          <div className='char-avatar-container'>
+            <CroppedImage
+              imageSrc={openedCharacter?.avatar?.imageLink || DEFAULT_IMAGE_LINK}
+              croppedAreaPixels={openedCharacter?.avatar?.croppedAreaPixels || null}
+              displayWidth={150}
+              displayHeight={150}
+              borderRadius='50%'
+            />
+            {!cantEdit && (
+              <EditAvatarButton htmlType='button' onClick={() => setEditAvatarModalIsOpen(true)}>
+                Edit avatar
+              </EditAvatarButton>
+            )}
+          </div>
+
           <h3>{openedCharacter.name}</h3>
-          <CampIcon size='20px' handleClick={handleMakeFullRest} />
+          <CampIcon size='26px' handleClick={handleMakeFullRest} />
         </div>
 
         <BaseInfo>
@@ -244,7 +299,7 @@ const CharacterPage = observer(() => {
             <Input
               onChange={(value) => handleChangeBaseInfo('race', value)}
               style={{ width: '100%' }}
-              disabled={canEdit}
+              disabled={cantEdit}
             />
           </FormItem>
           <FormItem gridArea='alignment' label='alignment' name='alignment'>
@@ -252,7 +307,7 @@ const CharacterPage = observer(() => {
               onChange={(value) => handleChangeBaseInfo('alignment', value)}
               options={alignmentSelectOptions}
               style={{ width: '100%' }}
-              disabled={canEdit}
+              disabled={cantEdit}
             />
           </FormItem>
           <CharClassesContainer>
@@ -270,7 +325,7 @@ const CharacterPage = observer(() => {
             <Button
               onClick={() => setAddClassModalIsOpen(true)}
               style={{ width: '25px', height: '25px', padding: 0 }}
-              disabled={canEdit}
+              disabled={cantEdit}
             >
               +
             </Button>
@@ -279,7 +334,7 @@ const CharacterPage = observer(() => {
             <Checkbox
               checked={openedCharacter.private}
               onChange={handlePrivate}
-              disabled={canEdit}
+              disabled={cantEdit}
             />
           </FormItem>
           <FormItem gridArea='languages' label='languages' name='languages'>
@@ -287,7 +342,7 @@ const CharacterPage = observer(() => {
               mode='tags'
               onChange={(value) => handleChangeBaseInfo('languages', value)}
               style={{ width: '100%' }}
-              disabled={canEdit}
+              disabled={cantEdit}
             />
           </FormItem>
         </BaseInfo>
@@ -304,13 +359,13 @@ const CharacterPage = observer(() => {
                     gridArea='abilities'
                     charId={charId}
                     userId={userId}
-                    canEdit={canEdit}
+                    canEdit={cantEdit}
                   />
-                  <HitPointsInitiativeArmor charId={charId} userId={userId} canEdit={canEdit} />
-                  <SavingThrows charId={charId} userId={userId} canEdit={canEdit} />
-                  <Attack charId={charId} userId={userId} canEdit={canEdit} />
-                  <Skills charId={charId} userId={userId} canEdit={canEdit} />
-                  <Weapons charId={charId} userId={userId} canEdit={canEdit} />
+                  <HitPointsInitiativeArmor charId={charId} userId={userId} canEdit={cantEdit} />
+                  <SavingThrows charId={charId} userId={userId} canEdit={cantEdit} />
+                  <Attack charId={charId} userId={userId} canEdit={cantEdit} />
+                  <Skills charId={charId} userId={userId} canEdit={cantEdit} />
+                  <Weapons charId={charId} userId={userId} canEdit={cantEdit} />
 
                   <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
                     <FormItem>
@@ -325,27 +380,34 @@ const CharacterPage = observer(() => {
             {
               label: `Feats`,
               key: 'Feats',
-              children: <CharacterFeats charId={charId} userId={userId} canEdit={canEdit} />,
+              children: <CharacterFeats charId={charId} userId={userId} canEdit={cantEdit} />,
             },
             {
               label: `Spells`,
               key: 'Spells',
-              children: <CharacterSpells charId={charId} userId={userId} canEdit={canEdit} />,
+              children: <CharacterSpells charId={charId} userId={userId} canEdit={cantEdit} />,
             },
             {
               label: `Inventory`,
               key: 'Inventory',
-              children: <CharacterInventory charId={charId} userId={userId} canEdit={canEdit} />,
+              children: <CharacterInventory charId={charId} userId={userId} canEdit={cantEdit} />,
             },
             {
               label: `Equipped gear`,
               key: 'equippedItems',
-              children: <CharacterEquippedGear charId={charId} userId={userId} canEdit={canEdit} />,
+              children: (
+                <CharacterEquippedGear charId={charId} userId={userId} canEdit={cantEdit} />
+              ),
             },
             {
               label: `Changes history`,
               key: 'changes history',
               children: <ChangesHistory />,
+            },
+            {
+              label: 'Background',
+              key: 'Background',
+              children: <CharacterBackground charId={charId} userId={userId} canEdit={cantEdit} />,
             },
           ]}
         />

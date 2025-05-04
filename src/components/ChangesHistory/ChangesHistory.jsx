@@ -10,8 +10,6 @@ import {
   FormOutlined,
   PlayCircleOutlined,
   PlusOutlined,
-  RightOutlined,
-  RollbackOutlined,
   UndoOutlined,
 } from '@ant-design/icons';
 

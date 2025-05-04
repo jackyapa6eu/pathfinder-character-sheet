@@ -17,6 +17,21 @@ const Container = styled.div`
   }
 `;
 
+export const AcBonusType = {
+  armor: 'armor',
+  deflection: 'deflection',
+  dodge: 'dodge',
+  enhancement: 'enhancement',
+  insight: 'insight',
+  luck: 'luck',
+  natural: 'natural',
+  profane: 'profane',
+  sacred: 'sacred',
+  shield: 'shield',
+};
+
+export const acBonusTypeOptions = Object.values(AcBonusType).map((value) => ({ value }));
+
 const AcBonusInputs = ({ inputKey, deleteField }) => {
   return (
     <Container>
@@ -26,14 +41,7 @@ const AcBonusInputs = ({ inputKey, deleteField }) => {
           label='ac bonus type'
           rules={[requiredRule]}
         >
-          <Select
-            options={[
-              { value: 'armor' },
-              { value: 'shield' },
-              { value: 'natural' },
-              { value: 'deflection' },
-            ]}
-          />
+          <Select options={acBonusTypeOptions} />
         </StyledFormItem>
         <StyledFormItem
           name={['acBonus', inputKey, 'acBonus']}

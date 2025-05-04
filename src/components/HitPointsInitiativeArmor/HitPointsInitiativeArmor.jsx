@@ -35,7 +35,7 @@ const Initiative = styled.div`
 
 const Ac = styled.div`
   display: grid;
-  grid-template-columns: 38px 44px 44px 44px 44px 44px 44px 44px;
+  grid-template-columns: 38px 44px 44px 44px 44px 44px 44px;
   justify-items: center;
   align-items: center;
 `;
@@ -48,7 +48,8 @@ const TouchFlat = styled.div`
 `;
 
 const HitPointsInitiativeArmor = observer(({ charId, userId, canEdit }) => {
-  const { changeHitPoints, openedCharacter, changeMiscInitiative, changeAc } = charactersStore;
+  const { changeHitPoints, openedCharacter, changeMiscInitiative, changeAc, maxDexByLoad } =
+    charactersStore;
   const { user } = authStore;
   const [totalInitiative, setTotalInitiative] = useState(null);
   const [totalAc, setTotalAc] = useState(null);
@@ -57,34 +58,63 @@ const HitPointsInitiativeArmor = observer(({ charId, userId, canEdit }) => {
 
   const tempDexMod = openedCharacter.abilities?.dex?.tempModifier;
   const dexMod = openedCharacter.abilities?.dex?.modifier;
+  const maxDex = Math.min(openedCharacter.equipBonuses?.maxDex || 99, maxDexByLoad);
 
-  const resultDex = Math.min(tempDexMod ?? dexMod, openedCharacter.equipBonuses?.maxDex || 99);
+  const resultDex = Math.min(tempDexMod ?? dexMod, maxDex);
   useEffect(() => {
     const initiative = openedCharacter.abilities?.dex
       ? (openedCharacter.initiative?.miscModifier || 0) + (tempDexMod ?? dexMod)
       : null;
+
+    const getAcBonuses = (name) => {
+      return [openedCharacter.equipBonuses?.acBonus?.[name] || 0, openedCharacter.ac?.[name] || 0];
+    };
+    const getSum = (arr) => arr.reduce((acc, val) => acc + val, 0);
+
+    const armor = Math.max(...getAcBonuses('armor'));
+    const deflection = Math.max(...getAcBonuses('deflection'));
+    const dodge = getSum(getAcBonuses('dodge'));
+    const enhancement = Math.max(...getAcBonuses('enhancement'));
+    const insight = Math.max(...getAcBonuses('insight'));
+    const luck = Math.max(...getAcBonuses('luck'));
+    const natural = Math.max(...getAcBonuses('natural'));
+    const profane = Math.max(...getAcBonuses('profane'));
+    const sacred = Math.max(...getAcBonuses('sacred'));
+    const shield = Math.max(...getAcBonuses('shield'));
+    const size = openedCharacter.ac?.size || 0;
+
     const ac = openedCharacter.abilities?.dex
       ? 10 +
-        (openedCharacter.equipBonuses?.acBonus?.armor || 0) +
-        (openedCharacter.equipBonuses?.acBonus?.shield || 0) +
-        (openedCharacter.equipBonuses?.acBonus?.natural || 0) +
-        (openedCharacter.equipBonuses?.acBonus?.deflection || 0) +
-        (openedCharacter.ac?.miscModifier || 0) +
+        armor +
+        deflection +
+        dodge +
+        enhancement +
+        insight +
+        luck +
+        natural +
+        profane +
+        sacred +
+        shield +
+        size +
         resultDex
       : null;
+
     const touchArmor = openedCharacter.abilities?.dex
-      ? 10 +
-        (openedCharacter.equipBonuses?.acBonus?.deflection || 0) +
-        (openedCharacter.ac?.miscModifier || 0) +
-        resultDex
+      ? 10 + deflection + dodge + insight + luck + profane + sacred + size + resultDex
       : null;
+
     const flatArmor =
       10 +
-      (openedCharacter.equipBonuses?.acBonus?.armor || 0) +
-      (openedCharacter.equipBonuses?.acBonus?.shield || 0) +
-      (openedCharacter.equipBonuses?.acBonus?.natural || 0) +
-      (openedCharacter.equipBonuses?.acBonus?.deflection || 0) +
-      (openedCharacter.ac?.miscModifier || 0);
+      armor +
+      deflection +
+      enhancement +
+      insight +
+      luck +
+      natural +
+      profane +
+      sacred +
+      shield +
+      size;
 
     setTotalInitiative(initiative);
     setTotalAc(ac);
@@ -183,22 +213,22 @@ const HitPointsInitiativeArmor = observer(({ charId, userId, canEdit }) => {
             disabled
           />
         </FormItem>
-        <FormItem label='armor' textAlign='center' noBgLabel>
-          <InputNumber
-            controls={false}
-            value={openedCharacter.equipBonuses?.acBonus?.armor || null}
-            disabled
-            style={{ width: '100%', color: 'black' }}
-          />
-        </FormItem>
-        <FormItem label='shield' textAlign='center' noBgLabel>
-          <InputNumber
-            controls={false}
-            disabled
-            value={openedCharacter.equipBonuses?.acBonus?.shield || null}
-            style={{ width: '100%', color: 'black' }}
-          />
-        </FormItem>
+
+        {Object.entries(openedCharacter.equipBonuses?.acBonus || {})
+          .filter(([, value]) => !!value)
+          .map(([key, value]) => {
+            return (
+              <FormItem key={key} label={key} textAlign='center' noBgLabel>
+                <InputNumber
+                  controls={false}
+                  value={value || null}
+                  disabled
+                  style={{ width: '100%', color: 'black' }}
+                />
+              </FormItem>
+            );
+          })}
+
         <FormItem label='dex' textAlign='center' noBgLabel>
           <InputNumber
             controls={false}
@@ -207,27 +237,97 @@ const HitPointsInitiativeArmor = observer(({ charId, userId, canEdit }) => {
             disabled
           />
         </FormItem>
-        <FormItem label='natural' textAlign='center' noBgLabel>
+
+        <FormItem name={['ac', 'armor']} label='armor' textAlign='center' noBgLabel>
           <InputNumber
             controls={false}
             style={{ width: '100%', color: 'black' }}
-            disabled
-            value={openedCharacter.equipBonuses?.acBonus?.natural || null}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'armor', value)}
+            disabled={canEdit}
           />
         </FormItem>
-        <FormItem label='deflection' textAlign='center' noBgLabel>
+
+        <FormItem name={['ac', 'shield']} label='shield' textAlign='center' noBgLabel>
           <InputNumber
             controls={false}
             style={{ width: '100%', color: 'black' }}
-            disabled
-            value={openedCharacter.equipBonuses?.acBonus?.deflection || null}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'shield', value)}
+            disabled={canEdit}
           />
         </FormItem>
-        <FormItem name={['ac', 'miscModifier']} label='misc' textAlign='center' noBgLabel>
+
+        <FormItem name={['ac', 'dodge']} label='dodge' textAlign='center' noBgLabel>
           <InputNumber
             controls={false}
             style={{ width: '100%', color: 'black' }}
-            onChange={(value) => changeAc(userId || user.uid, charId, 'miscModifier', value)}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'dodge', value)}
+            disabled={canEdit}
+          />
+        </FormItem>
+        <FormItem name={['ac', 'natural']} label='natural' textAlign='center' noBgLabel>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'natural', value)}
+            disabled={canEdit}
+          />
+        </FormItem>
+        <FormItem name={['ac', 'deflection']} label='deflection' textAlign='center' noBgLabel>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'deflection', value)}
+            disabled={canEdit}
+          />
+        </FormItem>
+
+        <FormItem name={['ac', 'insight']} label='insight' textAlign='center' noBgLabel>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'insight', value)}
+            disabled={canEdit}
+          />
+        </FormItem>
+
+        <FormItem name={['ac', 'luck']} label='luck' textAlign='center' noBgLabel>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'luck', value)}
+            disabled={canEdit}
+          />
+        </FormItem>
+        <FormItem name={['ac', 'enhancement']} label='enhancement' textAlign='center' noBgLabel>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'enhancement', value)}
+            disabled={canEdit}
+          />
+        </FormItem>
+        <FormItem name={['ac', 'profane']} label='profane' textAlign='center' noBgLabel>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'profane', value)}
+            disabled={canEdit}
+          />
+        </FormItem>
+        <FormItem name={['ac', 'sacred']} label='sacred' textAlign='center' noBgLabel>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'sacred', value)}
+            disabled={canEdit}
+          />
+        </FormItem>
+
+        <FormItem name={['ac', 'size']} label='size' textAlign='center' noBgLabel>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAc(userId || user.uid, charId, 'size', value)}
             disabled={canEdit}
           />
         </FormItem>

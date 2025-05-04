@@ -38,7 +38,8 @@ const FeatLabel = styled.span`
 
 const Skill = observer(
   ({ name, title, ability, charId, userId, showLabels, trainedOnly, canEdit }) => {
-    const { openedCharacter, changeSkills, handleCopyToClickBoard } = charactersStore;
+    const { openedCharacter, changeSkills, handleCopyToClickBoard, loadCheckPenalty } =
+      charactersStore;
     const { user } = authStore;
     const [total, setTotal] = useState(null);
 
@@ -50,15 +51,19 @@ const Skill = observer(
         const abilityMod = openedCharacter.abilities?.[ability]?.modifier;
         const ranks = openedCharacter.skills?.[name]?.ranks;
         const miscMod = openedCharacter.skills?.[name]?.miscMod;
+
         const featTotal =
           (tempAbilityMod ?? abilityMod) +
-          (ranks || 0) +
-          (miscMod || 0) +
-          (openedCharacter.skills?.[name]?.bonusClassSkill && ranks > 0 ? 3 : 0) -
-          (['str', 'dex'].includes(ability) ? openedCharacter.equipBonuses?.checkPenalty || 0 : 0);
+            (ranks || 0) +
+            (miscMod || 0) +
+            (openedCharacter.skills?.[name]?.bonusClassSkill && ranks > 0 ? 3 : 0) +
+            (['str', 'dex'].includes(ability)
+              ? -Math.max(openedCharacter.equipBonuses?.checkPenalty || 0, loadCheckPenalty)
+              : 0) +
+            -openedCharacter.equipBonuses?.shieldCheckPenalty || 0;
         setTotal(trainedOnly && ranks === undefined ? null : featTotal);
       }
-    }, [openedCharacter, openedCharacter.equipBonuses]);
+    }, [openedCharacter, openedCharacter.equipBonuses, loadCheckPenalty]);
 
     const copyToClickBoard = useCallback(
       (event) => {
@@ -107,7 +112,10 @@ const Skill = observer(
           <InputNumber
             controls={false}
             value={
-              ['str', 'dex'].includes(ability) ? -openedCharacter.equipBonuses?.checkPenalty : null
+              ['str', 'dex'].includes(ability)
+                ? -Math.max(openedCharacter.equipBonuses?.checkPenalty || 0, loadCheckPenalty) -
+                    openedCharacter.equipBonuses?.shieldCheckPenalty || 0
+                : null
             }
             style={{ width: '100%' }}
             disabled

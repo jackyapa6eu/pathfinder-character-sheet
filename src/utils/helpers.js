@@ -54,14 +54,6 @@ const copyToClipboard = (text, callBack) => {
   textArea.remove();
 };
 
-const calcLoad = (settingsArr, weight) => {
-  const [light, mediumFrom, mediumTo, heavyFrom, heavyTo] = settingsArr;
-  if (weight <= light) return 'light';
-  if (weight >= mediumFrom && weight <= mediumTo) return 'medium';
-  if (weight >= heavyFrom && weight <= heavyTo) return 'heavy';
-  return `${heavyTo} max`;
-};
-
 export {
   capitalizedFirstLetter,
   filterUndefinedToNull,
@@ -71,5 +63,4 @@ export {
   getLSData,
   setLSData,
   copyToClipboard,
-  calcLoad,
 };

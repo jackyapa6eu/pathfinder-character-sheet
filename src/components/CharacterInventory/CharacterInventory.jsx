@@ -107,7 +107,7 @@ const CharacterInventory = observer(({ charId, userId, canEdit }) => {
   const [addKnownItemModalIsOpen, setAddKnownItemModalIsOpen] = useState(false);
   const [searchItemText, setSearchItemText] = useState('');
   const [editingItem, setEditingItem] = useState(null);
-  const { openedCharacter, editMoney } = charactersStore;
+  const { openedCharacter, editMoney, totalWeight, currentLoad } = charactersStore;
   const { user } = authStore;
 
   const handleSearch = (value) => {
@@ -118,27 +118,18 @@ const CharacterInventory = observer(({ charId, userId, canEdit }) => {
     await editMoney(userId || user.uid, charId, type, amount);
   };
 
-  const weight = useMemo(
-    () =>
-      Object.values(openedCharacter?.inventory || {}).reduce((acc, curr) => {
-        acc += !curr?.onHorse ? (curr?.weight || 0) * (curr?.count || 1) : 0;
-        return acc;
-      }, 0),
-    [openedCharacter]
-  );
-
-  const loaded = useMemo(
-    () =>
-      calcLoad(
-        carryingCapacityTable[
-          (openedCharacter?.abilities?.str?.score || 1) +
-            (openedCharacter?.equipBonuses?.abilityBonus?.str || 0) +
-            (openedCharacter?.abilities?.str?.adjustment || 0)
-        ],
-        weight
-      ),
-    [weight, openedCharacter]
-  );
+  // const loaded = useMemo(
+  //   () =>
+  //     calcLoad(
+  //       carryingCapacityTable[
+  //         (openedCharacter?.abilities?.str?.score || 1) +
+  //           (openedCharacter?.equipBonuses?.abilityBonus?.str || 0) +
+  //           (openedCharacter?.abilities?.str?.adjustment || 0)
+  //       ],
+  //       totalWeight
+  //     ),
+  //   [openedCharacter, totalWeight]
+  // );
 
   return (
     <CharacterInventoryContainer>
@@ -250,7 +241,12 @@ const CharacterInventory = observer(({ charId, userId, canEdit }) => {
 
           <CoinContainer>
             <FormItem label='weight' textAlign='center' noBgLabel>
-              <InputNumber value={weight} controls={false} style={{ width: '100%' }} disabled />
+              <InputNumber
+                value={totalWeight}
+                controls={false}
+                style={{ width: '100%' }}
+                disabled
+              />
             </FormItem>
             <Tooltip title=''>
               <CoinIconContainer>
@@ -261,7 +257,7 @@ const CharacterInventory = observer(({ charId, userId, canEdit }) => {
 
           <CoinContainer>
             <FormItem label='load' textAlign='center' noBgLabel>
-              <Input value={loaded} controls={false} style={{ width: '100%' }} disabled />
+              <Input value={currentLoad} controls={false} style={{ width: '100%' }} disabled />
             </FormItem>
             <Tooltip title=''>
               <CoinIconContainer>

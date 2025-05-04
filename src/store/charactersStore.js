@@ -2,7 +2,7 @@ import { makeAutoObservable, runInAction, toJS } from 'mobx';
 import { getDatabase, ref, set, get, onValue, update } from 'firebase/database';
 import { message } from 'antd';
 import { debounce } from 'lodash';
-import { availableSpellLevels } from '../utils/consts';
+import { availableSpellLevels, carryingCapacityTable } from '../utils/consts';
 import { copyToClipboard, filterUndefinedToNull, makeName } from '../utils/helpers';
 import authStore from './authStore';
 
@@ -297,6 +297,8 @@ export const initialUserData = {
 
   inventory: {},
 
+  totalWeight: 0,
+
   weapons: {},
 
   money: {
@@ -442,7 +444,7 @@ class CharactersStore {
   changeAbility = async (uid, charRef, abilityName, abilityType, abilityValue) => {
     const db = getDatabase();
 
-    const prevValue = this.openedCharacter.abilities[abilityName]?.[abilityType];
+    const prevValue = this.openedCharacter.abilities?.[abilityName]?.[abilityType];
 
     if (abilityType === 'score') {
       try {
@@ -501,6 +503,20 @@ class CharactersStore {
       message.error('Error');
     }
   }, 700);
+
+  changeAvatar = async (uid, charRef, newData) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/avatar`);
+
+    try {
+      await set(dataRef, newData);
+
+      message.success('Avatar changed!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error');
+    }
+  };
 
   changeHitPoints = debounce(async (uid, charRef, hpType, hpValue) => {
     const db = getDatabase();
@@ -1309,6 +1325,7 @@ class CharactersStore {
     const equippedItems = Object.values(this.openedCharacter.equippedItems);
     const result = equippedItems.reduce((acc, current) => {
       acc.checkPenalty ??= 0;
+      acc.shieldCheckPenalty ??= 0;
       acc.maxDex ??= 99;
 
       const item = this.openedCharacter.inventory?.[current];
@@ -1325,7 +1342,10 @@ class CharactersStore {
                 acc.acBonus[acBonusType] = acBonus;
               }
               if (acc.maxDex > maxDex) acc.maxDex = maxDex;
-              acc.checkPenalty += checkPenalty || 0;
+
+              if (acBonusType === 'shield') {
+                acc.shieldCheckPenalty += checkPenalty || 0;
+              } else acc.checkPenalty += checkPenalty || 0;
             });
           }
           if (keyName === 'savingThrows') {
@@ -1416,9 +1436,70 @@ class CharactersStore {
     });
   };
 
+  editBackground = async (uid, charRef, newBackground) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/background/`);
+    try {
+      await set(dataRef, newBackground);
+      message.success(`Background changed`);
+    } catch (e) {
+      console.log(e);
+      message.error('Error!');
+    }
+  };
+
   handleCopyToClickBoard = (text) => {
     copyToClipboard(text, () => message.success('Скопировано в буфер обмена', 1));
   };
+
+  get totalWeight() {
+    if (!this.openedCharacter.inventory) {
+      return 0;
+    }
+    return Object.values(this.openedCharacter.inventory).reduce((acc, current) => {
+      if (!current.onHorse) {
+        acc += current.weight || 0;
+      }
+
+      return acc;
+    }, 0);
+  }
+
+  get currentLoad() {
+    const settingsArr =
+      carryingCapacityTable[
+        (this.openedCharacter?.abilities?.str?.score || 1) +
+          (this.openedCharacter?.equipBonuses?.abilityBonus?.str || 0) +
+          (this.openedCharacter?.abilities?.str?.adjustment || 0)
+      ];
+    const [light, mediumFrom, mediumTo, heavyFrom, heavyTo] = settingsArr;
+    if (this.totalWeight <= light) return 'light';
+    if (this.totalWeight >= mediumFrom && this.totalWeight <= mediumTo) return 'medium';
+    if (this.totalWeight >= heavyFrom && this.totalWeight <= heavyTo) return 'heavy';
+    return `${heavyTo} max`;
+  }
+
+  get loadCheckPenalty() {
+    switch (this.currentLoad) {
+      case 'medium':
+        return 3;
+      case 'heavy':
+        return 6;
+      default:
+        return 0;
+    }
+  }
+
+  get maxDexByLoad() {
+    switch (this.currentLoad) {
+      case 'medium':
+        return 3;
+      case 'heavy':
+        return 1;
+      default:
+        return 99;
+    }
+  }
 }
 
 const charactersStore = new CharactersStore();
