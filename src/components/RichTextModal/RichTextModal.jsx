@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Modal } from 'antd';
 import ReactQuill from 'react-quill-new';
 import Quill from 'quill';
@@ -42,6 +42,38 @@ const htmlToDelta = (html) => {
 const RichTextModal = ({ text = '', handleSubmit, buttonText = 'Edit' }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [value, setValue] = useState(htmlToDelta(text));
+  const quillRef = useRef(null);
+
+  const modules = useMemo(() => {
+    return {
+      toolbar: {
+        container: [
+          ['bold', 'italic', 'underline', 'strike'],
+          ['blockquote', 'code-block'],
+          [{ header: 1 }, { header: 2 }],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          [{ script: 'sub' }, { script: 'super' }],
+          [{ size: ['small', false, 'large', 'huge'] }],
+          [{ color: [] }, { background: [] }],
+          [{ align: [] }],
+          ['link', 'image'],
+          ['clean'],
+        ],
+        handlers: {
+          image: () => {
+            const quill = quillRef.current?.getEditor();
+            if (quill) {
+              const range = quill.getSelection();
+              const url = window.prompt('Введите ссылку на изображение');
+              if (url && range) {
+                quill.insertEmbed(range.index, 'image', url);
+              }
+            }
+          },
+        },
+      },
+    };
+  }, []);
 
   const handleSave = () => {
     handleSubmit(value);
@@ -61,8 +93,13 @@ const RichTextModal = ({ text = '', handleSubmit, buttonText = 'Edit' }) => {
         centered
       >
         <div className='rich-text-modal-content'>
-          <StyledReactQuill theme='snow' value={value} onChange={setValue} />
-
+          <StyledReactQuill
+            ref={quillRef}
+            theme='snow'
+            value={value}
+            onChange={setValue}
+            modules={modules}
+          />
           <Button
             type='default'
             htmlType='button'

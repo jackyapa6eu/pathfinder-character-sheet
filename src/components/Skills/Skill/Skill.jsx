@@ -54,13 +54,13 @@ const Skill = observer(
 
         const featTotal =
           (tempAbilityMod ?? abilityMod) +
-            (ranks || 0) +
-            (miscMod || 0) +
-            (openedCharacter.skills?.[name]?.bonusClassSkill && ranks > 0 ? 3 : 0) +
-            (['str', 'dex'].includes(ability)
-              ? -Math.max(openedCharacter.equipBonuses?.checkPenalty || 0, loadCheckPenalty)
-              : 0) +
-            -openedCharacter.equipBonuses?.shieldCheckPenalty || 0;
+          (ranks || 0) +
+          (miscMod || 0) +
+          (openedCharacter.skills?.[name]?.bonusClassSkill && ranks > 0 ? 3 : 0) +
+          (['str', 'dex'].includes(ability)
+            ? -Math.max(openedCharacter.equipBonuses?.checkPenalty || 0, loadCheckPenalty)
+            : 0) +
+          -(openedCharacter.equipBonuses?.shieldCheckPenalty || 0);
         setTotal(trainedOnly && ranks === undefined ? null : featTotal);
       }
     }, [openedCharacter, openedCharacter.equipBonuses, loadCheckPenalty]);
