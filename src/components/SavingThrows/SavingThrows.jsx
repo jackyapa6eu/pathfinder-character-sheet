@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import styled from 'styled-components';
 import SavingThrow from './SavingThrow';
+import CharacterSpeed from '../CharacterSpeed';
 
 const ThrowsContainer = styled.div`
   grid-area: savingThrows;
@@ -13,7 +14,7 @@ const ThrowsContainer = styled.div`
   gap: 5px;
 `;
 
-const SavingThrows = ({ charId, userId, canEdit }) => {
+const SavingThrowsAndSpeed = ({ charId, userId, canEdit }) => {
   return (
     <ThrowsContainer>
       <SavingThrow
@@ -38,8 +39,9 @@ const SavingThrows = ({ charId, userId, canEdit }) => {
         userId={userId}
         canEdit={canEdit}
       />
+      <CharacterSpeed canEdit={canEdit} userId={userId} charId={charId} />
     </ThrowsContainer>
   );
 };
 
-export default memo(SavingThrows);
+export default memo(SavingThrowsAndSpeed);

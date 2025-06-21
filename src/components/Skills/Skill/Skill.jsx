@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { capitalizedFirstLetter } from '../../../utils/helpers';
 import styled from 'styled-components';
 import FormItem from '../../FormItem';
@@ -43,6 +43,15 @@ const Skill = observer(
     const { user } = authStore;
     const [total, setTotal] = useState(null);
 
+    const totalCheckPenalty = useMemo(() => {
+      return ['str', 'dex'].includes(ability)
+        ? -(
+            Math.max(Math.abs(openedCharacter.equipBonuses?.checkPenalty || 0), loadCheckPenalty) +
+            Math.abs(openedCharacter.equipBonuses?.shieldCheckPenalty || 0)
+          )
+        : 0;
+    }, [openedCharacter, openedCharacter.equipBonuses, loadCheckPenalty, ability]);
+
     useEffect(() => {
       if (!openedCharacter.abilities?.[ability]) {
         setTotal(null);
@@ -57,13 +66,10 @@ const Skill = observer(
           (ranks || 0) +
           (miscMod || 0) +
           (openedCharacter.skills?.[name]?.bonusClassSkill && ranks > 0 ? 3 : 0) +
-          (['str', 'dex'].includes(ability)
-            ? -Math.max(openedCharacter.equipBonuses?.checkPenalty || 0, loadCheckPenalty)
-            : 0) +
-          -(openedCharacter.equipBonuses?.shieldCheckPenalty || 0);
+          totalCheckPenalty;
         setTotal(trainedOnly && ranks === undefined ? null : featTotal);
       }
-    }, [openedCharacter, openedCharacter.equipBonuses, loadCheckPenalty]);
+    }, [openedCharacter, openedCharacter.equipBonuses, loadCheckPenalty, totalCheckPenalty]);
 
     const copyToClickBoard = useCallback(
       (event) => {
@@ -111,12 +117,7 @@ const Skill = observer(
         <FormItem label={showLabels && 'check penalty'} textAlign='center' noBgLabel>
           <InputNumber
             controls={false}
-            value={
-              ['str', 'dex'].includes(ability)
-                ? -Math.max(openedCharacter.equipBonuses?.checkPenalty || 0, loadCheckPenalty) -
-                    openedCharacter.equipBonuses?.shieldCheckPenalty || 0
-                : null
-            }
+            value={totalCheckPenalty || null}
             style={{ width: '100%' }}
             disabled
           />

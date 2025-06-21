@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction, toJS } from 'mobx';
-import { getDatabase, ref, set, get, onValue, update } from 'firebase/database';
+import { get, getDatabase, onValue, ref, set, update } from 'firebase/database';
 import { message } from 'antd';
 import { debounce } from 'lodash';
 import { availableSpellLevels, carryingCapacityTable } from '../utils/consts';
@@ -611,6 +611,28 @@ class CharactersStore {
     }
   });
 
+  changeSpeed = debounce(async (uid, charRef, field, newValue) => {
+    const db = getDatabase();
+    const prevValue = this.openedCharacter.speed?.[field];
+
+    try {
+      const updates = {};
+
+      updates[`users/${uid}/characters/${charRef}/speed/${field}`] = newValue;
+
+      await update(ref(db), updates);
+      await this.handleChangesLog(uid, charRef, {
+        type: 'changed',
+        target: `${field} speed`,
+        prevValue,
+        currValue: newValue,
+      }); // TODO +
+      message.success(`${field} speed changed!`);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+
   calcAttack = () => {
     const tempStrMod = this.openedCharacter.abilities?.str?.tempModifier;
     const strMod = this.openedCharacter.abilities?.str?.modifier;
@@ -621,6 +643,7 @@ class CharactersStore {
       (this.openedCharacter.attack?.bab || 0) +
       ((tempStrMod ?? strMod) || 0) +
       ((tempDexMod ?? dexMod) || 0) +
+      this.monkWisBonus +
       10;
     runInAction(() => {
       if (this.openedCharacter.attack) {
@@ -993,20 +1016,25 @@ class CharactersStore {
         }
       });
     });
+    let lvlCount = 0;
+    if (this.openedCharacter && this.openedCharacter?.classes) {
+      lvlCount = Object.values(toJS(this.openedCharacter.classes)).reduce((acc, curr) => {
+        return acc + (curr.levels || 0);
+      }, 0);
+    }
     if (
       this.openedCharacter.hitPoints.wounds &&
       this.openedCharacter.hitPoints.wounds <= this.openedCharacter.hitPoints.total
     ) {
-      updates[`users/${uid}/characters/${charRef}/hitPoints/wounds`] =
-        this.openedCharacter.hitPoints.wounds + 1 === this.openedCharacter.hitPoints.total
-          ? null
-          : this.openedCharacter.hitPoints.wounds + 1;
+      updates[`users/${uid}/characters/${charRef}/hitPoints/wounds`] = Math.min(
+        this.openedCharacter.hitPoints.wounds + lvlCount,
+        this.openedCharacter.hitPoints.total
+      );
     }
     // откатывает магические предметы
     Object.values(this.openedCharacter?.inventory || {}).forEach((item) => {
       if (item.charges) {
         Object.entries(item.charges).forEach(([chargesName, chargesData]) => {
-          console.log(chargesName, toJS(chargesData), item.ref);
           if (chargesData.restorable) {
             updates[`${item.ref}/charges/${chargesName}/count`] = chargesData.maxCharges;
           }
@@ -1458,7 +1486,8 @@ class CharactersStore {
     }
     return Object.values(this.openedCharacter.inventory).reduce((acc, current) => {
       if (!current.onHorse) {
-        acc += current.weight || 0;
+        const count = current.count === undefined ? 1 : current.count;
+        acc += (current.weight || 0) * count;
       }
 
       return acc;
@@ -1490,6 +1519,26 @@ class CharactersStore {
     }
   }
 
+  get totalSpeed() {
+    let baseSpeed = this.openedCharacter?.speed?.base || 0;
+    let total = 0;
+    const misc = this.openedCharacter?.speed?.misc || 0;
+
+    switch (this.currentLoad) {
+      case 'medium':
+        if (this.openedCharacter?.speed?.base === 30) baseSpeed = 20;
+        if (this.openedCharacter?.speed?.base === 20) baseSpeed = 15;
+        break;
+      case 'heavy':
+        if (this.openedCharacter?.speed?.base === 30) baseSpeed = 20;
+        if (this.openedCharacter?.speed?.base === 20) baseSpeed = 15;
+        break;
+    }
+
+    total = baseSpeed + misc;
+    return total;
+  }
+
   get maxDexByLoad() {
     switch (this.currentLoad) {
       case 'medium':
@@ -1499,6 +1548,25 @@ class CharactersStore {
       default:
         return 99;
     }
+  }
+
+  get isMonk() {
+    if (this.openedCharacter && this.openedCharacter?.classes)
+      return Object.keys(this.openedCharacter?.classes).includes('Monk');
+    else return false;
+  }
+
+  get monkWisBonus() {
+    const acBonuses = this.openedCharacter?.equipBonuses?.acBonus || {};
+    const isArmorEquipped = (acBonuses.armor ?? 0) > 0 || (acBonuses.shield ?? 0) > 0;
+
+    const currWisMod =
+      this.openedCharacter.abilities?.wis?.tempModifier ??
+      this.openedCharacter.abilities?.wis?.modifier;
+
+    return currWisMod > 0 && this.isMonk && !isArmorEquipped && this.currentLoad === 'light'
+      ? currWisMod
+      : 0;
   }
 }
 

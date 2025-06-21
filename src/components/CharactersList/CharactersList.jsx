@@ -97,7 +97,9 @@ const CharactersList = observer(() => {
 
   useEffect(() => {
     if (user) {
-      getData();
+      (async () => {
+        await getData();
+      })();
     }
   }, [user]);
 

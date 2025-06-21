@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import CharSheetRowLabel from '../CharlSheetRowLabel/CharSheetRowLabel';
@@ -48,8 +48,15 @@ const TouchFlat = styled.div`
 `;
 
 const HitPointsInitiativeArmor = observer(({ charId, userId, canEdit }) => {
-  const { changeHitPoints, openedCharacter, changeMiscInitiative, changeAc, maxDexByLoad } =
-    charactersStore;
+  const {
+    changeHitPoints,
+    openedCharacter,
+    changeMiscInitiative,
+    changeAc,
+    maxDexByLoad,
+    isMonk,
+    monkWisBonus,
+  } = charactersStore;
   const { user } = authStore;
   const [totalInitiative, setTotalInitiative] = useState(null);
   const [totalAc, setTotalAc] = useState(null);
@@ -59,8 +66,8 @@ const HitPointsInitiativeArmor = observer(({ charId, userId, canEdit }) => {
   const tempDexMod = openedCharacter.abilities?.dex?.tempModifier;
   const dexMod = openedCharacter.abilities?.dex?.modifier;
   const maxDex = Math.min(openedCharacter.equipBonuses?.maxDex || 99, maxDexByLoad);
-
   const resultDex = Math.min(tempDexMod ?? dexMod, maxDex);
+
   useEffect(() => {
     const initiative = openedCharacter.abilities?.dex
       ? (openedCharacter.initiative?.miscModifier || 0) + (tempDexMod ?? dexMod)
@@ -96,11 +103,21 @@ const HitPointsInitiativeArmor = observer(({ charId, userId, canEdit }) => {
         sacred +
         shield +
         size +
-        resultDex
+        resultDex +
+        monkWisBonus
       : null;
 
     const touchArmor = openedCharacter.abilities?.dex
-      ? 10 + deflection + dodge + insight + luck + profane + sacred + size + resultDex
+      ? 10 +
+        deflection +
+        dodge +
+        insight +
+        luck +
+        profane +
+        sacred +
+        size +
+        resultDex +
+        monkWisBonus
       : null;
 
     const flatArmor =
@@ -114,6 +131,7 @@ const HitPointsInitiativeArmor = observer(({ charId, userId, canEdit }) => {
       profane +
       sacred +
       shield +
+      monkWisBonus +
       size;
 
     setTotalInitiative(initiative);
@@ -237,6 +255,17 @@ const HitPointsInitiativeArmor = observer(({ charId, userId, canEdit }) => {
             disabled
           />
         </FormItem>
+
+        {isMonk && (
+          <FormItem label='wis' textAlign='center' noBgLabel>
+            <InputNumber
+              controls={false}
+              value={monkWisBonus}
+              style={{ width: '100%', color: 'black' }}
+              disabled
+            />
+          </FormItem>
+        )}
 
         <FormItem name={['ac', 'armor']} label='armor' textAlign='center' noBgLabel>
           <InputNumber
