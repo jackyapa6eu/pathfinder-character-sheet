@@ -48,7 +48,7 @@ export const ProgressBar = ({
     <Tooltip title={description}>
       <MainContainer isDarkTheme={isDarkTheme} $color={color}>
         <span>
-          {current} / {max}
+          {current.toLocaleString('ru-RU')} / {max.toLocaleString('ru-RU')}
         </span>
         <Current BGColor={BGColor} $width={percent} />
       </MainContainer>
