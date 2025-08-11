@@ -3,7 +3,6 @@ import CharSheetRowLabel from '../../CharlSheetRowLabel/CharSheetRowLabel';
 import FormItem from '../../FormItem';
 import { InputNumber } from 'antd';
 import { observer } from 'mobx-react';
-import charactersStore from '../../../store/charactersStore';
 import styled from 'styled-components';
 import authStore from '../../../store/authStore';
 import { toJS } from 'mobx';
@@ -16,8 +15,8 @@ const SavingThrowContainer = styled.div`
 `;
 
 const SavingThrow = observer(
-  ({ name, abilityName, charId, userId, showLabels = false, canEdit }) => {
-    const { openedCharacter, changeSavingThrows, handleCopyToClickBoard } = charactersStore;
+  ({ store, name, abilityName, charId, userId, showLabels = false, canEdit }) => {
+    const { openedCharacter, changeSavingThrows, handleCopyToClickBoard } = store;
     const { user } = authStore;
 
     const copyToClickBoard = useCallback(() => {

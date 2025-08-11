@@ -16,6 +16,7 @@ import CharacterPage from './components/CharacterPage';
 import knownItemsStore from './store/knownItemsStore';
 import loadingImage from './assets/images/loading-image.gif';
 import { getLSData, setLSData } from './utils/helpers';
+import CharacterPageContextWrapper from './components/CharacterPageContextWrapper';
 
 const StyledApp = styled.div`
   display: grid;
@@ -47,7 +48,7 @@ const MainContainer = styled.main`
   }
 `;
 
-const Loader = styled.div`
+export const Loader = styled.div`
   position: absolute;
   width: 100%;
   height: 100%;
@@ -89,6 +90,7 @@ const App = observer(() => {
     setAppMountedAuthLoadingState,
   } = authStore;
   const { setUserId } = knownItemsStore;
+
   useEffect(() => {
     setAppMountedAuthLoadingState('loading');
     auth.onAuthStateChanged(async (user) => {
@@ -143,7 +145,7 @@ const App = observer(() => {
           <Route
             element={
               <ProtectedRoute
-                component={<CharacterPage />}
+                component={<CharacterPageContextWrapper isDarkTheme={isDarkTheme} />}
                 to='/'
                 condition={isStayLogged || user}
               />
@@ -153,7 +155,7 @@ const App = observer(() => {
           <Route
             element={
               <ProtectedRoute
-                component={<CharacterPage />}
+                component={<CharacterPageContextWrapper isDarkTheme={isDarkTheme} />}
                 to='/'
                 condition={isStayLogged || user?.dm || user}
               />

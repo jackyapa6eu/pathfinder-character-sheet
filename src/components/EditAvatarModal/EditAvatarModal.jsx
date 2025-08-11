@@ -4,7 +4,6 @@ import { Button, Form, Input, Modal } from 'antd';
 import { useForm, useWatch } from 'antd/es/form/Form';
 import ImageCropModal from '../ImageCropModal';
 import CroppedImage from '../CroppedImage';
-import charactersStore from '../../store/charactersStore';
 import { observer } from 'mobx-react';
 import authStore from '../../store/authStore';
 
@@ -40,7 +39,7 @@ const ButtonBox = styled.div`
 
 const DEFAULT_IMAGE_LINK = 'https://i.postimg.cc/bNHNQwtg/0926d090-dd70-4242-926e-5cea3c486c48.png';
 
-const EditAvatarModal = observer(({ charId, userId, modalIsOpen, setModalIsOpen }) => {
+const EditAvatarModal = observer(({ store, charId, userId, modalIsOpen, setModalIsOpen }) => {
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [croppedImage, setCroppedImage] = useState(null);
   const [cropData, setCropData] = useState(null);
@@ -49,7 +48,7 @@ const EditAvatarModal = observer(({ charId, userId, modalIsOpen, setModalIsOpen 
 
   const imageUrl = useWatch('imageLink', form);
 
-  const { changeAvatar, openedCharacter } = charactersStore;
+  const { changeAvatar, openedCharacter } = store;
   const { user } = authStore;
 
   const handleFinish = async (values) => {

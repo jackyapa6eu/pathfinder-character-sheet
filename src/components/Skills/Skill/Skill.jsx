@@ -3,10 +3,8 @@ import { capitalizedFirstLetter } from '../../../utils/helpers';
 import styled from 'styled-components';
 import FormItem from '../../FormItem';
 import { Checkbox, InputNumber, Tooltip } from 'antd';
-import charactersStore from '../../../store/charactersStore';
 import authStore from '../../../store/authStore';
 import { observer } from 'mobx-react';
-import { toJS } from 'mobx';
 
 const FeatContainer = styled.div`
   display: grid;
@@ -37,9 +35,8 @@ const FeatLabel = styled.span`
 `;
 
 const Skill = observer(
-  ({ name, title, ability, charId, userId, showLabels, trainedOnly, canEdit }) => {
-    const { openedCharacter, changeSkills, handleCopyToClickBoard, loadCheckPenalty } =
-      charactersStore;
+  ({ store, name, title, ability, charId, userId, showLabels, trainedOnly, canEdit }) => {
+    const { openedCharacter, changeSkills, handleCopyToClickBoard, loadCheckPenalty } = store;
     const { user } = authStore;
     const [total, setTotal] = useState(null);
 

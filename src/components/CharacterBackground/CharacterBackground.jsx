@@ -1,6 +1,5 @@
 import React from 'react';
 import { observer } from 'mobx-react';
-import charactersStore from '../../store/charactersStore';
 import RichTextModal from '../RichTextModal';
 import styled from 'styled-components';
 
@@ -31,12 +30,12 @@ const StyledContainer = styled.div`
 
   img {
     max-width: 100%;
-    max-height: 90vh;
+    max-height: 70vh;
   }
 `;
 
-const CharacterBackground = observer(({ charId, userId, canEdit }) => {
-  const { openedCharacter, editBackground } = charactersStore;
+const CharacterBackground = observer(({ store, charId, userId, canEdit }) => {
+  const { openedCharacter, editBackground } = store;
 
   const handleEditBackGround = async (newValue) => {
     await editBackground(userId, charId, newValue);

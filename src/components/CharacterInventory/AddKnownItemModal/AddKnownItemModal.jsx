@@ -5,7 +5,6 @@ import { observer } from 'mobx-react';
 import { itemTypes } from '../../../utils/consts';
 import GroupedInventoryItems from '../../GroupedInventarItems/GroupedInventoryItems';
 import { CollapseLabel, itemTemplate, StyledCollapse } from '../CharacterInventory';
-import charactersStore, { initialUserData } from '../../../store/charactersStore';
 import knownItemsStore from '../../../store/knownItemsStore';
 import { useForm } from 'antd/es/form/Form';
 
@@ -28,6 +27,7 @@ const StyledForm = styled(Form)`
 
 const AddKnownItemModal = observer(
   ({
+    store,
     charId,
     userId,
     addKnownItemModalIsOpen,
@@ -73,6 +73,7 @@ const AddKnownItemModal = observer(
                     searchItemText={searchItemText}
                     setEditingItem={setEditingItem}
                     setAddItemModalIsOpen={setAddItemModalIsOpen}
+                    store={store}
                     isKnown
                   />
                 ),

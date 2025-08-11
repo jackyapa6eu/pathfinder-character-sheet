@@ -3,7 +3,6 @@ import { observer } from 'mobx-react';
 import { useMemo } from 'react';
 import { format } from 'date-fns';
 
-import charactersStore from '../../store/charactersStore';
 import {
   ArrowRightOutlined,
   DeleteOutlined,
@@ -82,8 +81,8 @@ const formatDate = (timestamp) => {
   return format(new Date(timestamp), 'HH:mm dd.MM.yyyy');
 };
 
-export const ChangesHistory = observer(() => {
-  const { openedCharacter } = charactersStore;
+export const ChangesHistory = observer(({ store }) => {
+  const { openedCharacter } = store;
 
   const historyArr = useMemo(() => {
     if (openedCharacter.changesHistory) {

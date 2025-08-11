@@ -13,7 +13,7 @@ const AbilitiesContainer = styled.div`
   gap: 5px;
 `;
 
-const Abilities = ({ charId, userId, canEdit }) => {
+const Abilities = ({ store, charId, userId, canEdit }) => {
   return (
     <AbilitiesContainer>
       <Ability
@@ -23,6 +23,7 @@ const Abilities = ({ charId, userId, canEdit }) => {
         userId={userId}
         abilityDesc='Сила'
         canEdit={canEdit}
+        store={store}
       />
       <Ability
         name='dex'
@@ -30,6 +31,7 @@ const Abilities = ({ charId, userId, canEdit }) => {
         userId={userId}
         abilityDesc='Ловкость'
         canEdit={canEdit}
+        store={store}
       />
       <Ability
         name='con'
@@ -37,6 +39,7 @@ const Abilities = ({ charId, userId, canEdit }) => {
         userId={userId}
         abilityDesc='Телосложение'
         canEdit={canEdit}
+        store={store}
       />
       <Ability
         name='int'
@@ -44,6 +47,7 @@ const Abilities = ({ charId, userId, canEdit }) => {
         userId={userId}
         abilityDesc='Интеллект'
         canEdit={canEdit}
+        store={store}
       />
       <Ability
         name='wis'
@@ -51,8 +55,16 @@ const Abilities = ({ charId, userId, canEdit }) => {
         userId={userId}
         abilityDesc='Мудрость'
         canEdit={canEdit}
+        store={store}
       />
-      <Ability name='cha' charId={charId} userId={userId} abilityDesc='Харизма' canEdit={canEdit} />
+      <Ability
+        store={store}
+        name='cha'
+        charId={charId}
+        userId={userId}
+        abilityDesc='Харизма'
+        canEdit={canEdit}
+      />
     </AbilitiesContainer>
   );
 };

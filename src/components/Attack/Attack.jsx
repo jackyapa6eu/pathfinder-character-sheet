@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import CharSheetRowLabel from '../CharlSheetRowLabel/CharSheetRowLabel';
 import FormItem from '../FormItem';
 import { InputNumber } from 'antd';
-import charactersStore from '../../store/charactersStore';
 import authStore from '../../store/authStore';
 
 const AttackContainer = styled.div`
@@ -33,20 +32,20 @@ const AttacksPerRound = styled.div`
 
 const Cmb = styled.div`
   display: grid;
-  grid-template-columns: 38px 44px;
+  grid-template-columns: 38px 44px 44px;
   justify-items: center;
   align-items: center;
 `;
 
 const Cmd = styled.div`
   display: grid;
-  grid-template-columns: 38px 44px;
+  grid-template-columns: 38px 44px 44px;
   justify-items: center;
   align-items: center;
 `;
 
-const Attack = observer(({ charId, userId, canEdit }) => {
-  const { changeAttack, changeAttackPerRound, openedCharacter } = charactersStore;
+const Attack = observer(({ store, charId, userId, canEdit }) => {
+  const { changeAttack, changeAttackPerRound, changeAttackMisc, attack } = store;
   const { user } = authStore;
 
   return (
@@ -77,10 +76,17 @@ const Attack = observer(({ charId, userId, canEdit }) => {
         <CharSheetRowLabel label='cmb' />
         <FormItem textAlign='center' noBgLabel>
           <InputNumber
-            value={openedCharacter.attack?.cmb}
+            value={attack?.cmb}
             controls={false}
             style={{ width: '100%', color: 'black' }}
             disabled
+          />
+        </FormItem>
+        <FormItem textAlign='center' label='misc' noBgLabel name={['attack', 'cmbMisc']}>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAttackMisc(userId || user.uid, charId, 'cmbMisc', value)}
           />
         </FormItem>
       </Cmb>
@@ -88,10 +94,17 @@ const Attack = observer(({ charId, userId, canEdit }) => {
         <CharSheetRowLabel label='cmd' />
         <FormItem textAlign='center' noBgLabel>
           <InputNumber
-            value={openedCharacter.attack?.cmd}
+            value={attack?.cmd}
             controls={false}
             style={{ width: '100%', color: 'black' }}
             disabled
+          />
+        </FormItem>
+        <FormItem textAlign='center' label='misc' noBgLabel name={['attack', 'cmdMisc']}>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%', color: 'black' }}
+            onChange={(value) => changeAttackMisc(userId || user.uid, charId, 'cmdMisc', value)}
           />
         </FormItem>
       </Cmd>

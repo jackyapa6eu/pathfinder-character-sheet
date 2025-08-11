@@ -349,7 +349,7 @@ export const initialUserData = {
   },
 };
 
-class CharactersStore {
+export class CharactersStore {
   characters = {};
 
   openedCharacter = {};
@@ -380,24 +380,6 @@ class CharactersStore {
     const dataRef = ref(db, `users/${uid}/characters/${charId}`);
 
     return onValue(dataRef, this.onCharacterChange);
-  };
-
-  getCharactersList = async (uid) => {
-    const db = getDatabase();
-    const dataRef = ref(db, `users/${uid}/characters`);
-
-    try {
-      const response = await get(dataRef);
-      if (response.exists()) {
-        const characters = response.val();
-        runInAction(() => {
-          this.characters = characters;
-        });
-      }
-    } catch (e) {
-      message.error('Getting user data error.');
-      console.log(e);
-    }
   };
 
   createCharacter = async (uid, charData, hasSpells, callBack = false) => {
@@ -539,6 +521,27 @@ class CharactersStore {
     }
   }, 700);
 
+  changeExpPoints = debounce(async (uid, charRef, newValue) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/expPoints/current`);
+
+    const prevValue = this.openedCharacter.expPoints?.current;
+
+    try {
+      await set(dataRef, newValue);
+      await this.handleChangesLog(uid, charRef, {
+        type: 'changed',
+        target: `experience points`,
+        prevValue: prevValue,
+        currValue: newValue,
+      }); // TODO +
+      message.success('Experience points changed!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error on exp points change');
+    }
+  }, 700);
+
   changeMiscInitiative = debounce(async (uid, charRef, newInitiative) => {
     const db = getDatabase();
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/initiative/miscModifier`);
@@ -633,25 +636,26 @@ class CharactersStore {
     }
   });
 
-  calcAttack = () => {
-    const tempStrMod = this.openedCharacter.abilities?.str?.tempModifier;
-    const strMod = this.openedCharacter.abilities?.str?.modifier;
-    const tempDexMod = this.openedCharacter.abilities?.dex?.tempModifier;
-    const dexMod = this.openedCharacter.abilities?.dex?.modifier;
-    const cmb = (this.openedCharacter.attack?.bab || 0) + ((tempStrMod ?? strMod) || 0);
-    const cmd =
-      (this.openedCharacter.attack?.bab || 0) +
-      ((tempStrMod ?? strMod) || 0) +
-      ((tempDexMod ?? dexMod) || 0) +
-      this.monkWisBonus +
-      10;
-    runInAction(() => {
-      if (this.openedCharacter.attack) {
-        this.openedCharacter.attack.cmb = cmb;
-        this.openedCharacter.attack.cmd = cmd;
-      }
-    });
-  };
+  // calcAttack = () => {
+  //   const tempStrMod = this.openedCharacter.abilities?.str?.tempModifier;
+  //   const strMod = this.openedCharacter.abilities?.str?.modifier;
+  //   const tempDexMod = this.openedCharacter.abilities?.dex?.tempModifier;
+  //   const dexMod = this.openedCharacter.abilities?.dex?.modifier;
+  //
+  //   const cmb = (this.openedCharacter.attack?.bab || 0) + ((tempStrMod ?? strMod) || 0);
+  //   const cmd =
+  //     (this.openedCharacter.attack?.bab || 0) +
+  //     ((tempStrMod ?? strMod) || 0) +
+  //     ((tempDexMod ?? dexMod) || 0) +
+  //     this.monkWisBonus +
+  //     10;
+  //   runInAction(() => {
+  //     if (this.openedCharacter.attack) {
+  //       this.openedCharacter.attack.cmb = cmb;
+  //       this.openedCharacter.attack.cmd = cmd;
+  //     }
+  //   });
+  // };
 
   changeAttack = debounce(async (uid, charRef, newValue, isUpdate = false) => {
     const db = getDatabase();
@@ -692,6 +696,26 @@ class CharactersStore {
     } catch (e) {
       console.log(e);
       message.error('Error on character creation');
+    }
+  }, 700);
+
+  changeAttackMisc = debounce(async (uid, charRef, field, newValue) => {
+    const db = getDatabase();
+    const prevValue = this.openedCharacter.attack[field];
+
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/attack/${field}`);
+    try {
+      await set(dataRef, newValue);
+      await this.handleChangesLog(uid, charRef, {
+        type: 'changed',
+        target: `${field} changed`,
+        prevValue,
+        currValue: newValue,
+      }); // TODO +
+      message.success(`${field} changed!`);
+    } catch (e) {
+      console.log(e);
+      message.error(`${field} changed!`);
     }
   }, 700);
 
@@ -1208,12 +1232,40 @@ class CharactersStore {
         if (itemData.type === 'magicStick') {
           cost = (cost / itemData.chargesMax) * itemData.chargesLeft;
         }
-        const itemCost = Math.floor(cost / 2);
+        // Общая стоимость
+        let totalCost = cost * (itemData.count || 1);
+
+        // Половина стоимости
+        let itemCost = Math.floor(totalCost / 2);
+
+        console.log('totalCost', totalCost);
+        if (totalCost % 2 !== 0) {
+          const currencyOrder = ['platinum', 'gold', 'silver', 'copper'];
+          const currentCurrencyIndex = currencyOrder.indexOf(itemData.currency || 'gold');
+          console.log('currentCurrencyIndex:', currentCurrencyIndex);
+          if (currentCurrencyIndex >= 0 && currentCurrencyIndex < currencyOrder.length - 1) {
+            // Увеличиваем монеты меньшего номинала
+            const lesserCurrency = currencyOrder[currentCurrencyIndex + 1];
+            console.log('lesserCurrency', lesserCurrency);
+            console.log('before await', (this.openedCharacter.money[lesserCurrency] || 0) + 5);
+            await this.editMoney(
+              uid,
+              charRef,
+              lesserCurrency,
+              (this.openedCharacter.money[lesserCurrency] || 0) + 5
+            );
+            console.log('after await');
+          } else if (itemData.currency === 'copper') {
+            console.log('if else');
+            itemCost = Math.floor(itemCost);
+          }
+        }
+
         await this.editMoney(
           uid,
           charRef,
-          itemData.currency,
-          (this.openedCharacter.money[itemData.currency] || 0) + itemCost || 0
+          itemData.currency || 'gold',
+          (this.openedCharacter.money[itemData.currency || 'gold'] || 0) + itemCost || 0
         );
         message.success(`Item sold!`);
       } else message.success(`Item deleted!`);
@@ -1286,11 +1338,16 @@ class CharactersStore {
     }
   };
 
-  editMoney = debounce(async (uid, charRef, moneyType, amount) => {
+  debouncedEditMoney = debounce(async (uid, charRef, moneyType, amount) => {
+    await this.editMoney(uid, charRef, moneyType, amount);
+  }, 700);
+
+  editMoney = async (uid, charRef, moneyType, amount) => {
     const db = getDatabase();
     const dataRef = ref(db, `users/${uid}/characters/${charRef}/money/${moneyType}`);
     const prevValue = this.openedCharacter.money[moneyType];
     try {
+      console.log('dataRef, amount', dataRef, amount);
       await set(dataRef, amount);
       await this.handleChangesLog(uid, charRef, {
         type: 'changed',
@@ -1303,7 +1360,7 @@ class CharactersStore {
       console.log(e);
       message.error('Error!');
     }
-  }, 700);
+  };
 
   changeItemData = debounce(async (uid, charRef, itemName, dataType, newValue) => {
     const db = getDatabase();
@@ -1480,6 +1537,22 @@ class CharactersStore {
     copyToClipboard(text, () => message.success('Скопировано в буфер обмена', 1));
   };
 
+  addTeammate = async (uid, charRef, data) => {
+    const db = getDatabase();
+
+    const dataRef = ref(db, `users/${uid}/characters/${charRef}/teammates`);
+    console.log('this.openedCharacter?.[charRef]?.teammates:', toJS(this.openedCharacter));
+    const currTeammates = this.openedCharacter?.teammates || [];
+    currTeammates.push(data);
+    try {
+      await set(dataRef, currTeammates);
+      message.success('Teammate added!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error');
+    }
+  };
+
   get totalWeight() {
     if (!this.openedCharacter.inventory) {
       return 0;
@@ -1568,7 +1641,27 @@ class CharactersStore {
       ? currWisMod
       : 0;
   }
+
+  get attack() {
+    const tempStrMod = this.openedCharacter.abilities?.str?.tempModifier;
+    const strMod = this.openedCharacter.abilities?.str?.modifier;
+    const tempDexMod = this.openedCharacter.abilities?.dex?.tempModifier;
+    const dexMod = this.openedCharacter.abilities?.dex?.modifier;
+
+    const cmbMisc = this.openedCharacter.attack?.cmbMisc || 0;
+    const cmdMisc = this.openedCharacter.attack?.cmdMisc || 0;
+
+    const cmb = (this.openedCharacter.attack?.bab || 0) + ((tempStrMod ?? strMod) || 0) + cmbMisc;
+    const cmd =
+      (this.openedCharacter.attack?.bab || 0) +
+      ((tempStrMod ?? strMod) || 0) +
+      ((tempDexMod ?? dexMod) || 0) +
+      this.monkWisBonus +
+      cmdMisc +
+      10;
+    return { cmb, cmd };
+  }
 }
 
-const charactersStore = new CharactersStore();
-export default charactersStore;
+export const characterStore = new CharactersStore();
+// export default store;

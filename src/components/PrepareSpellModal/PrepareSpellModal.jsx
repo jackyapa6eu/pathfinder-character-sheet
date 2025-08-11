@@ -6,11 +6,8 @@ import {
   availableSpellLevels,
   availableSpellsSavingThrow,
 } from '../../utils/consts';
-import TextArea from 'antd/es/input/TextArea';
 import { ButtonBox, StyledFormItem } from '../../uiComponents/uiComponents';
 import styled from 'styled-components';
-import charactersStore, { initialUserData as openedCharacter } from '../../store/charactersStore';
-import { toJS } from 'mobx';
 import { useForm } from 'antd/es/form/Form';
 import authStore from '../../store/authStore';
 import { observer } from 'mobx-react';
@@ -28,6 +25,7 @@ const StyledForm = styled(Form)`
 
 const PrepareSpellModal = observer(
   ({
+    store,
     prepareSpellModalIsOpen,
     setPrepareSpellModalIsOpen,
     userId,
@@ -38,7 +36,7 @@ const PrepareSpellModal = observer(
     const [isMetamagic, setIsMetamagic] = useState(false);
     const [form] = useForm();
 
-    const { prepareSpell } = charactersStore;
+    const { prepareSpell } = store;
     const { user } = authStore;
 
     const onFinish = async (values) => {

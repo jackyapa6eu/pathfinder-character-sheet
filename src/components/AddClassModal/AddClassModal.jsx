@@ -3,7 +3,6 @@ import { Button, Form, Modal, Select } from 'antd';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { availableClasses } from '../../utils/consts';
-import charactersStore from '../../store/charactersStore';
 import authStore from '../../store/authStore';
 
 const StyledFormItem = styled(Form.Item)`
@@ -19,8 +18,8 @@ const ButtonBox = styled.div`
 `;
 
 const AddClassModal = observer(
-  ({ addClassModalIsOpen, setAddClassModalIsOpen, userId, charId }) => {
-    const { openedCharacter, addClass } = charactersStore;
+  ({ store, addClassModalIsOpen, setAddClassModalIsOpen, userId, charId }) => {
+    const { openedCharacter, addClass } = store;
     const { user } = authStore;
 
     const onFinish = useCallback(

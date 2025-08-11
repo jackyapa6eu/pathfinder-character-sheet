@@ -14,7 +14,7 @@ const ThrowsContainer = styled.div`
   gap: 5px;
 `;
 
-const SavingThrowsAndSpeed = ({ charId, userId, canEdit }) => {
+const SavingThrowsAndSpeed = ({ store, charId, userId, canEdit }) => {
   return (
     <ThrowsContainer>
       <SavingThrow
@@ -24,6 +24,7 @@ const SavingThrowsAndSpeed = ({ charId, userId, canEdit }) => {
         userId={userId}
         showLabels
         canEdit={canEdit}
+        store={store}
       />
       <SavingThrow
         name='reflex'
@@ -31,6 +32,7 @@ const SavingThrowsAndSpeed = ({ charId, userId, canEdit }) => {
         charId={charId}
         userId={userId}
         canEdit={canEdit}
+        store={store}
       />
       <SavingThrow
         name='will'
@@ -38,8 +40,9 @@ const SavingThrowsAndSpeed = ({ charId, userId, canEdit }) => {
         charId={charId}
         userId={userId}
         canEdit={canEdit}
+        store={store}
       />
-      <CharacterSpeed canEdit={canEdit} userId={userId} charId={charId} />
+      <CharacterSpeed store={store} canEdit={canEdit} userId={userId} charId={charId} />
     </ThrowsContainer>
   );
 };

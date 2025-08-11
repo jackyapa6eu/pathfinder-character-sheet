@@ -2,7 +2,6 @@ import { memo, useCallback, useEffect, useMemo } from 'react';
 import { InputNumber } from 'antd';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
-import charactersStore from '../../store/charactersStore';
 import CharSheetRowLabel from '../CharlSheetRowLabel/CharSheetRowLabel';
 import authStore from '../../store/authStore';
 import FormItem from '../FormItem';
@@ -14,8 +13,8 @@ const CharacterSpeedContainer = styled.div`
   align-items: center;
 `;
 
-const CharacterSpeed = observer(({ charId, userId, canEdit }) => {
-  const { changeSpeed, totalSpeed } = charactersStore;
+const CharacterSpeed = observer(({ store, charId, userId, canEdit }) => {
+  const { changeSpeed, totalSpeed } = store;
   const { user } = authStore;
 
   return (

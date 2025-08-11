@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
-import { memo, useEffect, useMemo, useState } from 'react';
-import charactersStore, { initialUserData } from '../../store/charactersStore';
+import { memo, useState } from 'react';
 import authStore from '../../store/authStore';
 import { Button, Collapse, Form, Input, InputNumber, Tooltip } from 'antd';
 import AddItemModal from './AddItemModal';
@@ -11,8 +10,6 @@ import Search from 'antd/es/input/Search';
 import CoinIcon from '../../icons/CoinIcon';
 import FormItem from '../FormItem';
 import AddKnownItemModal from './AddKnownItemModal';
-import { toJS } from 'mobx';
-import { calcLoad } from '../../utils/helpers';
 
 export const itemTemplate = '1fr 26px 50px 50px 66px';
 
@@ -102,12 +99,12 @@ const CoinIconContainer = styled.div`
   left: -5px;
 `;
 
-const CharacterInventory = observer(({ charId, userId, canEdit }) => {
+const CharacterInventory = observer(({ store, charId, userId, canEdit }) => {
   const [addItemModalIsOpen, setAddItemModalIsOpen] = useState(false);
   const [addKnownItemModalIsOpen, setAddKnownItemModalIsOpen] = useState(false);
   const [searchItemText, setSearchItemText] = useState('');
   const [editingItem, setEditingItem] = useState(null);
-  const { openedCharacter, editMoney, totalWeight, currentLoad } = charactersStore;
+  const { openedCharacter, debouncedEditMoney, totalWeight, currentLoad } = store;
   const { user } = authStore;
 
   const handleSearch = (value) => {
@@ -115,21 +112,8 @@ const CharacterInventory = observer(({ charId, userId, canEdit }) => {
   };
 
   const handleChangeMoney = async (type, amount) => {
-    await editMoney(userId || user.uid, charId, type, amount);
+    await debouncedEditMoney(userId || user.uid, charId, type, amount);
   };
-
-  // const loaded = useMemo(
-  //   () =>
-  //     calcLoad(
-  //       carryingCapacityTable[
-  //         (openedCharacter?.abilities?.str?.score || 1) +
-  //           (openedCharacter?.equipBonuses?.abilityBonus?.str || 0) +
-  //           (openedCharacter?.abilities?.str?.adjustment || 0)
-  //       ],
-  //       totalWeight
-  //     ),
-  //   [openedCharacter, totalWeight]
-  // );
 
   return (
     <CharacterInventoryContainer>
@@ -141,6 +125,7 @@ const CharacterInventory = observer(({ charId, userId, canEdit }) => {
         addKnownItemModalIsOpen={addKnownItemModalIsOpen}
         editingItem={editingItem}
         setEditingItem={setEditingItem}
+        store={store}
       />
       <AddKnownItemModal
         charId={charId}
@@ -151,6 +136,7 @@ const CharacterInventory = observer(({ charId, userId, canEdit }) => {
         editingItem={editingItem}
         setEditingItem={setEditingItem}
         setAddItemModalIsOpen={setAddItemModalIsOpen}
+        store={store}
       />
       <InventoryPanelContainer>
         <Button
@@ -285,6 +271,7 @@ const CharacterInventory = observer(({ charId, userId, canEdit }) => {
                 setEditingItem={setEditingItem}
                 setAddItemModalIsOpen={setAddItemModalIsOpen}
                 canEdit={canEdit}
+                store={store}
               />
             ),
           }))}

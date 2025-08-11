@@ -4,7 +4,6 @@ import FormItem from '../../FormItem';
 import { Button, Form, Input, InputNumber, Modal, notification, Select, Tooltip } from 'antd';
 import styled from 'styled-components';
 import CharSheetRowLabel from '../../CharlSheetRowLabel/CharSheetRowLabel';
-import charactersStore from '../../../store/charactersStore';
 import authStore from '../../../store/authStore';
 import TextArea from 'antd/es/input/TextArea';
 import { ButtonBox, StyledFormItem } from '../../../uiComponents/uiComponents';
@@ -181,7 +180,7 @@ const AddOnHitButton = styled(Button)`
   transition: all 0.5s ease;
 `;
 
-const WeaponItem = observer(({ weaponData, userId, charId, canEdit }) => {
+const WeaponItem = observer(({ store, weaponData, userId, charId, canEdit }) => {
   const [totalAttackBonus, setTotalAttackBonus] = useState('');
   const [resultDamage, setResultDamage] = useState('');
   const [addOnHitProperty, setAddOnHitProperty] = useState(false);
@@ -191,7 +190,7 @@ const WeaponItem = observer(({ weaponData, userId, charId, canEdit }) => {
     deleteWeapon,
     addWeaponPropertyOnHit,
     deleteWeaponPropertyOnHit,
-  } = charactersStore;
+  } = store;
   const { user } = authStore;
   const [api, contextHolder] = notification.useNotification();
 

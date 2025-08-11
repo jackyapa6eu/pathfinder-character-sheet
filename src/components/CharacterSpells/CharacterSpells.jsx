@@ -13,14 +13,10 @@ import {
   Switch,
   Tooltip,
 } from 'antd';
-import { CloseOutlined } from '@ant-design/icons';
-import charactersStore from '../../store/charactersStore';
 import authStore from '../../store/authStore';
 import TextArea from 'antd/es/input/TextArea';
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import {
-  availableClasses,
   availableSchools,
   availableSpellLevels,
   availableSpellsSavingThrow,
@@ -151,7 +147,7 @@ const PrepareSpellButton = styled(Button)`
   font-size: 10px;
 `;
 
-const CharacterSpells = observer(({ charId, userId, canEdit }) => {
+const CharacterSpells = observer(({ store, charId, userId, canEdit }) => {
   const [addSpellModalIsOpen, setAddSpellModalIsOpen] = useState(false);
   const [showAllSpellsPerDay, setShowAllSpellsPerDay] = useState(false);
   const [prepareSpellModalIsOpen, setPrepareSpellModalIsOpen] = useState(false);
@@ -165,7 +161,7 @@ const CharacterSpells = observer(({ charId, userId, canEdit }) => {
     deletePreparedSpell,
     changeFreeSlotsForLevel,
     changeMaxSpellsPerDay,
-  } = charactersStore;
+  } = store;
   const { user } = authStore;
   const [api, contextHolder] = notification.useNotification();
 
@@ -274,6 +270,7 @@ const CharacterSpells = observer(({ charId, userId, canEdit }) => {
         setPreparingSpell={setPreparingSpell}
         userId={userId}
         charId={charId}
+        store={store}
       />
       <Modal
         title='Add spell'

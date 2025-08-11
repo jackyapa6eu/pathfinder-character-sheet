@@ -1,13 +1,11 @@
 import { memo, useCallback } from 'react';
 import { observer } from 'mobx-react';
-import charactersStore from '../../store/charactersStore';
 import { fieldsAndStrFilter } from '../../utils/helpers';
 import styled from 'styled-components';
 import { itemTemplate } from '../CharacterInventory/CharacterInventory';
 import { Button, Input, InputNumber, notification, Tooltip } from 'antd';
 import authStore from '../../store/authStore';
 import FormItem from '../FormItem';
-import { toJS } from 'mobx';
 import knownItemsStore from '../../store/knownItemsStore';
 import { EyeOutlined } from '@ant-design/icons';
 import ItemDescription from '../ItemDescription';
@@ -86,14 +84,14 @@ const Item = styled.div`
 `;
 
 const GroupedInventoryItems = observer(
-  ({ groupName, searchItemText, charId, userId, canEdit, isKnown }) => {
+  ({ store, groupName, searchItemText, charId, userId, canEdit, isKnown }) => {
     const {
       openedCharacter,
       deleteInventoryItem,
       magicItemUse,
       changeItemData,
       createInventoryItem,
-    } = charactersStore;
+    } = store;
     const { user } = authStore;
     const { knownItems, changeItemData: changeKnown } = knownItemsStore;
     const [api, contextHolder] = notification.useNotification();
@@ -125,6 +123,7 @@ const GroupedInventoryItems = observer(
                 userId={userId}
                 charId={charId}
                 canEdit={canEdit}
+                store={store}
               />
             </div>
           ),
@@ -257,7 +256,13 @@ const GroupedInventoryItems = observer(
                 {!!el.cost && !isKnown && (
                   <Tooltip
                     placement='topRight'
-                    title={el.cost ? `sell item for ${el.cost ?? ''} ${el.currency ?? ''}` : ''}
+                    title={
+                      el.cost
+                        ? `sell item for ${(el.cost * (el.count || 1)) / 2 ?? ''} ${
+                            el.currency ?? ''
+                          }`
+                        : ''
+                    }
                   >
                     <Button
                       disabled={canEdit}

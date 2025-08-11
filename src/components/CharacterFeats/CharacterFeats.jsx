@@ -3,7 +3,6 @@ import { memo, useState } from 'react';
 import { Button, Form, Input, Modal, notification } from 'antd';
 import styled from 'styled-components';
 import TextArea from 'antd/es/input/TextArea';
-import charactersStore from '../../store/charactersStore';
 import authStore from '../../store/authStore';
 
 const FeatsContainer = styled.div`
@@ -69,9 +68,9 @@ const DeleteFeatButton = styled(Button)`
   font-size: 6px;
 `;
 
-const CharacterFeats = observer(({ charId, userId, canEdit }) => {
+const CharacterFeats = observer(({ store, charId, userId, canEdit }) => {
   const [addFeatModalIsOpen, setAddFeatModalIsOpen] = useState(false);
-  const { addFeat, deleteFeat, openedCharacter } = charactersStore;
+  const { addFeat, deleteFeat, openedCharacter } = store;
   const { user } = authStore;
 
   const [api, contextHolder] = notification.useNotification();

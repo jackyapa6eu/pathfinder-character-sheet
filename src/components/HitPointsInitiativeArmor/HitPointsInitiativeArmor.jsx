@@ -4,9 +4,7 @@ import styled from 'styled-components';
 import CharSheetRowLabel from '../CharlSheetRowLabel/CharSheetRowLabel';
 import FormItem from '../FormItem';
 import { InputNumber } from 'antd';
-import charactersStore from '../../store/charactersStore';
 import authStore from '../../store/authStore';
-import { toJS } from 'mobx';
 
 const HitPointsContainer = styled.div`
   grid-area: HitPointsInitiativeArmor;
@@ -22,6 +20,13 @@ const HitPointsContainer = styled.div`
 const TotalHitPoints = styled.div`
   display: grid;
   grid-template-columns: 38px 44px 88px 88px;
+  justify-items: center;
+  align-items: center;
+`;
+
+const ExpPoints = styled.div`
+  display: grid;
+  grid-template-columns: 38px 88px 88px;
   justify-items: center;
   align-items: center;
 `;
@@ -47,16 +52,17 @@ const TouchFlat = styled.div`
   align-items: center;
 `;
 
-const HitPointsInitiativeArmor = observer(({ charId, userId, canEdit }) => {
+const HitPointsInitiativeArmor = observer(({ store, charId, userId, canEdit }) => {
   const {
     changeHitPoints,
+    changeExpPoints,
     openedCharacter,
     changeMiscInitiative,
     changeAc,
     maxDexByLoad,
     isMonk,
     monkWisBonus,
-  } = charactersStore;
+  } = store;
   const { user } = authStore;
   const [totalInitiative, setTotalInitiative] = useState(null);
   const [totalAc, setTotalAc] = useState(null);
@@ -184,6 +190,18 @@ const HitPointsInitiativeArmor = observer(({ charId, userId, canEdit }) => {
           />
         </FormItem>
       </TotalHitPoints>
+
+      <ExpPoints>
+        <CharSheetRowLabel label='exp' />
+        <FormItem name={['expPoints', 'current']} label='current' textAlign='center' noBgLabel>
+          <InputNumber
+            controls={false}
+            style={{ width: '100%' }}
+            onChange={(newValue) => changeExpPoints(userId || user.uid, charId, newValue)}
+            disabled={canEdit}
+          />
+        </FormItem>
+      </ExpPoints>
 
       <Initiative>
         <CharSheetRowLabel label='initiative' />

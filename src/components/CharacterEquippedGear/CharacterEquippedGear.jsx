@@ -2,9 +2,8 @@ import { memo } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { Select } from 'antd';
-import { equippedItem, itemTypes } from '../../utils/consts';
 import { StyledFormItem } from '../../uiComponents/uiComponents';
-import charactersStore, { initialUserData } from '../../store/charactersStore';
+import { initialUserData } from '../../store/charactersStore';
 import authStore from '../../store/authStore';
 
 const EquippedGearContainer = styled.div`
@@ -34,8 +33,8 @@ const EquippedGearContainer = styled.div`
   }
 `;
 
-const CharacterEquippedGear = observer(({ charId, userId, canEdit }) => {
-  const { openedCharacter, equipItem } = charactersStore;
+const CharacterEquippedGear = observer(({ store, charId, userId, canEdit }) => {
+  const { openedCharacter, equipItem } = store;
   const { user } = authStore;
   const { empty, ...itemsTypes } = initialUserData.equippedItems;
   return (

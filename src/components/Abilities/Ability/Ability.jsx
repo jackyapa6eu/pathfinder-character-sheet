@@ -2,7 +2,6 @@ import { memo, useCallback } from 'react';
 import styled from 'styled-components';
 import FormItem from '../../FormItem';
 import { InputNumber } from 'antd';
-import charactersStore from '../../../store/charactersStore';
 import { observer } from 'mobx-react';
 import authStore from '../../../store/authStore';
 import CharSheetRowLabel from '../../CharlSheetRowLabel/CharSheetRowLabel';
@@ -15,8 +14,8 @@ const AbilityContainer = styled.div`
 `;
 
 const Ability = observer(
-  ({ name = '', showLabel = false, abilityDesc, charId, userId, canEdit }) => {
-    const { changeAbilityDebounce, openedCharacter, handleCopyToClickBoard } = charactersStore;
+  ({ store, name = '', showLabel = false, abilityDesc, charId, userId, canEdit }) => {
+    const { changeAbilityDebounce, openedCharacter, handleCopyToClickBoard } = store;
     const { user } = authStore;
 
     const handleScoreChange = async (value, name, type) => {

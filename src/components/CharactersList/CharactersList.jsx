@@ -2,10 +2,8 @@ import { observer } from 'mobx-react';
 import React, { memo, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { toJS } from 'mobx';
 import { FaSkullCrossbones } from 'react-icons/fa6';
 
-import charactersStore from '../../store/charactersStore';
 import authStore from '../../store/authStore';
 import usersStore from '../../store/usersStore';
 import CroppedImage from '../CroppedImage';
@@ -77,7 +75,6 @@ const ListsContainer = styled.div`
 const DEFAULT_IMAGE_LINK = 'https://i.postimg.cc/bNHNQwtg/0926d090-dd70-4242-926e-5cea3c486c48.png';
 
 const CharactersList = observer(() => {
-  const { getCharactersList } = charactersStore;
   const { user } = authStore;
   const { getUsers, usersCharacters } = usersStore;
 
@@ -92,7 +89,7 @@ const CharactersList = observer(() => {
   );
 
   const getData = async () => {
-    await Promise.all([getCharactersList(user.uid), getUsers(user.uid, user.dm)]);
+    await Promise.all([getUsers(user.uid, user.dm)]);
   };
 
   useEffect(() => {

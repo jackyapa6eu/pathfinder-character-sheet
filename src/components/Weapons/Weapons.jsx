@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
-import { memo, useEffect, useState } from 'react';
-import charactersStore from '../../store/charactersStore';
+import { memo, useState } from 'react';
 import { Button, Form, Input, InputNumber, Modal, Select, Tooltip } from 'antd';
 import { ButtonBox, StyledFormItem } from '../../uiComponents/uiComponents';
 import authStore from '../../store/authStore';
@@ -50,9 +49,9 @@ const StyledForm = styled(Form)`
     '. . . submit';
 `;
 
-const Weapons = observer(({ charId, userId, canEdit }) => {
+const Weapons = observer(({ store, charId, userId, canEdit }) => {
   const [addWeaponModalIsOpen, setAddWeaponModalIsOpen] = useState(false);
-  const { openedCharacter, createWeapon } = charactersStore;
+  const { openedCharacter, createWeapon } = store;
   const { user } = authStore;
 
   const finishCreateWeapon = async (values) => {
@@ -132,6 +131,7 @@ const Weapons = observer(({ charId, userId, canEdit }) => {
         {openedCharacter.weapons &&
           Object.entries(openedCharacter.weapons).map(([weaponName, weaponData]) => (
             <WeaponItem
+              store={store}
               charId={charId}
               userId={userId}
               key={weaponName}

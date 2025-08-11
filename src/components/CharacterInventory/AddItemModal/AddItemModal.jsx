@@ -4,10 +4,8 @@ import { Button, Form, Input, InputNumber, Modal, Select } from 'antd';
 import styled from 'styled-components';
 import { ButtonBox, StyledFormItem } from '../../../uiComponents/uiComponents';
 import TextArea from 'antd/es/input/TextArea';
-import charactersStore from '../../../store/charactersStore';
 import authStore from '../../../store/authStore';
 import { equippedItem, itemTypes } from '../../../utils/consts';
-import { toJS } from 'mobx';
 import { useForm } from 'antd/es/form/Form';
 import knownItemsStore from '../../../store/knownItemsStore';
 import ChargesInputs from './inputs/ChargesInputs';
@@ -75,6 +73,7 @@ const componentDictionary = {
 
 const AddItemModal = observer(
   ({
+    store,
     charId,
     userId,
     addItemModalIsOpen,
@@ -87,7 +86,7 @@ const AddItemModal = observer(
     const [cost, setCost] = useState(null);
     const [additionalInputs, setAdditionalInputs] = useState({});
     const [newFieldType, setNewFieldType] = useState(null);
-    const { createInventoryItem } = charactersStore;
+    const { createInventoryItem } = store;
     const { createKnownItem } = knownItemsStore;
     const { user } = authStore;
 
