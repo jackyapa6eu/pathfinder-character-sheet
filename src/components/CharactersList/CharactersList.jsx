@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import React, { memo, useEffect, useMemo } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaSkullCrossbones } from 'react-icons/fa6';
@@ -7,6 +7,10 @@ import { FaSkullCrossbones } from 'react-icons/fa6';
 import authStore from '../../store/authStore';
 import usersStore from '../../store/usersStore';
 import CroppedImage from '../CroppedImage';
+import { Button, Form, Input, Modal, Select, Tooltip } from 'antd';
+import { availableClasses } from '../../utils/consts';
+import { ButtonBox, StyledFormItem } from '../../uiComponents/uiComponents';
+import { characterStore } from '../../store/charactersStore';
 
 const CharacterListContainer = styled.div`
   display: flex;
@@ -75,8 +79,10 @@ const ListsContainer = styled.div`
 const DEFAULT_IMAGE_LINK = 'https://i.postimg.cc/bNHNQwtg/0926d090-dd70-4242-926e-5cea3c486c48.png';
 
 const CharactersList = observer(() => {
+  const [addDeathCauseModalIsOpen, setAddDeathCauseModalIsOpen] = useState(false);
   const { user } = authStore;
   const { getUsers, usersCharacters } = usersStore;
+  const { addDeathCause } = characterStore;
 
   const navigate = useNavigate();
 
@@ -92,6 +98,13 @@ const CharactersList = observer(() => {
     await Promise.all([getUsers(user.uid, user.dm)]);
   };
 
+  const handleAddDeathCause = async (values) => {
+    const { owner, charName } = addDeathCauseModalIsOpen;
+    await addDeathCause(owner, charName, values.cause);
+    await getData();
+    setAddDeathCauseModalIsOpen(null);
+  };
+
   useEffect(() => {
     if (user) {
       (async () => {
@@ -104,7 +117,7 @@ const CharactersList = observer(() => {
     <CharacterListContainer>
       <ListsContainer>
         <CardsContainer>
-          {chars.map(({ owner, name, charName, classes, isDead, avatar }) => (
+          {chars.map(({ owner, name, charName, classes, isDead, avatar, deathCause }) => (
             <CharacterCard
               onClick={() => navigate(`${owner}/chars/${charName}`)}
               owner={owner === user.uid ?? false}
@@ -132,12 +145,53 @@ const CharactersList = observer(() => {
                 ))}
               </p>
               {isDead && (
-                <FaSkullCrossbones style={{ position: 'absolute', right: '5px', bottom: '5px' }} />
+                <Tooltip
+                  title={
+                    <Button
+                      type='default'
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setAddDeathCauseModalIsOpen({ owner, charName });
+                      }}
+                    >
+                      Указать причину
+                    </Button>
+                  }
+                  placement='top'
+                >
+                  <FaSkullCrossbones
+                    style={{ position: 'absolute', right: '5px', bottom: '5px' }}
+                  />
+                </Tooltip>
+              )}
+              {deathCause && (
+                <span style={{ position: 'absolute', right: '5px', top: '5px' }}>{deathCause}</span>
               )}
             </CharacterCard>
           ))}
         </CardsContainer>
       </ListsContainer>
+
+      <Modal
+        title='Death cause'
+        open={Boolean(addDeathCauseModalIsOpen)}
+        onCancel={() => setAddDeathCauseModalIsOpen(null)}
+        footer={null}
+        destroyOnClose
+      >
+        <Form layout='vertical' labelAlign='left' onFinish={handleAddDeathCause}>
+          <StyledFormItem name='cause'>
+            <Input style={{ width: '100%' }} />
+          </StyledFormItem>
+          <ButtonBox>
+            <StyledFormItem>
+              <Button type='default' htmlType='submit'>
+                Save
+              </Button>
+            </StyledFormItem>
+          </ButtonBox>
+        </Form>
+      </Modal>
     </CharacterListContainer>
   );
 });

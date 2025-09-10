@@ -1553,6 +1553,20 @@ export class CharactersStore {
     }
   };
 
+  addDeathCause = async (owner, charName, newData) => {
+    const db = getDatabase();
+    const dataRef = ref(db, `users/${owner}/characters/${charName}/deathCause`);
+
+    try {
+      await set(dataRef, newData);
+
+      message.success('Death cause added!');
+    } catch (e) {
+      console.log(e);
+      message.error('Error');
+    }
+  };
+
   get totalWeight() {
     if (!this.openedCharacter.inventory) {
       return 0;
